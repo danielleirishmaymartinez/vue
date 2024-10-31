@@ -32,7 +32,7 @@ const { mobile } = useDisplay()
               <v-divider class="my-5"></v-divider>
               <h5 class="text-center">
                 Already have account?
-                <RouterLink class="text-primary" to="/">
+                <RouterLink class="text-primary" to="/login">
                   Click here to Login</RouterLink
                 >
               </h5>
