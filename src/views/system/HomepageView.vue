@@ -30,11 +30,9 @@ async function logout() {
         </v-btn>
 
         <v-toolbar-title class="d-flex align-center" @click="$router.push('/homepage')">
-          <img src="/images/logo.png" alt="logo" class="mr-2" width="25" />
+          <img src="/images/logo.png" alt="logo" class="mr-2" width="50" />
           <span class="ml-1">STASH</span>
         </v-toolbar-title>
-
-        <v-spacer></v-spacer>
 
         <v-text-field
           solo
@@ -43,7 +41,7 @@ async function logout() {
           prepend-inner-icon="mdi-magnify"
           label="Search"
           hide-details
-          class="mx-3"
+          class="d-flex flex-column mt-20"
         ></v-text-field>
 
         <v-btn text @click="logout">Logout</v-btn>

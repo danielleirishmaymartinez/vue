@@ -19,35 +19,28 @@ function navigateTo(path) {
     :permanent="!mobile"
     :temporary="mobile"
     app
-    width="250"
+    width="220"
   >
-    <!-- Profile Section -->
-    <v-list class="pt-6">
+    <v-list class="d-flex flex-column mt-15 flex-row mx-6">
       <v-list-item
-        prepend-avatar="https://randomuser.me/api/portraits/women/85.jpg"
-        subtitle="sandra_a88@gmail.com"
-        title="Sandra Adams"
-      ></v-list-item>
-    </v-list>
-
-    <v-divider></v-divider>
-
-    <!-- Centered List Items for Navigation -->
-    <v-list class="d-flex flex-column align-center mt-5">
-      <v-list-item
-        prepend-icon="mdi-folder"
-        title="My Files"
-        @click="navigateTo('/myfiles')"
+        prepend-icon="mdi-account"
+        title="Profile"
+        @click="navigateTo('/profile')"
       ></v-list-item>
       <v-list-item
-        prepend-icon="mdi-account-multiple"
-        title="Shared with me"
-        @click="navigateTo('/shared')"
+        prepend-icon="mdi-home"
+        title="Home"
+        @click="navigateTo('/homepage')"
       ></v-list-item>
       <v-list-item
-        prepend-icon="mdi-star"
-        title="Starred"
-        @click="navigateTo('/starred')"
+        prepend-icon="mdi-cog"
+        title="Settings"
+        @click="navigateTo('/settings')"
+      ></v-list-item>
+      <v-list-item
+        prepend-icon="mdi-bookmark"
+        title="Saved"
+        @click="navigateTo('/saved')"
       ></v-list-item>
     </v-list>
   </v-navigation-drawer>
