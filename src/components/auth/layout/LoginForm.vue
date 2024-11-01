@@ -26,30 +26,33 @@
 
 <script setup>
 import { ref } from 'vue';
-import { requiredValidator, emailValidator, passwordValidator } from '@/utils/validators';
-import supabase from '@/utils/supabase'; // Adjust the path as necessary
+import { requiredValidator, emailValidator, passwordValidator } from '@/utils/validators.js';
+import supabase from '@/utils/supabase.js';
 import { useRouter } from 'vue-router';
 
 const email = ref('');
 const password = ref('');
-const errorMessage = ref(''); // For error messages
+const errorMessage = ref('');
 
-const router = useRouter(); // Create a router instance
+const router = useRouter();
 
 async function onSubmit() {
-  const { user, error } = await supabase.auth.signIn({
-    email: email.value,
-    password: password.value,
-  });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value,
+    });
 
-  if (error) {
-    errorMessage.value = `Login error: ${error.message}`; // Set the error message
-  } else {
-    console.log('Logged in:', user);
-    errorMessage.value = ''; // Clear any previous error messages
-
-    // Redirect to the homepage after successful login
-    router.push('/homepage'); // Adjust this route based on your homepage configuration
+    if (error) {
+      errorMessage.value = `Login error: ${error.message}`;
+    } else if (data.user) {
+      console.log('Logged in:', data.user);
+      errorMessage.value = '';
+      router.push('/homepage');
+    }
+  } catch (err) {
+    errorMessage.value = `Unexpected error: ${err.message}`;
+    console.error(err);
   }
 }
 </script>

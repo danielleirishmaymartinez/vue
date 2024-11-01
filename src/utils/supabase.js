@@ -1,7 +1,14 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://saznhgsazamtqdluzckv.supabase.co';
-const supabaseKey = process.env.VUE_APP_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
+
+// Create Supabase client with session persistence
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true, // Enable session persistence
+    storage: localStorage, // Use localStorage to persist sessions
+  },
+});
 
 export default supabase;

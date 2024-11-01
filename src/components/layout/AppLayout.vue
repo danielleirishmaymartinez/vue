@@ -9,7 +9,6 @@ function onClick() {
   theme.value = theme.value === 'light' ? 'dark' : 'light';
 }
 
-// Function to navigate to different routes
 function navigateTo(path) {
   router.push(path);
 }
@@ -20,7 +19,7 @@ function navigateTo(path) {
     <v-app :theme="theme">
       <v-app-bar class="px-3">
         <v-btn text class="d-flex align-center" @click="$router.push('/')">
-          <img src="@/assets/logo.png" alt="icon" class="mr-2" width="25" />
+          <img src="/images/logo.png" alt="logo" class="mr-2" width="25" />
           <span class="ml-1">STASH</span>
         </v-btn>
 

@@ -53,8 +53,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import { requiredValidator, emailValidator, passwordValidator, confirmPasswordValidator, alphaValidator } from '@/utils/validators';
-import supabase from '@/utils/supabase'; // Adjust the path as necessary
+import { requiredValidator, emailValidator, passwordValidator, confirmPasswordValidator, alphaValidator } from '@/utils/validators.js';
+import supabase from '@/utils/supabase.js'; // Adjust the path as necessary
 import { useRouter } from 'vue-router';
 
 const firstname = ref('');
