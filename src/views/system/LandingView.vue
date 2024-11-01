@@ -1,5 +1,5 @@
 <script setup>
-import AppLayout from '@/components/layout/AppLayout.vue'
+import AppLayout from '@/components/system/AppLayout.vue'
 import { ref } from 'vue'
 import { useDisplay } from 'vuetify'
 

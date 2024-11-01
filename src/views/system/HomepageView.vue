@@ -1,5 +1,5 @@
 <script setup>
-import SidebarNav from '@/components/layout/SidebarNav.vue';
+import SidebarNav from '@/components/system/SidebarNav.vue';
 import { useDisplay } from 'vuetify';
 import { ref } from 'vue';
 import supabase from '@/utils/supabase.js';
