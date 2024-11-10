@@ -50,9 +50,9 @@ async function logout() {
       <v-container fluid class="d-flex">
         <SidebarNav v-model:drawer="drawerVisible" />
         <v-main class="mt-5 pt-3">
-
         </v-main>
       </v-container>
+
     </v-app>
   </v-responsive>
 </template>
