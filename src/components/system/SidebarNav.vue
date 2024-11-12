@@ -19,7 +19,7 @@ function navigateTo(path) {
     :permanent="!mobile"
     :temporary="mobile"
     app
-    width="250"
+    width="220"
   >
     <v-list class="d-flex flex-column mt-15 flex-row mx-6">
       <v-list-item

@@ -1,5 +1,6 @@
 <script setup>
 import SidebarNav from '@/components/system/SidebarNav.vue';
+import HomepageCard from '@/components/system/HomepageCard.vue';
 import { useDisplay } from 'vuetify';
 import { ref } from 'vue';
 import supabase from '@/utils/supabase.js';
@@ -50,6 +51,7 @@ async function logout() {
       <v-container fluid class="d-flex">
         <SidebarNav v-model:drawer="drawerVisible" />
         <v-main class="mt-5 pt-3">
+          <HomepageCard />
         </v-main>
       </v-container>
 
