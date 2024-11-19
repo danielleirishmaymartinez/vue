@@ -34,12 +34,12 @@ function navigateTo(path) {
           <v-list-item
             prepend-icon="mdi-home"
             title="Home"
-            @click="navigateTo('/homepage')"
+            @click="navigateTo('/home')"
           ></v-list-item>
           <v-list-item
             prepend-icon="mdi-cog"
             title="Settings"
-            @click="navigateTo('/settings/personal')"
+            @click="navigateTo('/settings')"
           ></v-list-item>
           <v-list-item
             prepend-icon="mdi-bookmark"
