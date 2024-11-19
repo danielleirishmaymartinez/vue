@@ -145,8 +145,8 @@ const onCardClick = (cardName) => {
 
 <style scoped>
 .main-card {
-  width: 123%;
-  height: 450px;
+  width: 105%;
+  height: 400px;
 }
 
 .custom-container {
