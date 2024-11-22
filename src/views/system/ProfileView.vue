@@ -1,4 +1,5 @@
 <script setup>
+import Navbar from '@/components/system/Navbar.vue'; // Import the Navbar component
 import SidebarNav from '@/components/system/SidebarNav.vue';
 import { useDisplay } from 'vuetify';
 import { ref } from 'vue';
@@ -23,36 +24,37 @@ async function logout() {
 <template>
   <v-responsive class="border rounded">
     <v-app>
-      <!-- Top Navbar -->
-      <v-app-bar app elevation="0" color="transparent" class="px-4">
-        <v-btn icon @click="drawerVisible = !drawerVisible" v-if="mobile">
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
-
-        <v-toolbar-title class="d-flex align-center" @click="$router.push('/homepage')">
-          <img src="/images/logo.png" alt="logo" class="mr-2" width="50" />
-          <span class="ml-1">STASH</span>
-        </v-toolbar-title>
-
-        <v-text-field
-          solo
-          flat
-          dense
-          prepend-inner-icon="mdi-magnify"
-          label="Search"
-          hide-details
-          class="d-flex flex-column mt-20"
-        ></v-text-field>
-
-        <v-btn text @click="logout">Logout</v-btn>
-      </v-app-bar>
+      <!-- Top Navbar (integrated Navbar component) -->
+      <Navbar />
 
       <v-container fluid class="d-flex">
+        <!-- Sidebar Navigation -->
         <SidebarNav v-model:drawer="drawerVisible" />
-        <v-main class="mt-5 pt-3">
 
+        <!-- Main Content Area -->
+        <v-main class="mt-5 pt-3">
+          <v-container>
+            <!-- Main content for your page goes here -->
+            <v-row>
+              <v-col cols="12">
+                <v-card>
+                  <v-card-title>Main Content Area</v-card-title>
+                  <v-card-text>
+                    Add the content for this page here.
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-main>
       </v-container>
     </v-app>
   </v-responsive>
 </template>
+
+<style scoped>
+/* Style adjustments for layout, if necessary */
+.v-responsive {
+  height: 100%;
+}
+</style>
