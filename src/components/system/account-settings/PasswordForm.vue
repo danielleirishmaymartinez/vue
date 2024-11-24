@@ -90,6 +90,7 @@ const onFormSubmit = () => {
       class="mt-2"
       type="submit"
       color="red-darken-4"
+      rounded="pill"
       prepend-icon="mdi-key"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"

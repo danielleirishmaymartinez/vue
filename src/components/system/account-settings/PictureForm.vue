@@ -20,7 +20,7 @@ const formAction = ref({
   ...formActionDefault,
 });
 const refVForm = ref();
-const imgPreview = ref(authStore.userData?.image_url || '/images/img-profile.png');
+const imgPreview = ref(authStore.userData?.image_url || '/images/profile.png');
 
 // Function to handle file change and show image preview
 const onPreview = async (event) => {
@@ -33,7 +33,7 @@ const onPreview = async (event) => {
 
 // Function to reset preview if file-input clear is clicked
 const onPreviewReset = () => {
-  imgPreview.value = authStore.userData?.image_url || '/images/img-profile.png';
+  imgPreview.value = authStore.userData?.image_url || '/images/profile.png';
 };
 
 // Submit Functionality
@@ -98,6 +98,7 @@ const onFormSubmit = () => {
           class="mt-2"
           type="submit"
           color="red-darken-4"
+          rounded="pill"
           prepend-icon="mdi-image-edit"
           :disabled="formAction.formProcess"
           :loading="formAction.formProcess"

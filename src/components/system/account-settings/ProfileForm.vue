@@ -13,6 +13,10 @@ const formData = ref({
   lastname: authStore.userData?.lastname || '',
   email: authStore.userData?.email || '',
   phone: authStore.userData?.phone || '',
+  facebookLink: authStore.userData?.facebookLink || '', // Added Facebook link
+  bio: authStore.userData?.bio || '', // Added bio
+  location: authStore.userData?.location || '', // Added location
+  time: authStore.userData?.time || '', // Added time
 });
 
 const formAction = ref({ ...formActionDefault });
@@ -81,21 +85,53 @@ const onFormSubmit = () => {
         />
       </v-col>
 
+      <!-- Facebook Link Field -->
       <v-col cols="12" sm="6">
         <v-text-field
-          v-model="formData.phone"
-          label="Phone Number"
-          prepend-inner-icon="mdi-phone"
-          prefix="+63"
-          :rules="[requiredValidator, integerValidator]"
+          v-model="formData.facebookLink"
+          label="Facebook Link"
+          prepend-inner-icon="mdi-facebook"
         />
       </v-col>
+
+      <!-- Location Field -->
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="formData.location"
+          label="Location"
+          prepend-inner-icon="mdi-map-marker-outline"
+          hint="Enter your location"
+        />
+      </v-col>
+
+      <!-- Time Field -->
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="formData.time"
+          label="Available Time"
+          prepend-inner-icon="mdi-clock-outline"
+          type="time"
+          hint="Enter the time"
+        />
+      </v-col>
+
+      <!-- Bio Field -->
+      <v-col cols="12" sm="6">
+        <v-textarea
+          v-model="formData.bio"
+          label="Bio"
+          rows="2"
+          hint="Tell us about yourself"
+        />
+      </v-col>
+
     </v-row>
 
     <v-btn
       class="mt-2"
       type="submit"
       color="red-darken-4"
+      rounded="pill"
       prepend-icon="mdi-account-box-edit-outline"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"

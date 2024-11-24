@@ -55,19 +55,19 @@ async function logout() {
           </template>
         </v-card>
 
-        <v-card class="mb-5">
+        <v-card class="mb-5" title="Profile Picture">
           <v-card-text>
             <PictureForm /> <!-- Added -->
           </v-card-text>
         </v-card>
 
-        <v-card class="mb-5">
+        <v-card class="mb-5" title="Profile Information">
           <v-card-text>
             <ProfileForm />
           </v-card-text>
         </v-card>
 
-        <v-card class="mb-5">
+        <v-card class="mb-5" title="Change Password">
           <v-card-text>
             <PasswordForm />
           </v-card-text>
