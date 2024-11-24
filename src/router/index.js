@@ -5,7 +5,7 @@ import RegisterView from '@/views/auth/RegisterView.vue'
 import LandingView from '@/views/system/LandingView.vue'
 import HomepageView from '@/views/system/HomepageView.vue'
 import ProfileView from '@/views/system/ProfileView.vue'
-import AccountSettingsView from '@/views/system/AccountSettingsView.vue';
+import SettingsView from '@/views/system/SettingsView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,7 +40,7 @@ const router = createRouter({
     {
       path: '/settings',
       name: 'settings',
-      component: AccountSettingsView,
+      component: SettingsView,
       meta: { requiresAuth: true },
     },
   ],
