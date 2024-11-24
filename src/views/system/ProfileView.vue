@@ -33,7 +33,7 @@ onMounted(async () => {
     // Fetch user profile using user_id from profiles table
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("*")
+      .select("first_name, last_name, profile_image, bio, preferred_location, preferred_time")
       .eq("user_id", userStore.userData.id) // Use user_id from the store
       .limit(1); // Ensure only one row is returned
 
@@ -57,7 +57,8 @@ onMounted(async () => {
 
 // Default user profile if not found
 const getDefaultProfile = () => ({
-  name: "Unknown User",
+  first_name: "Unknown",
+  last_name: "User",
   bio: "No bio available.",
   preferred_location: "Not specified",
   preferred_time: "Not specified",
@@ -132,26 +133,25 @@ const logout = async () => {
     <v-app>
       <!-- Top Navbar -->
       <Navbar />
-      <br><br>
 
       <v-container fluid class="d-flex">
         <!-- Sidebar Navigation -->
         <SidebarNav v-model:drawer="drawerVisible" />
 
         <!-- Main Content -->
-        <v-main class="mt-6 pt-5">
-          <v-container class="profile-container pb-6">
+        <v-main class="mt-10 pt-12">
+          <v-container class="profile-container pb-11">
             <!-- Profile Section -->
             <v-row>
               <!-- Profile Image Section -->
               <v-col cols="12" md="4" class="d-flex justify-center align-center mb-4">
                 <v-avatar size="200" class="profile-avatar">
                   <template v-if="userProfile?.profile_image">
-                    <img :src="userProfile.profile_image" alt="User Avatar" />
+                    <img :src="userProfile.profile_image" alt="pfp" />
                   </template>
                   <template v-else>
                     <span class="initials">
-                      {{ getInitials(userProfile.name || "Unknown User") }}
+                      {{ getInitials(userProfile.first_name + ' ' + userProfile.last_name || "Unknown User") }}
                     </span>
                   </template>
                 </v-avatar>
@@ -162,7 +162,7 @@ const logout = async () => {
                 <div class="profile-details">
                   <!-- User Name -->
                   <br>
-                  <h2 class="mb-2">{{ userProfile.name || "Unknown User" }}</h2>
+                  <h2 class="mb-2">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
                   
                   <!-- User Bio -->
                   <p class="text-muted mb-4">{{ userProfile.bio || "No bio available." }}</p>
@@ -177,7 +177,6 @@ const logout = async () => {
               </v-col>
             </v-row>
           </v-container>
-          <br>
           <v-divider :thickness="1" class="border-opacity-50" color="black"></v-divider>
 
           <!-- Tabs Section -->

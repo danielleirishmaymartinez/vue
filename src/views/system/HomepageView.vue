@@ -9,36 +9,36 @@ import { useDisplay } from "vuetify";
 const { mobile } = useDisplay();
 const drawerVisible = ref(!mobile.value);
 
-// Product data
-const products = ref([]);
-const selectedProduct = ref(null);
+// Post data
+const posts = ref([]);
+const selectedPost = ref(null);
 const isModalOpen = ref(false);
 
-// Fetch products from Supabase
-async function fetchProducts() {
-  const { data, error } = await supabase.from("products").select("*");
+// Fetch posts from Supabase
+async function fetchPosts() {
+  const { data, error } = await supabase.from("posts").select("*");
   if (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching posts:", error);
   } else {
-    products.value = data;
+    posts.value = data;
   }
 }
 
-// Open modal for product details
-function openModal(product) {
-  selectedProduct.value = product;
+// Open modal for post details
+function openModal(post) {
+  selectedPost.value = post;
   isModalOpen.value = true;
 }
 
 // Close modal
 function closeModal() {
   isModalOpen.value = false;
-  selectedProduct.value = null;
+  selectedPost.value = null;
 }
 
-// Fetch products on load
+// Fetch posts on load
 onMounted(() => {
-  fetchProducts();
+  fetchPosts();
 });
 </script>
 
@@ -59,21 +59,21 @@ onMounted(() => {
           </v-banner-text>
         </v-banner>
 
-        <!-- Product Grid -->
+        <!-- Posts Grid -->
         <v-row dense>
           <v-col
-            v-for="product in products"
-            :key="product.id"
+            v-for="post in posts"
+            :key="post.post_id"
             cols="12"
             sm="6"
             md="4"
           >
-            <v-card :class="{ 'gray-filter': product.is_sold }">
-              <v-img :src="product.image" alt="Product Image" height="200"></v-img>
-              <v-card-title>{{ product.item_name }}</v-card-title>
-              <v-card-subtitle>₱{{ product.price }}</v-card-subtitle>
+            <v-card :class="{ 'gray-filter': post.is_sold }">
+              <v-img :src="post.image" alt="Post Image" height="200"></v-img>
+              <v-card-title>{{ post.item_name }}</v-card-title>
+              <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
               <v-card-actions>
-                <v-btn color="primary" @click="openModal(product)">
+                <v-btn color="primary" @click="openModal(post)">
                   View Details
                 </v-btn>
               </v-card-actions>
@@ -81,18 +81,18 @@ onMounted(() => {
           </v-col>
         </v-row>
 
-        <!-- Modal for Product Details -->
+        <!-- Modal for Post Details -->
         <v-dialog v-model="isModalOpen" max-width="500">
           <v-card>
-            <v-img :src="selectedProduct?.image" alt="Product Image" height="300"></v-img>
-            <v-card-title>{{ selectedProduct?.item_name }}</v-card-title>
-            <v-card-subtitle>₱{{ selectedProduct?.price }}</v-card-subtitle>
+            <v-img :src="selectedPost?.image" alt="Post Image" height="300"></v-img>
+            <v-card-title>{{ selectedPost?.item_name }}</v-card-title>
+            <v-card-subtitle>₱{{ selectedPost?.price }}</v-card-subtitle>
             <v-card-text>
-              <p><strong>Description:</strong> {{ selectedProduct?.description }}</p>
-              <p><strong>Location:</strong> {{ selectedProduct?.location }}</p>
-              <p><strong>Time:</strong> {{ selectedProduct?.time }}</p>
-              <p><strong>Type:</strong> {{ selectedProduct?.type }}</p>
-              <p v-if="selectedProduct?.is_sold" class="text-error">
+              <p><strong>Description:</strong> {{ selectedPost?.description }}</p>
+              <p><strong>Location:</strong> {{ selectedPost?.location }}</p>
+              <p><strong>Time:</strong> {{ selectedPost?.time }}</p>
+              <p><strong>Type:</strong> {{ selectedPost?.type }}</p>
+              <p v-if="selectedPost?.is_sold" class="text-error">
                 <strong>Status:</strong> Sold Out
               </p>
             </v-card-text>
