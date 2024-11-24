@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import Navbar from "@/components/system/Navbar.vue";
 import SidebarNav from "@/components/system/SidebarNav.vue";
+import Navbar from "@/components/system/Navbar.vue";
 import { useDisplay } from "vuetify";
 import { useRouter } from "vue-router";
 import { useAuthUserStore } from "@/stores/authUserStore.js"; // Import the store
