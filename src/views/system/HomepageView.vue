@@ -25,7 +25,6 @@ async function logout() {
 <template>
   <v-responsive class="border rounded">
     <v-app>
-      <!-- Replace existing Top Navbar with the new Navbar -->
       <Navbar />
 
       <v-container fluid class="d-flex">
@@ -34,7 +33,6 @@ async function logout() {
           <HomepageCard />
         </v-main>
       </v-container>
-
     </v-app>
   </v-responsive>
 </template>
