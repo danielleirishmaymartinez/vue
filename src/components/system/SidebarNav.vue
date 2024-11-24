@@ -5,7 +5,7 @@ import { useDisplay } from 'vuetify';
 
 const router = useRouter();
 const { mobile } = useDisplay();
-const drawer = ref(!mobile.value); // Drawer visibility toggle
+const drawer = ref(!mobile.value);
 
 // Function to navigate to different routes
 function navigateTo(path) {
@@ -19,7 +19,7 @@ function navigateTo(path) {
     :permanent="!mobile"
     :temporary="mobile"
     app
-    width="220"
+    width="250"
   >
     <v-list class="d-flex flex-column mt-15 flex-row mx-6">
       <v-list-item
@@ -30,7 +30,7 @@ function navigateTo(path) {
       <v-list-item
         prepend-icon="mdi-home"
         title="Home"
-        @click="navigateTo('/homepage')"
+        @click="navigateTo('/home')"
       ></v-list-item>
       <v-list-item
         prepend-icon="mdi-cog"

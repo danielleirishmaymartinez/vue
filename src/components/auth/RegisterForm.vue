@@ -1,94 +1,148 @@
-<template>
-  <v-form fast-fail @submit.prevent="onSubmit">
-    <v-text-field
-      label="Firstname:"
-      variant="outlined"
-      :rules="[requiredValidator, alphaValidator]"
-      v-model="firstname"
-    ></v-text-field>
-
-    <v-text-field
-      label="Lastname:"
-      variant="outlined"
-      :rules="[requiredValidator, alphaValidator]"
-      v-model="lastname"
-    ></v-text-field>
-
-    <v-text-field
-      label="Email:"
-      variant="outlined"
-      :rules="[requiredValidator, emailValidator]"
-      v-model="email"
-    ></v-text-field>
-
-    <v-text-field
-      label="Password:"
-      type="password"
-      variant="outlined"
-      :rules="[requiredValidator, passwordValidator]"
-      v-model="password"
-    ></v-text-field>
-
-    <v-text-field
-      label="Confirm Password:"
-      type="password"
-      variant="outlined"
-      :rules="[requiredValidator, (value) => confirmPasswordValidator(value, password)]"
-      v-model="confirmPassword"
-    ></v-text-field>
-
-    <v-btn class="mt-2" type="submit" block color="primary">Sign Up</v-btn>
-
-    <!-- Error message -->
-    <v-alert v-if="errorMessage" type="error" class="mt-3">
-      {{ errorMessage }}
-    </v-alert>
-
-    <!-- Success message -->
-    <v-alert v-if="successMessage" type="success" class="mt-3">
-      {{ successMessage }}
-    </v-alert>
-  </v-form>
-</template>
-
 <script setup>
-import { ref } from 'vue';
-import { requiredValidator, emailValidator, passwordValidator, confirmPasswordValidator, alphaValidator } from '@/utils/validators.js';
-import supabase from '@/utils/supabase.js'; // Adjust the path as necessary
-import { useRouter } from 'vue-router';
+import {
+  requiredValidator,
+  emailValidator,
+  passwordValidator,
+  confirmedValidator
+} from '@/utils/validators'
+import { ref } from 'vue'
+import AlertNotification from '@/components/common/AlertNotification.vue'
+import { supabase, formActionDefault } from '@/utils/supabase.js'
+import { useRouter } from 'vue-router'
 
-const firstname = ref('');
-const lastname = ref('');
-const email = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const errorMessage = ref(''); // For error messages
-const successMessage = ref(''); // For success messages
+// Utilize pre-defined vue functions
+const router = useRouter()
 
-const router = useRouter(); // Create a router instance
+// Load Variables
+const formDataDefault = {
+  firstname: '',
+  lastname: '',
+  email: '',
+  password: '',
+  password_confirmation: ''
+}
+const formData = ref({
+  ...formDataDefault
+})
+const formAction = ref({
+  ...formActionDefault
+})
+const isPasswordVisible = ref(false)
+const isPasswordConfirmVisible = ref(false)
+const refVForm = ref()
 
-async function onSubmit() {
-  const { user, error } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value,
+const onSubmit = async () => {
+
+  formAction.value = { ...formActionDefault, formProcess: true }
+
+  const { data, error } = await supabase.auth.signUp({
+    email: formData.value.email,
+    password: formData.value.password,
     options: {
       data: {
-        firstname: firstname.value,
-        lastname: lastname.value,
-      },
-    },
-  });
+        firstname: formData.value.firstname,
+        lastname: formData.value.lastname,
+        is_admin: false // Just turn to true if super admin account
+        // role: 'Administrator' // If role based; just change the string based on role
+      }
+    }
+  })
 
   if (error) {
-    errorMessage.value = `Registration error: ${error.message}`; // Set the error message
-    successMessage.value = ''; // Clear success message
-  } else {
-    successMessage.value = 'Registration successful! Redirecting to login...'; // Set success message
-    errorMessage.value = ''; // Clear error message
-
-    setTimeout(() => {
-      router.push('/login');
-    }, 2000);
+    // Add Error Message and Status Code
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    // Add Success Message
+    formAction.value.formSuccessMessage = 'Successfully Registered Account.'
+    // Redirect Acct to Dashboard
+    router.replace('/login')
   }
+
+  // Reset Form
+  refVForm.value?.reset()
+  // Turn off processing
+  formAction.value.formProcess = false
+}
+
+// Trigger Validators
+const onFormSubmit = () => {
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) onSubmit()
+  })
 }
 </script>
+
+<template>
+  <AlertNotification
+    :form-success-message="formAction.formSuccessMessage"
+    :form-error-message="formAction.formErrorMessage"
+  ></AlertNotification>
+
+  <v-form ref="refVForm" @submit.prevent="onFormSubmit">
+    <v-row dense>
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="formData.firstname"
+          label="Firstname"
+          :rules="[requiredValidator]"
+        ></v-text-field>
+      </v-col>
+
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="formData.lastname"
+          label="Lastname"
+          :rules="[requiredValidator]"
+        ></v-text-field>
+      </v-col>
+
+      <v-col cols="12">
+        <v-text-field
+          v-model="formData.email"
+          label="Email"
+          prepend-inner-icon="mdi-email-outline"
+          :rules="[requiredValidator, emailValidator]"
+        ></v-text-field>
+      </v-col>
+
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="formData.password"
+          prepend-inner-icon="mdi-lock-outline"
+          label="Password"
+          :type="isPasswordVisible ? 'text' : 'password'"
+          :append-inner-icon="isPasswordVisible ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append-inner="isPasswordVisible = !isPasswordVisible"
+          :rules="[requiredValidator, passwordValidator]"
+        ></v-text-field>
+      </v-col>
+
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="formData.password_confirmation"
+          label="Password Confirmation"
+          :type="isPasswordConfirmVisible ? 'text' : 'password'"
+          :append-inner-icon="isPasswordConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
+          :rules="[
+            requiredValidator,
+            confirmedValidator(formData.password_confirmation, formData.password)
+          ]"
+        ></v-text-field>
+      </v-col>
+    </v-row>
+
+    <v-btn
+      class="mt-2"
+      type="submit"
+      color="red-darken-4"
+      prepend-icon="mdi-account-plus"
+      :disabled="formAction.formProcess"
+      :loading="formAction.formProcess"
+      block
+    >
+      Register
+    </v-btn>
+  </v-form>
+</template>

@@ -15,8 +15,9 @@ function navigateTo(path) {
     <v-app
       :theme="themeStore.theme"
       :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
+      class="bg-image"
     >
-      <v-app-bar class="px-3">
+      <v-app-bar class="px-3 blurred-navbar" flat>
         <v-btn text class="d-flex align-center" @click="navigateTo('/')">
           <img src="/images/logo.png" alt="logo" class="mr-2" width="25" />
           <span class="ml-1">STASH</span>
@@ -41,7 +42,7 @@ function navigateTo(path) {
         </v-container>
       </v-main>
 
-      <v-footer elevation="24" border app>
+      <v-footer elevation="24" border app class="blurred-navbar">
         <v-container>
           <v-row>
             <v-col class="text-center">
@@ -57,13 +58,32 @@ function navigateTo(path) {
 <style scoped>
 /* Dark mode styles */
 .dark-mode {
-  background-color: #121212;
+  background-color: rgba(18, 18, 18, 0.9);
   color: #ffffff;
 }
 
 /* Light mode styles */
 .light-mode {
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.9);
   color: #000000;
+}
+
+/* Background image for the entire app */
+.bg-image {
+  background-image: url('/images/loo.jpg'); /* Update the path as necessary */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+.blurred-navbar {
+  background-color: rgba(255, 255, 255, 0.3); 
+  backdrop-filter: blur(10px);
+  box-shadow: none;
+}
+
+.dark-mode .blurred-navbar {
+  background-color: rgba(18, 18, 18, 0.4); /* Adjust for dark mode */
 }
 </style>

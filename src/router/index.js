@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isAuthenticated } from '@/utils/supabase'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import LandingView from '@/views/system/LandingView.vue'
@@ -26,26 +27,50 @@ const router = createRouter({
       component: RegisterView,
     },
     {
-      path: '/homepage',
-      name: 'homepage',
+      path: '/home',
+      name: 'home',
       component: HomepageView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/profile',
       name: 'profile',
       component: ProfileView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/settings',
       name: 'settings',
       component: SettingsView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/saved',
       name: 'saved',
       component: SavedView,
+      meta: { requiresAuth: true },
     },
   ],
+})
+
+// Navigation guard
+router.beforeEach(async (to) => {
+  const isLoggedIn = await isAuthenticated()
+
+  // Redirect authenticated users away from login/register
+  if ((to.name === 'login' || to.name === 'register') && isLoggedIn) {
+    return { name: 'home' }
+  }
+
+  // Redirect unauthenticated users to login for protected routes
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    return { name: 'login' }
+  }
+
+  // Redirect to home if landing page is accessed when logged in
+  if (to.name === 'landing' && isLoggedIn) {
+    return { name: 'home' }
+  }
 })
 
 export default router
