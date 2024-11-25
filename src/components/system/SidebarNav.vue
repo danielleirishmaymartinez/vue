@@ -19,7 +19,7 @@ function navigateTo(path) {
     :permanent="!mobile"
     :temporary="mobile"
     app
-    width="250"
+    width="300"
   >
     <v-list class="d-flex flex-column mt-15 flex-row mx-6">
       <v-list-item
@@ -36,11 +36,6 @@ function navigateTo(path) {
         prepend-icon="mdi-cog"
         title="Settings"
         @click="navigateTo('/settings')"
-      ></v-list-item>
-      <v-list-item
-        prepend-icon="mdi-bookmark"
-        title="Saved"
-        @click="navigateTo('/saved')"
       ></v-list-item>
     </v-list>
   </v-navigation-drawer>

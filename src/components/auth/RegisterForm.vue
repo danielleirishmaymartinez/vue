@@ -32,9 +32,9 @@ const isPasswordConfirmVisible = ref(false)
 const refVForm = ref()
 
 const onSubmit = async () => {
-
   formAction.value = { ...formActionDefault, formProcess: true }
 
+  // Register user in Supabase auth
   const { data, error } = await supabase.auth.signUp({
     email: formData.value.email,
     password: formData.value.password,
@@ -42,21 +42,38 @@ const onSubmit = async () => {
       data: {
         firstname: formData.value.firstname,
         lastname: formData.value.lastname,
-        is_admin: false // Just turn to true if super admin account
-        // role: 'Administrator' // If role based; just change the string based on role
+        is_admin: false
       }
     }
   })
 
   if (error) {
-    // Add Error Message and Status Code
+    // Handle error and show message
     formAction.value.formErrorMessage = error.message
     formAction.value.formStatus = error.status
   } else if (data) {
-    // Add Success Message
-    formAction.value.formSuccessMessage = 'Successfully Registered Account.'
-    // Redirect Acct to Dashboard
-    router.replace('/login')
+    // User registration was successful, now insert profile data
+    const { user } = data
+
+    const { error: profileError } = await supabase.from("profiles").insert([
+      {
+        user_id: user.id, // This is the user ID from auth
+        first_name: formData.value.firstname,
+        last_name: formData.value.lastname,
+        // You can add any other additional profile info here
+      }
+    ])
+
+    if (profileError) {
+      // Handle any errors that occur while inserting into the profiles table
+      formAction.value.formErrorMessage = profileError.message
+      formAction.value.formStatus = profileError.status
+    } else {
+      // Add Success Message
+      formAction.value.formSuccessMessage = 'Successfully Registered Account.'
+      // Redirect to login
+      router.replace('/login')
+    }
   }
 
   // Reset Form
