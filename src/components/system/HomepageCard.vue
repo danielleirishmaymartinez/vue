@@ -1,12 +1,14 @@
 <script setup>
+import { useSavedProductsStore } from '@/stores/savedProducts';
 import { ref } from 'vue';
 
-// Carousel items
+const savedProductsStore = useSavedProductsStore();
+
 const carouselItems = [
   {
     image: 'https://via.placeholder.com/800x400?text=Slide+1',
-    title: 'Welcome to Our Store',
-    subtitle: 'Explore the latest deals!',
+    title: 'Discover our Bestsellers',
+    subtitle: 'Fall in love with flavors you’ve never tasted before!',
   },
   {
     image: 'https://via.placeholder.com/800x400?text=Slide+2',
@@ -20,51 +22,52 @@ const carouselItems = [
   },
 ];
 
-// Product cards
 const products = ref([
   {
-    image: 'https://via.placeholder.com/300?text=Product+1',
-    name: 'Ballpen',
-    description: 'asdghjk',
-    price: '10',
-    label: null,
+    image: 'https://via.placeholder.com/300x200?text=Product+1',
+    name: '2 packs of highlighter',
+    seller: 'by Dani',
+    price: '112',
+    description: 'To make your reviewer colorful hahaha.',
   },
   {
-    image: 'https://via.placeholder.com/300?text=Product+2',
+    image: 'https://via.placeholder.com/300x200?text=Product+2',
+    name: 'Jansport Bag',
+    seller: 'by Nine',
+    price: '750',
+    description: 'Open for swap and sale.',
+  },
+  {
+    image: 'https://via.placeholder.com/300x200?text=Product+3',
     name: 'Yellow Pad',
-    description: '1 whole',
-    price: '35',
-    label: 'Sale',
+    seller: 'by Les',
+    price: '78',
+    description: 'Para nay kasuwatan sa answer, kung way answer uli.',
   },
   {
-    image: 'https://via.placeholder.com/300?text=Product+3',
+    image: 'https://via.placeholder.com/300x200?text=Product+4',
     name: 'Shoes',
-    description: 'Converge',
-    price: '1900',
-    label: 'More Corors',
-  },
-  {
-    image: 'https://via.placeholder.com/300?text=Product+4',
-    name: 'Organic Honey Jar',
-    description: 'by Sweet Honey Co.',
-    price: '15',
-    label: null,
-  },
-  {
-    image: 'https://via.placeholder.com/300?text=Product+5',
-    name: 'AMbot',
-    description: 'bbbbbbbooot',
-    price: '0',
-    label: 'New',
-  },
-  {
-    image: 'https://via.placeholder.com/300?text=Product+6',
-    name: 'Saging',
-    description: 'saging genggeng',
-    price: '10',
-    label: null,
+    seller: 'by lola',
+    price: '2000',
+    description: 'For Swap.',
   },
 ]);
+
+const toggleSave = (product) => {
+  if (savedProductsStore.savedProducts.some((p) => p.name === product.name)) {
+    savedProductsStore.removeProduct(product.name);
+  } else {
+    savedProductsStore.addProduct(product);
+  }
+};
+
+const isSaved = (product) => savedProductsStore.savedProducts.some((p) => p.name === product.name);
+
+const showProductDetail = ref(null);
+
+const viewProductDetails = (product) => {
+  showProductDetail.value = product;
+};
 </script>
 
 <template>
@@ -81,64 +84,81 @@ const products = ref([
       </v-carousel-item>
     </v-carousel>
 
+    <!-- Discover Section -->
+    <div class="text-center mt-5">
+      <h2 class="discover-title">Pamalit namo</h2>
+      <p class="discover-subtitle">
+        Para di kuni ipang labay!
+      </p>
+    </div>
+
     <!-- Product Cards -->
-    <v-container>
-      <v-row>
+    <v-container class="product-section mt-5">
+      <v-row justify="center" dense>
         <v-col
           v-for="(product, index) in products"
           :key="index"
           cols="12"
           sm="6"
-          md="4"
-          class="d-flex"
+          md="3"
         >
-          <v-card class="product-card">
-            <!-- Badge -->
-            <v-badge
-              v-if="product.label"
-              color="orange"
-              text-color="white"
-              value="{{ product.label }}"
-              location="top-right"
-              class="badge-label"
-            ></v-badge>
+          <v-card class="product-card" @click="viewProductDetails(product)">
+            <!-- Image with Heart Icon -->
+            <v-img :src="product.image" class="product-image" height="200px">
+              <v-btn
+                icon
+                @click.stop="toggleSave(product)"
+                class="heart-icon"
+                :class="{'saved': isSaved(product)}"
+              >
+                <v-icon>{{ isSaved(product) ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
+              </v-btn>
+            </v-img>
 
-            <!-- Image -->
-            <v-img :src="product.image" class="product-image"></v-img>
-
-            <!-- Details -->
-            <v-card-text>
+            <!-- Product Details -->
+            <v-card-text class="text-center">
               <div class="product-name">{{ product.name }}</div>
               <div class="product-seller">{{ product.seller }}</div>
               <div class="product-price">{{ product.price }}</div>
             </v-card-text>
-
-            <!-- Actions -->
-            <v-card-actions>
-              <v-btn color="primary" text>View</v-btn>
-              <v-btn icon>
-                <v-icon>mdi-heart</v-icon>
-              </v-btn>
-            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
     </v-container>
+
+    <!-- Product Detail Modal -->
+    <v-dialog v-model="showProductDetail" max-width="800px">
+      <v-card>
+        <v-card-title class="text-h5">{{ showProductDetail?.name }}</v-card-title>
+        <v-card-subtitle>{{ showProductDetail?.seller }}</v-card-subtitle>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-img :src="showProductDetail?.image" class="product-detail-image" />
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="product-description">{{ showProductDetail?.description }}</div>
+              <div class="product-price">{{ showProductDetail?.price }}</div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="showProductDetail = null" text>Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <style scoped>
-/* Carousel styles */
+/* Carousel Styles */
 .carousel-container {
   margin-bottom: 40px;
 }
 
 .carousel-content {
-  position: absolute;
-  bottom: 30px;
-  left: 30px;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 
 .carousel-title {
@@ -150,48 +170,89 @@ const products = ref([
   font-size: 1.5rem;
 }
 
-/* Product card styles */
+/* Discover Section */
+.discover-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.discover-subtitle {
+  font-size: 1.25rem;
+  color: gray;
+  margin-bottom: 30px;
+}
+
+/* Product Section */
+.product-section {
+  margin-top: 40px;
+}
+
 .product-card {
-  width: 100%;
-  border: 1px solid #ddd;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  cursor: pointer;
+  height: 350px; /* Ensures all cards have the same height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .product-image {
+  position: relative;
   height: 200px;
   object-fit: cover;
+  background-color: #f9f9f9;
+}
+
+.heart-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+}
+
+.heart-icon .v-icon {
+  color: red;
+}
+
+.saved {
+  color: #ff4081;
 }
 
 .product-name {
   font-weight: bold;
   font-size: 1rem;
-  margin-bottom: 0.5rem;
 }
 
 .product-seller {
+  color: gray;
   font-size: 0.875rem;
-  color: #888;
-  margin-bottom: 0.5rem;
 }
 
 .product-price {
-  font-size: 1rem;
-  color: #ff5722;
-  font-weight: bold;
+  color: orange;
+  font-size: 1.25rem;
 }
 
-.badge-label {
-  position: absolute;
-  z-index: 1;
-  top: 10px;
-  right: 10px;
+.product-detail-image {
+  width: 100%;
+  height: auto;
+}
+
+.product-description {
+  margin-top: 10px;
+  color: #333;
+  font-size: 1rem;
+}
+
+.v-btn {
+  text-transform: none;
 }
 </style>
