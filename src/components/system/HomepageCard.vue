@@ -1,69 +1,25 @@
 <script setup>
-import { useSavedProductsStore } from '@/stores/savedProducts';
-import { ref } from 'vue';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-const savedProductsStore = useSavedProductsStore();
-
-const carouselItems = [
-  {
-    image: 'https://via.placeholder.com/800x400?text=Slide+1',
-    title: 'Discover our Bestsellers',
-    subtitle: 'Fall in love with flavors you’ve never tasted before!',
-  },
-  {
-    image: 'https://via.placeholder.com/800x400?text=Slide+2',
-    title: 'Seasonal Discounts',
-    subtitle: 'Limited-time offers just for you.',
-  },
-  {
-    image: 'https://via.placeholder.com/800x400?text=Slide+3',
-    title: 'New Arrivals',
-    subtitle: 'Check out our newest collections.',
-  },
-];
-
+// Mock product data
 const products = ref([
-  {
-    image: 'https://via.placeholder.com/300x200?text=Product+1',
-    name: '2 packs of highlighter',
-    seller: 'by Dani',
-    price: '112',
-    description: 'To make your reviewer colorful hahaha.',
-  },
-  {
-    image: 'https://via.placeholder.com/300x200?text=Product+2',
-    name: 'Jansport Bag',
-    seller: 'by Nine',
-    price: '750',
-    description: 'Open for swap and sale.',
-  },
-  {
-    image: 'https://via.placeholder.com/300x200?text=Product+3',
-    name: 'Yellow Pad',
-    seller: 'by Les',
-    price: '78',
-    description: 'Para nay kasuwatan sa answer, kung way answer uli.',
-  },
-  {
-    image: 'https://via.placeholder.com/300x200?text=Product+4',
-    name: 'Shoes',
-    seller: 'by lola',
-    price: '2000',
-    description: 'For Swap.',
-  },
+  { name: "Laptop", price: "₱20,000", image: "/images/laptop.jpg", seller: "John Doe", description: "High-performance laptop" },
+  { name: "Phone", price: "₱15,000", image: "/images/phone.jpg", seller: "Jane Doe", description: "Latest model smartphone" },
 ]);
 
+const showProductDetail = ref(null);
+const isSaved = ref([]);
+
 const toggleSave = (product) => {
-  if (savedProductsStore.savedProducts.some((p) => p.name === product.name)) {
-    savedProductsStore.removeProduct(product.name);
+  if (isSaved.value.includes(product.name)) {
+    isSaved.value = isSaved.value.filter((item) => item !== product.name);
   } else {
-    savedProductsStore.addProduct(product);
+    isSaved.value.push(product.name);
   }
 };
 
-const isSaved = (product) => savedProductsStore.savedProducts.some((p) => p.name === product.name);
-
-const showProductDetail = ref(null);
+const isSaved = (product) => isSaved.value.includes(product.name);
 
 const viewProductDetails = (product) => {
   showProductDetail.value = product;
@@ -73,7 +29,7 @@ const viewProductDetails = (product) => {
 <template>
   <v-container>
     <!-- Carousel -->
-    <v-carousel class="carousel-container" hide-delimiters height="400">
+    <v-carousel hide-delimiters height="400">
       <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
         <v-img :src="item.image" cover>
           <v-container class="carousel-content">
@@ -87,9 +43,7 @@ const viewProductDetails = (product) => {
     <!-- Discover Section -->
     <div class="text-center mt-5">
       <h2 class="discover-title">Pamalit namo</h2>
-      <p class="discover-subtitle">
-        Para di kuni ipang labay!
-      </p>
+      <p class="discover-subtitle">Para di kuni ipang labay!</p>
     </div>
 
     <!-- Product Cards -->
@@ -103,7 +57,6 @@ const viewProductDetails = (product) => {
           md="3"
         >
           <v-card class="product-card" @click="viewProductDetails(product)">
-            <!-- Image with Heart Icon -->
             <v-img :src="product.image" class="product-image" height="200px">
               <v-btn
                 icon
@@ -114,8 +67,6 @@ const viewProductDetails = (product) => {
                 <v-icon>{{ isSaved(product) ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
               </v-btn>
             </v-img>
-
-            <!-- Product Details -->
             <v-card-text class="text-center">
               <div class="product-name">{{ product.name }}</div>
               <div class="product-seller">{{ product.seller }}</div>
@@ -143,7 +94,7 @@ const viewProductDetails = (product) => {
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="showProductDetail = null" text>Close</v-btn>
+          <v-btn text @click="showProductDetail = null">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -151,108 +102,55 @@ const viewProductDetails = (product) => {
 </template>
 
 <style scoped>
-/* Carousel Styles */
-.carousel-container {
-  margin-bottom: 40px;
-}
-
-.carousel-content {
-  color: white;
-  text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-}
-
-.carousel-title {
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-.carousel-subtitle {
-  font-size: 1.5rem;
-}
-
-/* Discover Section */
-.discover-title {
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-.discover-subtitle {
-  font-size: 1.25rem;
-  color: gray;
-  margin-bottom: 30px;
-}
-
-/* Product Section */
-.product-section {
-  margin-top: 40px;
-}
-
 .product-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-  height: 350px; /* Ensures all cards have the same height */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: none;
 }
 
-.product-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+.product-name {
+  font-size: 16px;
+  font-weight: bold;
 }
 
-.product-image {
-  position: relative;
-  height: 200px;
-  object-fit: cover;
-  background-color: #f9f9f9;
+.product-description {
+  font-size: 14px;
+}
+
+.product-price {
+  font-size: 16px;
+  color: #ff4081;
+}
+
+.product-detail-image {
+  max-height: 400px;
+  object-fit: contain;
 }
 
 .heart-icon {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-}
-
-.heart-icon .v-icon {
-  color: red;
-}
-
-.saved {
   color: #ff4081;
 }
 
-.product-name {
+.saved {
+  color: red;
+}
+
+.carousel-title {
+  font-size: 30px;
   font-weight: bold;
-  font-size: 1rem;
 }
 
-.product-seller {
-  color: gray;
-  font-size: 0.875rem;
+.carousel-subtitle {
+  font-size: 20px;
 }
 
-.product-price {
-  color: orange;
-  font-size: 1.25rem;
+.discover-title {
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.product-detail-image {
-  width: 100%;
-  height: auto;
-}
-
-.product-description {
-  margin-top: 10px;
-  color: #333;
-  font-size: 1rem;
-}
-
-.v-btn {
-  text-transform: none;
+.product-section {
+  margin-top: 50px;
 }
 </style>
