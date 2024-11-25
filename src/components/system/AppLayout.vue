@@ -45,9 +45,9 @@ function navigateTo(path) {
       <v-footer elevation="24" border app class="blurred-navbar">
         <v-container>
           <v-row>
-            <v-col class="text-center">
-              Copyright @ 2024 - Student Trade and Sell Hub
-            </v-col>
+        <div :class="mobile ? 'w-100 text-center' : ''">
+          Copyright @ 2024 - Student Trade and Sell Hub
+        </div>
           </v-row>
         </v-container>
       </v-footer>
@@ -64,13 +64,13 @@ function navigateTo(path) {
 
 /* Light mode styles */
 .light-mode {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.712);
   color: #000000;
 }
 
 /* Background image for the entire app */
 .bg-image {
-  background-image: url('/images/loo.jpg'); /* Update the path as necessary */
+  background-image: url('/images/bg-image.png'); /* Update the path as necessary */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -78,12 +78,12 @@ function navigateTo(path) {
 }
 
 .blurred-navbar {
-  background-color: rgba(255, 255, 255, 0.3); 
+  background-color: rgba(236, 216, 171, 0.3); 
   backdrop-filter: blur(10px);
   box-shadow: none;
 }
 
 .dark-mode .blurred-navbar {
-  background-color: rgba(18, 18, 18, 0.4); /* Adjust for dark mode */
+  background-color: rgba(37, 22, 2, 0.658); /* Adjust for dark mode */
 }
 </style>
