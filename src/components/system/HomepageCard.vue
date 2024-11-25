@@ -1,25 +1,69 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useSavedProductsStore } from '@/stores/savedProducts';
+import { ref } from 'vue';
 
-// Mock product data
+const savedProductsStore = useSavedProductsStore();
+
+const carouselItems = [
+  {
+    image: 'https://via.placeholder.com/800x400?text=Slide+1',
+    title: 'Discover our Bestsellers',
+    subtitle: 'Fall in love with flavors you’ve never tasted before!',
+  },
+  {
+    image: 'https://via.placeholder.com/800x400?text=Slide+2',
+    title: 'Seasonal Discounts',
+    subtitle: 'Limited-time offers just for you.',
+  },
+  {
+    image: 'https://via.placeholder.com/800x400?text=Slide+3',
+    title: 'New Arrivals',
+    subtitle: 'Check out our newest collections.',
+  },
+];
+
 const products = ref([
-  { name: "Laptop", price: "₱20,000", image: "/images/laptop.jpg", seller: "John Doe", description: "High-performance laptop" },
-  { name: "Phone", price: "₱15,000", image: "/images/phone.jpg", seller: "Jane Doe", description: "Latest model smartphone" },
+  {
+    image: 'https://via.placeholder.com/300x200?text=Product+1',
+    name: 'Beet & Cashew Butter (2-Pack)',
+    seller: 'by Better Almond Butter',
+    price: '$36',
+    description: 'A unique blend of beets and cashews in a smooth butter.',
+  },
+  {
+    image: 'https://via.placeholder.com/300x200?text=Product+2',
+    name: 'Chocolate Bark Variety Gift Box',
+    seller: 'by Ticket Chocolate',
+    price: '$25',
+    description: 'Delicious chocolate bark in various flavors, perfect for gifting.',
+  },
+  {
+    image: 'https://via.placeholder.com/300x200?text=Product+3',
+    name: 'Porcini Powder and Dried Mushrooms Collection',
+    seller: 'by Wine Forest',
+    price: '$38-$76',
+    description: 'A curated collection of porcini powder and dried mushrooms.',
+  },
+  {
+    image: 'https://via.placeholder.com/300x200?text=Product+4',
+    name: 'Better Almond Butter',
+    seller: 'by Better Almond Butter',
+    price: '$40-$60',
+    description: 'Creamy and smooth almond butter for your daily nutrition.',
+  },
 ]);
 
-const showProductDetail = ref(null);
-const isSaved = ref([]);
-
 const toggleSave = (product) => {
-  if (isSaved.value.includes(product.name)) {
-    isSaved.value = isSaved.value.filter((item) => item !== product.name);
+  if (savedProductsStore.savedProducts.some((p) => p.name === product.name)) {
+    savedProductsStore.removeProduct(product.name);
   } else {
-    isSaved.value.push(product.name);
+    savedProductsStore.addProduct(product);
   }
 };
 
-const isSaved = (product) => isSaved.value.includes(product.name);
+const isSaved = (product) => savedProductsStore.savedProducts.some((p) => p.name === product.name);
+
+const showProductDetail = ref(null);
 
 const viewProductDetails = (product) => {
   showProductDetail.value = product;
@@ -29,7 +73,7 @@ const viewProductDetails = (product) => {
 <template>
   <v-container>
     <!-- Carousel -->
-    <v-carousel hide-delimiters height="400">
+    <v-carousel class="carousel-container" hide-delimiters height="400">
       <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
         <v-img :src="item.image" cover>
           <v-container class="carousel-content">
@@ -42,8 +86,10 @@ const viewProductDetails = (product) => {
 
     <!-- Discover Section -->
     <div class="text-center mt-5">
-      <h2 class="discover-title">Pamalit namo</h2>
-      <p class="discover-subtitle">Para di kuni ipang labay!</p>
+      <h2 class="discover-title">Discover our Bestsellers</h2>
+      <p class="discover-subtitle">
+        Fall in love with flavors you’ve never tasted before!
+      </p>
     </div>
 
     <!-- Product Cards -->
@@ -57,6 +103,7 @@ const viewProductDetails = (product) => {
           md="3"
         >
           <v-card class="product-card" @click="viewProductDetails(product)">
+            <!-- Image with Heart Icon -->
             <v-img :src="product.image" class="product-image" height="200px">
               <v-btn
                 icon
@@ -67,6 +114,8 @@ const viewProductDetails = (product) => {
                 <v-icon>{{ isSaved(product) ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
               </v-btn>
             </v-img>
+
+            <!-- Product Details -->
             <v-card-text class="text-center">
               <div class="product-name">{{ product.name }}</div>
               <div class="product-seller">{{ product.seller }}</div>
@@ -94,7 +143,7 @@ const viewProductDetails = (product) => {
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-btn text @click="showProductDetail = null">Close</v-btn>
+          <v-btn @click="showProductDetail = null" text>Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -102,55 +151,108 @@ const viewProductDetails = (product) => {
 </template>
 
 <style scoped>
-.product-card {
-  box-shadow: none;
+/* Carousel Styles */
+.carousel-container {
+  margin-bottom: 40px;
 }
 
-.product-name {
-  font-size: 16px;
+.carousel-content {
+  color: white;
+  text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.carousel-title {
+  font-size: 2rem;
   font-weight: bold;
 }
 
-.product-description {
-  font-size: 14px;
+.carousel-subtitle {
+  font-size: 1.5rem;
 }
 
-.product-price {
-  font-size: 16px;
-  color: #ff4081;
+/* Discover Section */
+.discover-title {
+  font-size: 2rem;
+  font-weight: bold;
 }
 
-.product-detail-image {
-  max-height: 400px;
-  object-fit: contain;
+.discover-subtitle {
+  font-size: 1.25rem;
+  color: gray;
+  margin-bottom: 30px;
+}
+
+/* Product Section */
+.product-section {
+  margin-top: 40px;
+}
+
+.product-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 350px; /* Ensures all cards have the same height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.product-image {
+  position: relative;
+  height: 200px;
+  object-fit: cover;
+  background-color: #f9f9f9;
 }
 
 .heart-icon {
   position: absolute;
   top: 10px;
   right: 10px;
-  color: #ff4081;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
 }
 
-.saved {
+.heart-icon .v-icon {
   color: red;
 }
 
-.carousel-title {
-  font-size: 30px;
+.saved {
+  color: #ff4081;
+}
+
+.product-name {
   font-weight: bold;
+  font-size: 1rem;
 }
 
-.carousel-subtitle {
-  font-size: 20px;
+.product-seller {
+  color: gray;
+  font-size: 0.875rem;
 }
 
-.discover-title {
-  font-size: 24px;
-  font-weight: bold;
+.product-price {
+  color: orange;
+  font-size: 1.25rem;
 }
 
-.product-section {
-  margin-top: 50px;
+.product-detail-image {
+  width: 100%;
+  height: auto;
+}
+
+.product-description {
+  margin-top: 10px;
+  color: #333;
+  font-size: 1rem;
+}
+
+.v-btn {
+  text-transform: none;
 }
 </style>
