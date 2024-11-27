@@ -42,7 +42,7 @@ const products = ref([
     name: 'Stabilo Boss Highlighter',
     seller: 'by Wine',
     price: '150',
-    description: '1 set of highlighter, open for swap to a set og colored pen',
+    description: '1 set of highlighter, open for swap to a set of colored pen',
   },
   {
     image: '/images/ballpen.jpg',
@@ -186,7 +186,7 @@ const viewProductDetails = (product) => {
 }
 
 .carousel-content {
-  color: white;
+  color: rgb(255, 255, 255);
   text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 

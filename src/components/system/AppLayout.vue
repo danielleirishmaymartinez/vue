@@ -70,7 +70,7 @@ function navigateTo(path) {
 
 /* Background image for the entire app */
 .bg-image {
-  background-image: url('/images/bg-image.png'); /* Update the path as necessary */
+  background-image: url('/images/lp-bg.jpg'); /* Update the path as necessary */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
