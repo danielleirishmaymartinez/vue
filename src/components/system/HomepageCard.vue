@@ -6,7 +6,7 @@ const savedProductsStore = useSavedProductsStore();
 
 const carouselItems = [
   {
-    image: 'https://via.placeholder.com/800x400?text=Slide+1',
+    image: '/images/binder.jpg',
     title: 'Discover our Bestsellers',
     subtitle: 'Fall in love with flavors you’ve never tasted before!',
   },
@@ -24,32 +24,32 @@ const carouselItems = [
 
 const products = ref([
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+1',
-    name: 'Beet & Cashew Butter (2-Pack)',
-    seller: 'by Better Almond Butter',
-    price: '$36',
-    description: 'A unique blend of beets and cashews in a smooth butter.',
+    image: '/images/binder.jpg',
+    name: 'Binder',
+    seller: 'by Dani',
+    price: 'P179',
+    description: 'for sale only, 4 pcs binder',
   },
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+2',
-    name: 'Chocolate Bark Variety Gift Box',
-    seller: 'by Ticket Chocolate',
-    price: '$25',
-    description: 'Delicious chocolate bark in various flavors, perfect for gifting.',
+    image: '/images/aquaflask.jpg',
+    name: 'Aquaflask',
+    seller: 'by Lola',
+    price: 'P1200',
+    description: 'for sale only 40oz aquaflask rose pink',
   },
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+3',
-    name: 'Porcini Powder and Dried Mushrooms Collection',
-    seller: 'by Wine Forest',
-    price: '$38-$76',
-    description: 'A curated collection of porcini powder and dried mushrooms.',
+    image: '/images/highlighter.jpg',
+    name: 'Stabilo Boss Highlighter',
+    seller: 'by Wine',
+    price: 'P150',
+    description: '1 set of highlighter, open for swap to a set og colored pen',
   },
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+4',
-    name: 'Better Almond Butter',
-    seller: 'by Better Almond Butter',
-    price: '$40-$60',
-    description: 'Creamy and smooth almond butter for your daily nutrition.',
+    image: '/images/ballpen.jpg',
+    name: 'Dong-A Fine Tech',
+    seller: 'by Lusi',
+    price: 'P128',
+    description: 'for sale 5 pcs Dong-A Sign Pen',
   },
 ]);
 

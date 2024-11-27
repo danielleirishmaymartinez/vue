@@ -6,12 +6,7 @@ import LandingView from '@/views/system/LandingView.vue';
 import HomepageView from '@/views/system/HomepageView.vue';
 import ProfileView from '@/views/system/ProfileView.vue';
 import SettingsView from '@/views/system/SettingsView.vue';
-import SavedView from '@/views/system/SavedView.vue'; // <-- Add this import
 
-const routes = [
-  { path: '/', name: 'Home', component: HomepageView },
-  { path: '/saved', name: 'Saved', component: SavedView }, // <-- Add this route
-];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
