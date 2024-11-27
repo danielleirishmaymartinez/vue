@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useSavedProductsStore } from '@/stores/savedProducts';
 import SidebarNav from "@/components/system/SidebarNav.vue";
 import Navbar from "@/components/system/Navbar.vue";
 import { useDisplay } from "vuetify";
@@ -10,11 +11,15 @@ import supabase from "@/utils/supabase.js";
 // State
 const { mobile } = useDisplay();
 const drawerVisible = ref(!mobile.value);
+const savedProductsStore = useSavedProductsStore(); // Access saved products store
 const router = useRouter();
 const userProfile = ref({});
 const showPostForm = ref(false);
 const activeTab = ref(0);
 const posts = ref([]);
+
+// Get saved products from the store
+const savedProducts = savedProductsStore.savedProducts;
 
 // Access the authentication store
 const userStore = useAuthUserStore();
@@ -184,6 +189,8 @@ const logout = async () => {
             <v-tab value="posts" prepend-icon="mdi-grid">Posts</v-tab>
             <v-tab value="saved" prepend-icon="mdi-bookmark">Saved</v-tab>
           </v-tabs>
+
+          
 
           <!-- Tab Content -->
           <div v-if="activeTab === 'posts'">
