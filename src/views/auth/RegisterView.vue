@@ -10,17 +10,16 @@ const { mobile } = useDisplay()
   <AppLayout :is-with-app-bar-nav-icon="false">
     <template #content>
       <v-container fluid>
-        <v-row>
-          <v-col cols="12" lg="4" :class="mobile ? '' : 'pt-20'">
-            <v-card class="mx-auto" elevation="0" max-width="600">
+        <v-row justify="center">
+          <v-col cols="14" lg="7" :class="mobile ? '' : 'pt-20'">
+            <v-card class="mx-auto rounded-lg" elevation="0" max-width="700">
               <v-card-title class="text-center">
+                <h3 class="font-weight-black mt-5">Registration</h3>
                 <v-img
                   class="mx-auto"
-                  src="/images/logo-shop.png"
-                  :width="mobile ? '75%' : '65%'"
+                  src="/images/logo.png"
+                  :width="mobile ? '25%' : '25%'"
                 ></v-img>
-
-                <h3 class="font-weight-black mt-5">Registration</h3>
               </v-card-title>
 
               <v-card-text class="pt-4">

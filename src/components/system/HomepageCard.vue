@@ -6,50 +6,50 @@ const savedProductsStore = useSavedProductsStore();
 
 const carouselItems = [
   {
-    image: 'https://via.placeholder.com/800x400?text=Slide+1',
-    title: 'Discover our Bestsellers',
-    subtitle: 'Fall in love with flavors you’ve never tasted before!',
+    image: '/images/car-1.jpg',
+    title: 'Discover unbeatable prices',
+    subtitle: 'And swap opportunities right here on campus!',
   },
   {
-    image: 'https://via.placeholder.com/800x400?text=Slide+2',
-    title: 'Seasonal Discounts',
-    subtitle: 'Limited-time offers just for you.',
+    image: '/images/car-2.jpg',
+    title: 'Unlock incredible deals at our virtual marketplace',
+    subtitle: 'where every purchase and swap saves you more!',
   },
   {
-    image: 'https://via.placeholder.com/800x400?text=Slide+3',
-    title: 'New Arrivals',
+    image: '/images/car-3.jpg',
+    title: 'Buy what you need, swap what you don’t',
     subtitle: 'Check out our newest collections.',
   },
 ];
 
 const products = ref([
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+1',
-    name: '2 packs of highlighter',
+    image: '/images/binder.jpg',
+    name: 'Binder',
     seller: 'by Dani',
-    price: '112',
-    description: 'To make your reviewer colorful hahaha.',
+    price: '179',
+    description: 'for sale only, 4 pcs binder',
   },
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+2',
-    name: 'Jansport Bag',
-    seller: 'by Nine',
-    price: '750',
-    description: 'Open for swap and sale.',
+    image: '/images/aquaflask.jpg',
+    name: 'Aquaflask',
+    seller: 'by Lola',
+    price: '1200',
+    description: 'for sale only 40oz aquaflask rose pink',
   },
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+3',
-    name: 'Yellow Pad',
-    seller: 'by Les',
-    price: '78',
-    description: 'Para nay kasuwatan sa answer, kung way answer uli.',
+    image: '/images/highlighter.jpg',
+    name: 'Stabilo Boss Highlighter',
+    seller: 'by Wine',
+    price: '150',
+    description: '1 set of highlighter, open for swap to a set og colored pen',
   },
   {
-    image: 'https://via.placeholder.com/300x200?text=Product+4',
-    name: 'Shoes',
-    seller: 'by lola',
-    price: '2000',
-    description: 'For Swap.',
+    image: '/images/ballpen.jpg',
+    name: 'Dong-A Fine Tech',
+    seller: 'by Lusi',
+    price: '128',
+    description: 'for sale 5 pcs Dong-A Sign Pen',
   },
 ]);
 
@@ -86,9 +86,9 @@ const viewProductDetails = (product) => {
 
     <!-- Discover Section -->
     <div class="text-center mt-5">
-      <h2 class="discover-title">Pamalit namo</h2>
+      <h2 class="discover-title">Shop smart, save big!</h2>
       <p class="discover-subtitle">
-        Para di kuni ipang labay!
+        Affordable prices and easy swaps await you here!
       </p>
     </div>
 
@@ -127,26 +127,55 @@ const viewProductDetails = (product) => {
     </v-container>
 
     <!-- Product Detail Modal -->
-    <v-dialog v-model="showProductDetail" max-width="800px">
-      <v-card>
-        <v-card-title class="text-h5">{{ showProductDetail?.name }}</v-card-title>
-        <v-card-subtitle>{{ showProductDetail?.seller }}</v-card-subtitle>
-        <v-card-text>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-img :src="showProductDetail?.image" class="product-detail-image" />
-            </v-col>
-            <v-col cols="12" md="6">
-              <div class="product-description">{{ showProductDetail?.description }}</div>
-              <div class="product-price">{{ showProductDetail?.price }}</div>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="showProductDetail = null" text>Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+<v-dialog v-model="showProductDetail" max-width="800px" transition="dialog-bottom-transition">
+  <v-card class="product-detail-card">
+    <!-- Header Section -->
+    <v-card-title class="product-detail-header">
+      <div>
+        <h2 class="product-title">{{ showProductDetail?.name }}</h2>
+        <p class="product-seller">{{ showProductDetail?.seller }}</p>
+      </div>
+      <v-btn icon @click="showProductDetail = null" class="close-btn">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-card-title>
+
+    <!-- Content Section -->
+    <v-card-text>
+      <v-row>
+        <!-- Product Image -->
+        <v-col cols="12" md="6" class="d-flex justify-center">
+          <v-img
+            :src="showProductDetail?.image"
+            class="product-detail-image"
+            cover
+            height="300px"
+          />
+        </v-col>
+
+        <!-- Product Details -->
+        <v-col cols="12" md="6">
+          <div class="product-description">
+            <h3>Description</h3>
+            <p>{{ showProductDetail?.description }}</p>
+          </div>
+          <div class="product-price">
+            <h3>Price</h3>
+            <p>P{{ showProductDetail?.price }}</p>
+          </div>
+        </v-col>
+      </v-row>
+    </v-card-text>
+
+    <!-- Footer Section -->
+    <v-card-actions class="product-detail-footer">
+      <v-btn block @click="showProductDetail = null" color="primary" outlined>
+        Close
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
   </v-container>
 </template>
 
@@ -180,6 +209,81 @@ const viewProductDetails = (product) => {
   font-size: 1.25rem;
   color: gray;
   margin-bottom: 30px;
+}
+
+/* Modal Card */
+.product-detail-card {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Header Styles */
+.product-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f693c1;
+  padding: 16px;
+}
+
+.product-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.product-seller {
+  font-size: 0.875rem;
+  color: #757575;
+  margin-top: 4px;
+}
+
+.close-btn {
+  color: #ff5252;
+  transition: transform 0.2s ease;
+}
+
+.close-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Image Styles */
+.product-detail-image {
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Description and Price */
+.product-description h3,
+.product-price h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.product-description p,
+.product-price p {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+/* Footer Styles */
+.product-detail-footer {
+  padding: 16px;
+  background-color: #f5f5f5;
+}
+
+.product-detail-footer .v-btn {
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.product-detail-footer .v-btn:hover {
+  background-color: #c9c3c3;
+  color: white;
 }
 
 /* Product Section */
