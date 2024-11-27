@@ -6,19 +6,19 @@ const savedProductsStore = useSavedProductsStore();
 
 const carouselItems = [
   {
-    image: '/images/binder.jpg',
-    title: 'Discover our Bestsellers',
-    subtitle: 'Fall in love with flavors you’ve never tasted before!',
+    image: '/images/car-1.jpg',
+    title: 'Discover unbeatable prices',
+    subtitle: 'And swap opportunities right here on campus!',
   },
   {
-    image: 'https://via.placeholder.com/800x400?text=Slide+2',
-    title: 'Seasonal Discounts',
-    subtitle: 'Limited-time offers just for you.',
+    image: '/images/car-2.jpg',
+    title: 'Unlock incredible deals at our virtual marketplace',
+    subtitle: 'where every purchase and swap saves you more!',
   },
   {
-    image: 'https://via.placeholder.com/800x400?text=Slide+3',
-    title: 'New Arrivals',
-    subtitle: 'Check out our newest collections.',
+    image: '/images/car-3.jpg',
+    title: 'Buy what you need, swap what you don’t',
+    subtitle: 'affordability meets sustainability here!',
   },
 ];
 
@@ -86,9 +86,9 @@ const viewProductDetails = (product) => {
 
     <!-- Discover Section -->
     <div class="text-center mt-5">
-      <h2 class="discover-title">Discover our Bestsellers</h2>
+      <h2 class="discover-title">Shop smart, save big!</h2>
       <p class="discover-subtitle">
-        Fall in love with flavors you’ve never tasted before!
+        Affordable prices and easy swaps await you here!
       </p>
     </div>
 
