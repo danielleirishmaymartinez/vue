@@ -5,12 +5,7 @@ import RegisterView from '@/views/auth/RegisterView.vue'
 import HomepageView from '@/views/system/HomepageView.vue'
 import ProfileView from '@/views/system/ProfileView.vue'
 import SettingsView from '@/views/system/SettingsView.vue';
-import SavedView from '@/views/system/SavedView.vue';
 
-const routes = [
-  { path: '/', name: 'Home', component: HomepageView },
-  { path: '/saved', name: 'Saved', component: SavedView },
-];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,33 +43,27 @@ const router = createRouter({
       component: SettingsView,
       meta: { requiresAuth: true },
     },
-    {
-      path: '/saved',
-      name: 'saved',
-      component: SavedView,
-      meta: { requiresAuth: true },
-    },
   ],
-})
+});
 
 // Navigation guard
 router.beforeEach(async (to) => {
-  const isLoggedIn = await isAuthenticated()
+  const isLoggedIn = await isAuthenticated();
 
   // Redirect authenticated users away from login/register
   if ((to.name === 'login' || to.name === 'register') && isLoggedIn) {
-    return { name: 'home' }
+    return { name: 'home' };
   }
 
   // Redirect unauthenticated users to login for protected routes
   if (to.meta.requiresAuth && !isLoggedIn) {
-    return { name: 'login' }
+    return { name: 'login' };
   }
 
   // Redirect to home if landing page is accessed when logged in
   if (to.name === 'landing' && isLoggedIn) {
-    return { name: 'home' }
+    return { name: 'home' };
   }
-})
+});
 
-export default router
+export default router;
