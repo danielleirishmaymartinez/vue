@@ -1,5 +1,10 @@
 <script setup>
-import { requiredValidator, emailValidator, passwordValidator, confirmedValidator } from '@/utils/validators'
+import {
+  requiredValidator,
+  emailValidator,
+  passwordValidator,
+  confirmedValidator
+} from '@/utils/validators'
 import { ref } from 'vue'
 import AlertNotification from '@/components/common/AlertNotification.vue'
 import { supabase, formActionDefault } from '@/utils/supabase.js'
@@ -77,37 +82,11 @@ const onSubmit = async () => {
   formAction.value.formProcess = false
 }
 
-// Debuggable form submission
+// Trigger Validators
 const onFormSubmit = () => {
-  console.log("onFormSubmit called");
-  
-  // Manually check validation for each field
-  const isFirstNameValid = requiredValidator(formData.value.firstname);
-  const isLastNameValid = requiredValidator(formData.value.lastname);
-  const isEmailValid = emailValidator(formData.value.email);
-  const isPasswordValid = passwordValidator(formData.value.password);
-  const isPasswordConfirmationValid = confirmedValidator(formData.value.password_confirmation, formData.value.password);
-
-  console.log("First Name Valid:", isFirstNameValid);
-  console.log("Last Name Valid:", isLastNameValid);
-  console.log("Email Valid:", isEmailValid);
-  console.log("Password Valid:", isPasswordValid);
-  console.log("Password Confirmation Valid:", isPasswordConfirmationValid);
-
-  // Check if any validation failed
-  if (isFirstNameValid !== true || isLastNameValid !== true || isEmailValid !== true || isPasswordValid !== true || isPasswordConfirmationValid !== true) {
-    console.log("Validation failed!");
-    return; // Prevent submitting the form
-  }
-
-  // Proceed to submit the form if validation passes
-  console.log("Validation passed, submitting form...");
   refVForm.value?.validate().then(({ valid }) => {
-    console.log("Validation result:", valid);
-    if (valid) {
-      onSubmit();
-    }
-  });
+    if (valid) onSubmit()
+  })
 }
 </script>
 
@@ -168,10 +147,7 @@ const onFormSubmit = () => {
           :append-inner-icon="isPasswordConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
           @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
           :rules="[requiredValidator, confirmedValidator(formData.password_confirmation, formData.password)]"
-<<<<<<< HEAD
           class="input-field"
-=======
->>>>>>> 8b9b66184c35f21e1a1d3f9cfa74692523b8d149
         ></v-text-field>
       </v-col>
     </v-row>
@@ -188,7 +164,6 @@ const onFormSubmit = () => {
       Register
     </v-btn>
   </v-form>
-<<<<<<< HEAD
 </template>
 
 <style scoped>
@@ -257,6 +232,3 @@ v-row {
   margin-top: 20px;
 }
 </style>
-=======
-</template>
->>>>>>> 8b9b66184c35f21e1a1d3f9cfa74692523b8d149
