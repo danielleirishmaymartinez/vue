@@ -23,18 +23,18 @@ function navigateTo(path) {
   >
     <v-list class="d-flex flex-column mt-15 flex-row mx-6 pt-12">
       <v-list-item
-        prepend-icon="mdi-account"
-        title="Profile"
-        @click="navigateTo('/profile')"
-      ></v-list-item>
-      <v-list-item
         prepend-icon="mdi-home"
         title="Home"
         @click="navigateTo('/home')"
       ></v-list-item>
       <v-list-item
+        prepend-icon="mdi-account"
+        title="Profile"
+        @click="navigateTo('/profile')"
+      ></v-list-item>
+      <v-list-item
         prepend-icon="mdi-cog"
-        title="Settings"
+        title="Account Settings"
         @click="navigateTo('/settings')"
       ></v-list-item>
     </v-list>

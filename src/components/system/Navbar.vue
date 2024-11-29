@@ -1,8 +1,79 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthUserStore } from '@/stores/authUser.js'; // Update import path to the merged authUser.js file
+import supabase from '@/utils/supabase.js';
+
+const router = useRouter();
+const showAppearancePage = ref(false); // Use `ref` here to manage the dropdown page toggle
+const userProfile = ref({});
+
+const userStore = useAuthUserStore(); // Use the updated store
+
+// Initialize session and fetch user profile on mounted
+onMounted(async () => {
+  const isLoggedIn = await userStore.isAuthenticated(); // Check if the user is authenticated
+  if (!isLoggedIn) {
+    router.push('/login');
+    return;
+  }
+
+  // Fetch user profile using user_id from profiles table
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, profile_image')
+    .eq('user_id', userStore.userData?.id) // Access user ID from the store
+    .single();
+
+  if (error) {
+    console.error('Error fetching profile:', error);
+  } else {
+    userProfile.value = data || { first_name: 'Unknown', last_name: 'User', profile_image: '/default-avatar.jpg' };
+  }
+});
+
+// Redirect to Profile Page
+const goToProfile = () => {
+  router.push('/profile');
+};
+
+// Switch Appearance Page Toggle
+const switchAppearance = () => {
+  showAppearancePage.value = true; // This will toggle the visibility of the appearance page
+};
+
+// Switch to Light Mode
+const switchToLightMode = () => {
+  console.log('Switched to Light Mode');
+};
+
+// Switch to Dark Mode
+const switchToDarkMode = () => {
+  console.log('Switched to Dark Mode');
+};
+
+// Go Back to the Original Dropdown Page
+const goBack = () => {
+  showAppearancePage.value = false; // Reset to original dropdown view
+};
+
+// Logout function
+async function logout() {
+  try {
+    await supabase.auth.signOut();
+    userStore.$reset(); // Reset user data in the store
+    router.push('/login');
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+}
+</script>
+
 <template>
   <v-app-bar color="primary" dark>
     <!-- Logo and Web Name -->
     <v-container class="d-flex align-center">
-      <img src="/public/images/logo.png" alt="Logo" class="me-2" style="width: 40px; height: 40px;" />
+      <img src="/images/logo.png" alt="Logo" class="me-2" style="width: 40px; height: 40px;" />
       <span class="text-h6">STASH</span>
     </v-container>
 
@@ -96,76 +167,6 @@
     </v-menu>
   </v-app-bar>
 </template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import supabase from '@/utils/supabase.js';
-import { useAuthUserStore } from '@/stores/authUserStore.js';
-
-const router = useRouter();
-const showAppearancePage = ref(false); // Use `ref` here to manage the dropdown page toggle
-const userProfile = ref({});
-
-const userStore = useAuthUserStore();
-
-// Initialize session and fetch user profile on mounted
-onMounted(async () => {
-  const isLoggedIn = await userStore.isAuthenticated();
-  if (!isLoggedIn) {
-    router.push('/login');
-    return;
-  }
-
-  // Fetch user profile using user_id from profiles table
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, profile_image')
-    .eq('user_id', userStore.userData.id)
-    .single();
-
-  if (error) {
-    console.error('Error fetching profile:', error);
-  } else {
-    userProfile.value = data || { first_name: 'Unknown', last_name: 'User', profile_image: '/default-avatar.jpg' };
-  }
-});
-
-// Redirect to Profile Page
-const goToProfile = () => {
-  router.push('/profile');
-};
-
-// Switch Appearance Page Toggle
-const switchAppearance = () => {
-  showAppearancePage.value = true; // This will toggle the visibility of the appearance page
-};
-
-// Switch to Light Mode
-const switchToLightMode = () => {
-  console.log('Switched to Light Mode');
-};
-
-// Switch to Dark Mode
-const switchToDarkMode = () => {
-  console.log('Switched to Dark Mode');
-};
-
-// Go Back to the Original Dropdown Page
-const goBack = () => {
-  showAppearancePage.value = false; // Reset to original dropdown view
-};
-
-// Logout function
-async function logout() {
-  try {
-    await supabase.auth.signOut();
-    router.push('/login');
-  } catch (error) {
-    console.error('Logout error:', error);
-  }
-}
-</script>
 
 <style scoped>
 .account-dropdown {

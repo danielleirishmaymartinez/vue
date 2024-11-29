@@ -5,8 +5,8 @@ import SidebarNav from "@/components/system/SidebarNav.vue";
 import Navbar from "@/components/system/Navbar.vue";
 import { useDisplay } from "vuetify";
 import { useRouter } from "vue-router";
-import { useAuthUserStore } from "@/stores/authUserStore.js"; // Import the store
-import supabase from "@/utils/supabase.js";
+import { useAuthUserStore } from "@/stores/authUser.js";
+import { supabase } from "@/utils/supabase.js"; // Import supabase client
 
 // State
 const { mobile } = useDisplay();
@@ -21,13 +21,13 @@ const posts = ref([]);
 // Get saved products from the store
 const savedProducts = savedProductsStore.savedProducts;
 
-// Access the authentication store
-const userStore = useAuthUserStore();
+// Access the Pinia store
+const authUser = useAuthUserStore(); // Initialize the store
 
 // Initialize session and fetch user profile & posts
 onMounted(async () => {
   console.log("Before fetching profile:", userProfile.value);
-  const isLoggedIn = await userStore.isAuthenticated();
+  const isLoggedIn = await authUser.isAuthenticated(); // Use the store method
   if (!isLoggedIn) {
     console.error("No active session found. Redirecting to login...");
     router.push("/login");
@@ -35,11 +35,14 @@ onMounted(async () => {
   }
 
   try {
+    // Get the current user's ID from the store
+    const userId = authUser.userData.id;
+
     // Fetch user profile using user_id from profiles table
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("first_name, last_name, profile_image, bio, preferred_location, preferred_time")
-      .eq("user_id", userStore.userData.id) // Use user_id from the store
+      .eq("user_id", userId) // Use userId from the store
       .limit(1); // Ensure only one row is returned
 
     if (profileError) throw new Error(profileError.message);
@@ -51,7 +54,7 @@ onMounted(async () => {
     const { data: postData, error: postError } = await supabase
       .from("posts")
       .select("*")
-      .eq("user_id", userStore.userData.id); // Use user_id from the store
+      .eq("user_id", userId); // Use userId from the store
 
     if (postError) throw new Error(postError.message);
     posts.value = postData;
@@ -93,10 +96,11 @@ const newPost = ref({
 
 const submitPost = async () => {
   try {
-    const { error } = await supabase.from("posts").insert([
+    const userId = authUser.userData.id; // Get userId from the store
+    const { error } = await supabase.from("posts").insert([ 
       {
         ...newPost.value,
-        user_id: userStore.userData.id, // Ensure user_id is linked to the post
+        user_id: userId, // Ensure user_id is linked to the post
       },
     ]);
 
@@ -113,10 +117,11 @@ const submitPost = async () => {
 
 // Refresh user posts
 const refreshPosts = async () => {
+  const userId = authUser.userData.id; // Get userId from the store
   const { data, error } = await supabase
     .from("posts")
     .select("*")
-    .eq("user_id", userStore.userData.id); // Refresh posts for current user
+    .eq("user_id", userId); // Refresh posts for current user
 
   if (error) throw new Error(error.message);
   return data;
@@ -126,6 +131,7 @@ const refreshPosts = async () => {
 const logout = async () => {
   try {
     await supabase.auth.signOut();
+    authUser.$reset(); // Reset the store
     router.push("/login");
   } catch (error) {
     console.error("Logout error:", error.message);
