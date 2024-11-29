@@ -42,7 +42,7 @@ const products = ref([
     name: 'Stabilo Boss Highlighter',
     seller: 'by Wine',
     price: '150',
-    description: '1 set of highlighter, open for swap to a set og colored pen',
+    description: '1 set of highlighter, open for swap to a set of colored pen',
   },
   {
     image: '/images/ballpen.jpg',
@@ -63,10 +63,13 @@ const toggleSave = (product) => {
 
 const isSaved = (product) => savedProductsStore.savedProducts.some((p) => p.name === product.name);
 
+// State for modal control and product details
+const isDialogOpen = ref(false);
 const showProductDetail = ref(null);
 
 const viewProductDetails = (product) => {
   showProductDetail.value = product;
+  isDialogOpen.value = true;
 };
 </script>
 
@@ -127,57 +130,57 @@ const viewProductDetails = (product) => {
     </v-container>
 
     <!-- Product Detail Modal -->
-<v-dialog v-model="showProductDetail" max-width="800px" transition="dialog-bottom-transition">
-  <v-card class="product-detail-card">
-    <!-- Header Section -->
-    <v-card-title class="product-detail-header">
-      <div>
-        <h2 class="product-title">{{ showProductDetail?.name }}</h2>
-        <p class="product-seller">{{ showProductDetail?.seller }}</p>
-      </div>
-      <v-btn icon @click="showProductDetail = null" class="close-btn">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-card-title>
-
-    <!-- Content Section -->
-    <v-card-text>
-      <v-row>
-        <!-- Product Image -->
-        <v-col cols="12" md="6" class="d-flex justify-center">
-          <v-img
-            :src="showProductDetail?.image"
-            class="product-detail-image"
-            cover
-            height="300px"
-          />
-        </v-col>
-
-        <!-- Product Details -->
-        <v-col cols="12" md="6">
-          <div class="product-description">
-            <h3>Description</h3>
-            <p>{{ showProductDetail?.description }}</p>
+    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
+      <v-card class="product-detail-card">
+        <!-- Header Section -->
+        <v-card-title class="product-detail-header">
+          <div>
+            <h2 class="product-title">{{ showProductDetail?.name }}</h2>
+            <p class="product-seller">{{ showProductDetail?.seller }}</p>
           </div>
-          <div class="product-price">
-            <h3>Price</h3>
-            <p>P{{ showProductDetail?.price }}</p>
-          </div>
-        </v-col>
-      </v-row>
-    </v-card-text>
+          <v-btn icon @click="isDialogOpen = false" class="close-btn">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
 
-    <!-- Footer Section -->
-    <v-card-actions class="product-detail-footer">
-      <v-btn block @click="showProductDetail = null" color="primary" outlined>
-        Close
-      </v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+        <!-- Content Section -->
+        <v-card-text>
+          <v-row>
+            <!-- Product Image -->
+            <v-col cols="12" md="6" class="d-flex justify-center">
+              <v-img
+                :src="showProductDetail?.image"
+                class="product-detail-image"
+                cover
+                height="300px"
+              />
+            </v-col>
 
+            <!-- Product Details -->
+            <v-col cols="12" md="6">
+              <div class="product-description">
+                <h3>Description</h3>
+                <p>{{ showProductDetail?.description }}</p>
+              </div>
+              <div class="product-price">
+                <h3>Price</h3>
+                <p>P{{ showProductDetail?.price }}</p>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <!-- Footer Section -->
+        <v-card-actions class="product-detail-footer">
+          <v-btn block @click="isDialogOpen = false" color="primary" outlined>
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
+
 
 <style scoped>
 /* Carousel Styles */
@@ -186,7 +189,7 @@ const viewProductDetails = (product) => {
 }
 
 .carousel-content {
-  color: white;
+  color: rgb(255, 255, 255);
   text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -202,12 +205,13 @@ const viewProductDetails = (product) => {
 /* Discover Section */
 .discover-title {
   font-size: 2rem;
+  color: rgb(224, 83, 1);
   font-weight: bold;
 }
 
 .discover-subtitle {
   font-size: 1.25rem;
-  color: gray;
+  color: rgb(248, 159, 42);
   margin-bottom: 30px;
 }
 
@@ -223,7 +227,7 @@ const viewProductDetails = (product) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f693c1;
+  background-color: #ffc9e9;
   padding: 16px;
 }
 
@@ -235,12 +239,12 @@ const viewProductDetails = (product) => {
 
 .product-seller {
   font-size: 0.875rem;
-  color: #757575;
+  color: #fd7e34;
   margin-top: 4px;
 }
 
 .close-btn {
-  color: #ff5252;
+  color: #eaeaea;
   transition: transform 0.2s ease;
 }
 

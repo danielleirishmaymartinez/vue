@@ -30,7 +30,6 @@ const { mobile } = useDisplay()
 
                 <v-divider class="my-5"></v-divider>
 
-                <!-- Register text with clickable link -->
                 <div class="row justify-content-center my-1">
                   <h4 class="text-center">
                     Don't have an account? 
