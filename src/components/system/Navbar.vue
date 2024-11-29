@@ -70,7 +70,7 @@ async function logout() {
 </script>
 
 <template>
-  <v-app-bar color="primary" dark>
+  <v-app-bar dark>
     <!-- Logo and Web Name -->
     <v-container class="d-flex align-center">
       <img src="/images/logo.png" alt="Logo" class="me-2" style="width: 40px; height: 40px;" />
