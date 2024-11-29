@@ -20,7 +20,7 @@ async function logout() {
   }
 }
 </script>
-<template>
+<template>  
   <v-app>
     <!-- Navbar -->
     <Navbar @logout="logout" />
@@ -96,5 +96,3 @@ async function logout() {
   background-color: #f9f9f9; /* Optional background for sidebar */
 }
 </style>
-
-
