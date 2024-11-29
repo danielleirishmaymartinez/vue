@@ -205,13 +205,13 @@ const viewProductDetails = (product) => {
 /* Discover Section */
 .discover-title {
   font-size: 2rem;
-  color: rgb(224, 83, 1);
+  color: rgb(243, 108, 30);
   font-weight: bold;
 }
 
 .discover-subtitle {
   font-size: 1.25rem;
-  color: rgb(248, 159, 42);
+  color: rgb(46, 45, 46);
   margin-bottom: 30px;
 }
 
@@ -227,11 +227,12 @@ const viewProductDetails = (product) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffc9e9;
+  background-color: #ff6bb5;
   padding: 16px;
 }
 
 .product-title {
+  color:#2a2a2a;
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
@@ -239,12 +240,12 @@ const viewProductDetails = (product) => {
 
 .product-seller {
   font-size: 0.875rem;
-  color: #fd7e34;
+  color: #1f1b1b;
   margin-top: 4px;
 }
 
 .close-btn {
-  color: #eaeaea;
+  color:#ffc0ef;
   transition: transform 0.2s ease;
 }
 
@@ -269,7 +270,7 @@ const viewProductDetails = (product) => {
 .product-description p,
 .product-price p {
   font-size: 1rem;
-  color: #333;
+  color: #ff5cd6;
   margin: 0;
 }
 
@@ -286,7 +287,7 @@ const viewProductDetails = (product) => {
 }
 
 .product-detail-footer .v-btn:hover {
-  background-color: #c9c3c3;
+  background-color: #d87979;
   color: white;
 }
 
@@ -335,17 +336,18 @@ const viewProductDetails = (product) => {
 }
 
 .product-name {
+  color: #ffbf00;
   font-weight: bold;
   font-size: 1rem;
 }
 
 .product-seller {
-  color: gray;
+  color: rgb(24, 24, 24);
   font-size: 0.875rem;
 }
 
 .product-price {
-  color: orange;
+  color:rgb(33, 32, 32);
   font-size: 1.25rem;
 }
 
@@ -356,7 +358,7 @@ const viewProductDetails = (product) => {
 
 .product-description {
   margin-top: 10px;
-  color: #333;
+  color:rgb(33, 32, 32);
   font-size: 1rem;
 }
 
