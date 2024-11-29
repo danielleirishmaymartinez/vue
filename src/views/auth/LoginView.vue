@@ -11,8 +11,8 @@ const { mobile } = useDisplay()
   <AppLayout :is-with-app-bar-nav-icon="false">
     <template #content>
       <v-container fluid>
-        <v-row justify="center pt-4">
-          <v-col cols="14" lg="7" :class="mobile ? '' : 'pt-4'">
+        <div class="row justify-content-center pt-4">
+          <div class="col-12" sm="10" md="8" lg="6">
             <v-card class="mx-auto rounded-lg" elevation="0" max-width="700">
               <v-card-title class="text-center">
                 <h3 class="font-weight-black mt-5">Login your account</h3>
@@ -31,19 +31,21 @@ const { mobile } = useDisplay()
                 <v-divider class="my-5"></v-divider>
 
                 <!-- Register text with clickable link -->
-                <v-row justify="center" class="my-1">
+                <div class="row justify-content-center my-1">
                   <h4 class="text-center">
                     Don't have an account? 
                     <RouterLink class="text-red-darken-4 font-weight-black " to="/register">
                       Register
                     </RouterLink>
                   </h4>
-                </v-row>
+                </div>
               </v-card-text>
             </v-card>
-          </v-col>
-        </v-row>
+          </div>
+        </div>
       </v-container>
     </template>
   </AppLayout>
 </template>
+
+

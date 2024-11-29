@@ -35,28 +35,23 @@ function navigateTo(path) {
 
       <!-- Main Content -->
       <v-main>
-        <!-- Dynamic Content -->
-        <v-container class="d-flex">
-          <!-- Sidebar -->
-          <v-col cols="6 my-4" class="padded-row">
-            <v-row class="my-4">
+        <v-container>
+          <v-row>
+            <!-- Left Column: Text -->
+            <v-col cols="12" md="6" class="d-flex flex-column justify-center">
               <h3 class="h3 animated-text">Welcome to</h3>
-            </v-row>
-
-            <v-row justify="center" class="my-1 ml-2">
               <h1 class="title animated-text">Student Trade and <br>Sell Hub</h1>
-            </v-row>
-            <v-row class="ml-6">
               <p class="subtitle animated-text">
-                your campus-exclusive platform for trading and selling items, 
-                where you can easily post listings, browse deals, and connect with fellow students
+                Your campus-exclusive platform for trading and selling items, 
+                where you can easily post listings, browse deals, and connect with fellow students.
               </p>
-            </v-row>
-          </v-col>
+            </v-col>
 
-          <v-col cols="10">
-            <slot name="content"></slot>
-          </v-col>
+            <!-- Right Column: Login Form -->
+            <v-col cols="12" md="6" class="d-flex justify-center align-center">
+              <slot name="content"></slot>
+            </v-col>
+          </v-row>
         </v-container>
       </v-main>
     </v-app>
@@ -106,12 +101,6 @@ function navigateTo(path) {
   color: #000000;
 }
 
-/* Padding for Row */
-.padded-row {
-  padding: 100px; /* Ample spacing around the title */
-  text-align: center; /* Center-align text within the row */
-}
-
 /* Heading Styling */
 .h3 {
   font-size: 28px;
@@ -130,12 +119,11 @@ function navigateTo(path) {
   }
 }
 
-/* Apply animation to text */
 .animated-text {
   animation: slideUp 1s ease-out forwards;
 }
 
-/* Delay for the subtitle and title */
+/* Delay for animated elements */
 .animated-text:nth-child(2) {
   animation-delay: 0.3s;
 }

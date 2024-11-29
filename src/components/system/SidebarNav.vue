@@ -21,7 +21,7 @@ function navigateTo(path) {
     app
     width="300"
   >
-    <v-list class="d-flex flex-column mt-15 flex-row mx-6">
+    <v-list class="d-flex flex-column mt-15 flex-row mx-6 pt-12">
       <v-list-item
         prepend-icon="mdi-account"
         title="Profile"
@@ -46,6 +46,9 @@ function navigateTo(path) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background-size: cover;
+  background-position: center;
+  color:rgb(0, 0, 0);
 }
 
 .v-list-item {
