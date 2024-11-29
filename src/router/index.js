@@ -5,7 +5,6 @@ import RegisterView from '@/views/auth/RegisterView.vue'
 import HomepageView from '@/views/system/HomepageView.vue'
 import ProfileView from '@/views/system/ProfileView.vue'
 import SettingsView from '@/views/system/SettingsView.vue';
-import SavedView from '@/views/system/SavedView.vue'
 
 
 const router = createRouter({
