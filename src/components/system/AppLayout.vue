@@ -44,20 +44,22 @@ function navigateTo(path) {
         <v-main>
           <v-container>
             <v-row>
+          
               <!-- Left Column: Text -->
-              <v-col cols="12" md="6" class="d-flex flex-column justify-center">
-                <h3 class="h3 animated-text">Welcome to</h3>
-                <h1 class="title animated-text">Student Trade and <br />Sell Hub</h1>
-                <p class="subtitle animated-text">
-                  Your campus-exclusive platform for trading and selling items,
-                  where you can easily post listings, browse deals, and connect
-                  with fellow students.
-                </p>
+              <v-col cols="12" md="7" class="d-flex flex-column justify-center">
+        
               </v-col>
 
               <!-- Right Column: Login Form -->
-              <v-col cols="12" md="6" class="d-flex justify-center align-center">
-                <slot name="content"></slot>
+              <v-col cols="12" md="5" class="d-flex justify-center align-center">
+                <v-card
+                  class="blur-container"
+                  width="100%"
+                  max-width="600px"
+                  outlined
+                >
+                  <slot name="content"></slot>
+                </v-card>
               </v-col>
             </v-row>
           </v-container>
@@ -70,7 +72,7 @@ function navigateTo(path) {
 <style scoped>
 /* Background Wrapper */
 .background-wrapper {
-  background-image: url('/images/form-bg.jpg'); /* Path to your background image */
+  background-image: url('/images/lr1-form.png'); /* Path to your background image */
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -78,72 +80,33 @@ function navigateTo(path) {
   height: 100vh; /* Full viewport height */
 }
 
-/* Light and Dark Mode Styling */
-.light-mode {
-  color: #000000;
+/* Blurry Container Styling */
+.blur-container {
+  backdrop-filter: blur(2px); /* Adds blur to the form container */
+  background-color: rgba(245, 243, 246, 0.749); /* Transparent white */
+  border-radius: 8px;
+  box-shadow: none; /* Removes any shadow for a cleaner look */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.dark-mode {
-  color: #ffffff;
+/* Transparent Inner Elements */
+.blur-container ::v-deep(.v-card, .v-card__text, input, button, label, .v-btn) {
+  backdrop-filter: blur(5px); /* Apply blur to all inner elements */
+  background-color: rgba(206, 202, 207, 0.385); /* Ensure transparency */
+  border: none; /* Remove borders for consistency */
+  color: inherit; /* Use the theme's text color */
+  box-shadow: none; /* Remove shadows */
 }
 
-/* Title and Subtitle Styling */
-.title {
-  font-size: 40px;
-  font-weight: bold;
-  margin: 0;
-  font-style: italic;
-}
-
-.subtitle {
-  font-size: 18px;
-}
-
-/* Light and Dark Mode Title and Subtitle Colors */
-.dark-mode .title {
-  color: #ff84d4;
-}
-
-.light-mode .title {
-  color: #ef2087;
-}
-
-.dark-mode .subtitle {
-  color: #ffffff;
-}
-
-.light-mode .subtitle {
-  color: #000000;
-}
-
-/* Heading Styling */
-.h3 {
-  font-size: 28px;
-  margin: 0;
-}
-
-/* Animation for text */
-@keyframes slideUp {
-  0% {
-    transform: translateY(50px);
-    opacity: 0;
+/* Responsiveness for smaller screens */
+@media (max-width: 600px) {
+  .blur-container {
+    padding: 10px;
+    max-width: 100%;
   }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animated-text {
-  animation: slideUp 1s ease-out forwards;
-}
-
-/* Delay for animated elements */
-.animated-text:nth-child(2) {
-  animation-delay: 0.3s;
-}
-
-.animated-text:nth-child(3) {
-  animation-delay: 0.6s;
 }
 </style>
