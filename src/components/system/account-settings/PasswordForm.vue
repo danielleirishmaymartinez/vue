@@ -1,88 +1,84 @@
 <script setup>
-import AlertNotification from '@/components/common/AlertNotification.vue'
-import { formActionDefault, supabase } from '@/utils/supabase.js'
-import { confirmedValidator, passwordValidator, requiredValidator } from '@/utils/validators'
-import { ref } from 'vue'
+import AlertNotification from '@/components/common/AlertNotification.vue';
+import { formActionDefault, supabase } from '@/utils/supabase.js';
+import { requiredValidator, passwordValidator } from '@/utils/validators';
+import { ref, computed } from 'vue';
 
-// Load Variables
 const formDataDefault = {
   password: '',
-  password_confirmation: ''
-}
+  password_confirmation: '',
+};
 const formData = ref({
-  ...formDataDefault
-})
+  ...formDataDefault,
+});
 const formAction = ref({
-  ...formActionDefault
-})
-const isPasswordVisible = ref(false)
-const isPasswordConfirmVisible = ref(false)
-const refVForm = ref()
+  ...formActionDefault,
+});
+const isPasswordVisible = ref(false);
+const isPasswordConfirmVisible = ref(false);
+const refVForm = ref();
 
-// Submit Functionality
+// A dynamic validator to check password confirmation
+const confirmedValidator = computed(() => (value) =>
+  value === formData.value.password || 'Passwords do not match.'
+);
+
 const onSubmit = async () => {
-  /// Reset Form Action utils; Turn on processing at the same time
-  formAction.value = { ...formActionDefault, formProcess: true }
+  formAction.value = { ...formActionDefault, formProcess: true };
 
   const { data, error } = await supabase.auth.updateUser({
-    password: formData.value.password
-  })
+    password: formData.value.password,
+  });
 
   if (error) {
-    // Add Error Message and Status Code
-    formAction.value.formErrorMessage = error.message
-    formAction.value.formStatus = error.status
+    formAction.value.formErrorMessage = error.message;
+    formAction.value.formStatus = error.status;
   } else if (data) {
-    // Add Success Message
-    formAction.value.formSuccessMessage = 'Successfully Changed Password.'
+    formAction.value.formSuccessMessage = 'Successfully Changed Password.';
   }
 
-  // Reset Form
-  refVForm.value?.reset()
-  // Turn off processing
-  formAction.value.formProcess = false
-}
+  // Reset form fields after successful submission
+  formData.value = { ...formDataDefault };
+  formAction.value.formProcess = false;
+};
 
-// Trigger Validators
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
-    if (valid) onSubmit()
-  })
-}
+    if (valid) onSubmit();
+  });
+};
 </script>
 
 <template>
   <AlertNotification
     :form-success-message="formAction.formSuccessMessage"
     :form-error-message="formAction.formErrorMessage"
-  ></AlertNotification>
+  />
 
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
     <v-row dense>
       <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.password"
-          prepend-inner-icon="mdi-lock-outline"
-          label="New Password"
           :type="isPasswordVisible ? 'text' : 'password'"
-          :append-inner-icon="isPasswordVisible ? 'mdi-eye-off' : 'mdi-eye'"
-          @click:append-inner="isPasswordVisible = !isPasswordVisible"
+          label="New Password"
+          prepend-inner-icon="mdi-lock-outline"
           :rules="[requiredValidator, passwordValidator]"
-        ></v-text-field>
+          :append-icon="isPasswordVisible ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append="isPasswordVisible = !isPasswordVisible"
+        />
       </v-col>
 
       <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.password_confirmation"
-          label="Password Confirmation"
           :type="isPasswordConfirmVisible ? 'text' : 'password'"
-          :append-inner-icon="isPasswordConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
-          @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
-          :rules="[
-            requiredValidator,
-            confirmedValidator(formData.password_confirmation, formData.password)
-          ]"
-        ></v-text-field>
+          label="Confirm Password"
+          prepend-inner-icon="mdi-lock-outline"
+          :rules="[requiredValidator, confirmedValidator]"
+          :append-icon="isPasswordConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append="isPasswordConfirmVisible = !isPasswordConfirmVisible"
+        />
       </v-col>
     </v-row>
 
@@ -91,11 +87,11 @@ const onFormSubmit = () => {
       type="submit"
       color="red-darken-4"
       rounded="pill"
-      prepend-icon="mdi-key"
+      prepend-icon="mdi-key-variant"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"
     >
-      Change Password
+      Update Password
     </v-btn>
   </v-form>
 </template>
