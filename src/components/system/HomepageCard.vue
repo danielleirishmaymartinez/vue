@@ -57,7 +57,7 @@ onMounted(async () => {
   }
 });
 
-// Function to handle saving a post (this can be customized further as needed)
+// Function to handle saving a post
 const toggleSave = (post) => {
   if (savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name)) {
     savedProductsStore.removeProduct(post.item_name);
@@ -68,10 +68,12 @@ const toggleSave = (post) => {
 
 const isSaved = (post) => savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
-const showPostDetail = ref(null);
+const selectedPost = ref(null); // Holds the currently selected post details
+const isDialogOpen = ref(false); // Controls the dialog visibility
 
 const viewPostDetails = (post) => {
-  showPostDetail.value = post;
+  selectedPost.value = post;
+  isDialogOpen.value = true;
 };
 </script>
 
@@ -123,7 +125,7 @@ const viewPostDetails = (post) => {
             <!-- Post Details -->
             <v-card-text class="text-center">
               <div class="post-name">{{ post.item_name }}</div>
-              <div class="post-seller">by User</div> <!-- Modify this as needed -->
+              <div class="post-seller">by User</div>
               <div class="post-price">{{ post.price }}</div>
             </v-card-text>
           </v-card>
@@ -132,15 +134,15 @@ const viewPostDetails = (post) => {
     </v-container>
 
     <!-- Post Detail Modal -->
-    <v-dialog v-model="showPostDetail" max-width="800px" transition="dialog-bottom-transition">
+    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
       <v-card class="post-detail-card">
         <!-- Header Section -->
         <v-card-title class="post-detail-header">
           <div>
-            <h2 class="post-title">{{ showPostDetail?.item_name }}</h2>
-            <p class="post-seller">by User</p> <!-- Modify this as needed -->
+            <h2 class="post-title">{{ selectedPost?.item_name }}</h2>
+            <p class="post-seller">by User</p>
           </div>
-          <v-btn icon @click="showPostDetail = null" class="close-btn">
+          <v-btn icon @click="isDialogOpen = false" class="close-btn">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -151,7 +153,7 @@ const viewPostDetails = (post) => {
             <!-- Post Image -->
             <v-col cols="12" md="6" class="d-flex justify-center">
               <v-img
-                :src="showPostDetail?.image"
+                :src="selectedPost?.image"
                 class="post-detail-image"
                 cover
                 height="300px"
@@ -162,11 +164,11 @@ const viewPostDetails = (post) => {
             <v-col cols="12" md="6">
               <div class="post-description">
                 <h3>Description</h3>
-                <p>{{ showPostDetail?.description }}</p>
+                <p>{{ selectedPost?.description }}</p>
               </div>
               <div class="post-price">
                 <h3>Price</h3>
-                <p>P{{ showPostDetail?.price }}</p>
+                <p>P{{ selectedPost?.price }}</p>
               </div>
             </v-col>
           </v-row>
@@ -174,15 +176,15 @@ const viewPostDetails = (post) => {
 
         <!-- Footer Section -->
         <v-card-actions class="post-detail-footer">
-          <v-btn block @click="showPostDetail = null" color="primary" outlined>
+          <v-btn block @click="isDialogOpen = false" color="primary" outlined>
             Close
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </v-container>
 </template>
+
 
 
 <style scoped>
@@ -208,13 +210,13 @@ const viewPostDetails = (post) => {
 /* Discover Section */
 .discover-title {
   font-size: 2rem;
-  color: rgb(224, 83, 1);
+  color: rgb(243, 108, 30);
   font-weight: bold;
 }
 
 .discover-subtitle {
   font-size: 1.25rem;
-  color: rgb(248, 159, 42);
+  color: rgb(46, 45, 46);
   margin-bottom: 30px;
 }
 
@@ -230,10 +232,13 @@ const viewPostDetails = (post) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffc9e9;
+  background-color: #ff6bb5;
   padding: 16px;
 }
 
+.product-title {
+  color:#2a2a2a;
+}
 .post-title {
   font-size: 1.5rem;
   font-weight: bold;
@@ -242,12 +247,12 @@ const viewPostDetails = (post) => {
 
 .post-seller {
   font-size: 0.875rem;
-  color: #fd7e34;
+  color: #1f1b1b;
   margin-top: 4px;
 }
 
 .close-btn {
-  color: #eaeaea;
+  color:#ffc0ef;
   transition: transform 0.2s ease;
 }
 
@@ -272,7 +277,7 @@ const viewPostDetails = (post) => {
 .post-description p,
 .post-price p {
   font-size: 1rem;
-  color: #333;
+  color: #ff5cd6;
   margin: 0;
 }
 
@@ -286,6 +291,10 @@ const viewPostDetails = (post) => {
   font-weight: bold;
   border-radius: 8px;
   transition: background-color 0.2s ease;
+}
+
+.product-detail-footer .v-btn:hover {
+  background-color: #d87979;
 }
 
 .post-detail-footer .v-btn:hover {
@@ -337,4 +346,35 @@ const viewPostDetails = (post) => {
   color: #ff5252;
 }
 
+<<<<<<< HEAD
+.product-name {
+  color: #ffbf00;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.product-seller {
+  color: rgb(24, 24, 24);
+  font-size: 0.875rem;
+}
+
+.product-price {
+  color:rgb(33, 32, 32);
+  font-size: 1.25rem;
+}
+
+.product-detail-image {
+  width: 100%;
+  height: auto;
+}
+
+.product-description {
+  margin-top: 10px;
+  color:rgb(33, 32, 32);
+  font-size: 1rem;
+}
+
+.v-btn {
+  text-transform: none;
+}
 </style>

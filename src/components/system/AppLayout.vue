@@ -16,119 +16,128 @@ function navigateTo(path) {
       :theme="themeStore.theme"
       :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
     >
-      <!-- App Bar -->
-      <v-app-bar flat>
-        <v-btn text class="d-flex align-center" @click="navigateTo('/')">
-          <img src="/images/logo.png" alt="logo" class="mr-2" width="25" />
-          <span class="ml-1">STASH</span>
-        </v-btn>
+      <!-- Background Image -->
+      <div class="background-wrapper">
+        <!-- App Bar -->
+        <v-app-bar flat>
+          <v-btn text class="d-flex align-center" @click="navigateTo('/')">
+            <img
+              src="/images/logo.png"
+              alt="STASH logo"
+              class="mr-2"
+              width="25"
+            />
+            <span class="ml-1">STASH</span>
+          </v-btn>
 
-        <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
 
-        <v-btn
-          :icon="themeStore.theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-          @click="themeStore.toggleTheme"
-          variant="elevated"
-          slim
-        ></v-btn>
-      </v-app-bar>
+          <v-btn
+            :icon="themeStore.theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+            @click="themeStore.toggleTheme"
+            variant="elevated"
+            slim
+          ></v-btn>
+        </v-app-bar>
 
-      <!-- Main Content -->
-      <v-main>
-        <v-container>
-          <v-row>
-            <!-- Left Column: Text -->
-            <v-col cols="12" md="6" class="d-flex flex-column justify-center">
-              <h3 class="h3 animated-text">Welcome to</h3>
-              <h1 class="title animated-text">Student Trade and <br>Sell Hub</h1>
-              <p class="subtitle animated-text">
-                Your campus-exclusive platform for trading and selling items, 
-                where you can easily post listings, browse deals, and connect with fellow students.
-              </p>
-            </v-col>
+        <!-- Main Content -->
+        <v-main>
+          <v-container>
+            <v-row>
+              <!-- Left Column: Text -->
+              <v-col cols="12" md="7" class="d-flex flex-column justify-center">
+              </v-col>
 
-            <!-- Right Column: Login Form -->
-            <v-col cols="12" md="6" class="d-flex justify-center align-center">
-              <slot name="content"></slot>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-main>
+              <!-- Right Column: Login Form -->
+              <v-col cols="12" md="5" class="d-flex justify-center align-center">
+                <v-card
+                  class="form-container"
+                  width="100%"
+                  max-width="600px"
+                  outlined
+                >
+                  <slot name="content">
+                    <v-text-field
+                      label="Email"
+                      type="email"
+                      variant="outlined"
+                      color="red"
+                      class="custom-field"
+                      density="compact"
+                      hide-details
+                    ></v-text-field>
+                    <v-text-field
+                      label="Password"
+                      type="password"
+                      variant="outlined"
+                      color="red"
+                      class="custom-field"
+                      density="compact"
+                      hide-details
+                    ></v-text-field>
+                  </slot>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-main>
+      </div>
     </v-app>
   </v-responsive>
 </template>
 
 <style scoped>
-/* Light and Dark Mode Styling */
-.light-mode {
-  background-color: rgba(255, 255, 255, 0.712);
-  color: #000000;
+/* Background Wrapper */
+.background-wrapper {
+  background-image: url('/images/lr1-form.png'); /* Path to your background image */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
 }
 
-.dark-mode {
-  background-color: rgba(18, 18, 18, 0.9);
-  color: #ffffff;
+/* Form Container Styling */
+.form-container {
+  background-color: rgba(245, 243, 246, 0.85); /* Light mode background */
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Title and Subtitle Styling */
-.title {
-  font-size: 40px;
-  font-weight: bold;
-  color: #9b5f06;
-  margin: 0;
-  font-style: italic;
+.dark-mode .form-container {
+  background-color: rgba(33, 33, 33, 0.85); /* Dark mode background */
 }
 
-.subtitle {
-  font-size: 18px;
-  color: #e0932f; /* Subtle gold color */
+/* Custom Field Styles */
+.custom-field .v-input {
+  background-color: transparent !important; /* Transparent background */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* Light and Dark Mode Title and Subtitle Colors */
-.dark-mode .title {
-  color: #e0b14b;
+/* Remove blue focus outline in dark mode */
+.custom-field input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: rgba(255, 0, 0, 0.7) !important; /* Red border on focus */
 }
 
-.light-mode .title {
-  color: #663906;
+/* Remove label blue effect */
+.custom-field .v-label {
+  color: rgba(255, 255, 255, 0.8) !important; /* White for dark mode */
 }
 
-.dark-mode .subtitle {
-  color: #ffffff;
+.light-mode .custom-field .v-label {
+  color: rgba(0, 0, 0, 0.8) !important; /* Black for light mode */
 }
 
-.light-mode .subtitle {
-  color: #000000;
-}
-
-/* Heading Styling */
-.h3 {
-  font-size: 28px;
-  margin: 0;
-}
-
-/* Animation for text */
-@keyframes slideUp {
-  0% {
-    transform: translateY(50px);
-    opacity: 0;
+/* Responsive Design */
+@media (max-width: 600px) {
+  .form-container {
+    padding: 10px;
+    max-width: 100%;
   }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animated-text {
-  animation: slideUp 1s ease-out forwards;
-}
-
-/* Delay for animated elements */
-.animated-text:nth-child(2) {
-  animation-delay: 0.3s;
-}
-
-.animated-text:nth-child(3) {
-  animation-delay: 0.6s;
 }
 </style>
