@@ -26,10 +26,7 @@ const authUser = useAuthUserStore(); // Initialize the store
 onMounted(async () => {
   console.log("Before fetching profile:", userProfile.value);
 
-  // Check if the user is authenticated using supabase.auth.getUser()
   const { data: { user }, error } = await supabase.auth.getUser();
-
-  // If no user or there is an error, redirect to login page
   if (error || !user) {
     console.error("No active session found. Redirecting to login...");
     router.push("/login");
@@ -37,22 +34,31 @@ onMounted(async () => {
   }
 
   try {
-    // Get user profile from 'profiles' table
-    const userId = user.id; // Get user ID from supabase.auth.getUser()
-
-    // Fetch user profile from the 'profiles' table
+    const userId = user.id;
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("first_name, last_name, profile_image, bio, preferred_location, preferred_time")
       .eq("user_id", userId)
-      .single(); // Use .single() to get a single record
+      .single();
 
     if (profileError) throw new Error(profileError.message);
 
-    // Set user profile or fallback to default profile if no data
+    // If there's a profile image, fetch the signed URL
+    if (profileData?.profile_image) {
+      const { data: signedUrlData, error: signedUrlError } = await supabase
+        .storage
+        .from('profile-images')
+        .createSignedUrl(profileData.profile_image, 60 * 60); // 1-hour expiration
+
+      if (signedUrlError) {
+        console.error("Error fetching signed URL:", signedUrlError.message);
+      } else {
+        profileData.profile_image = signedUrlData.signedUrl; // Update the profile image with the signed URL
+      }
+    }
+
     userProfile.value = profileData || getDefaultProfile();
 
-    // Fetch user posts
     const { data: postData, error: postError } = await supabase
       .from("posts")
       .select("*")
@@ -198,8 +204,6 @@ const logout = async () => {
             <v-tab value="saved" prepend-icon="mdi-bookmark">Saved</v-tab>
           </v-tabs>
 
-          
-
           <!-- Tab Content -->
           <div v-if="activeTab === 'posts'">
             <!-- Posts Grid -->
@@ -311,4 +315,10 @@ const logout = async () => {
   position: relative;
   z-index: 1;
 }
+.profile-avatar img {
+  object-fit: cover; /* This ensures the image is properly cropped to fill the space without stretching */
+  width: 100%;       /* Make the image fill the container */
+  height: 100%;      /* Make the image fill the container */
+}
+
 </style>

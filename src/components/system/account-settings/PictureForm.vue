@@ -22,35 +22,101 @@ const formAction = ref({
 });
 
 const refVForm = ref();
-const imgPreview = ref(authStore.userData?.image_url || '/images/profile.png');
+const imgPreview = ref('/images/profile.png'); // Default preview image
+
+// Fetch the profile image URL from the database for the current user
+const fetchProfileImage = async () => {
+  const { data: profileData, error: profileError } = await supabase
+    .from('profiles')
+    .select('profile_image')
+    .eq('user_id', authStore.userData?.id)
+    .single(); // Assuming user_id is unique
+
+  if (profileError) {
+    console.error('Error fetching profile image:', profileError.message);
+    return;
+  }
+
+  if (profileData?.profile_image) {
+    // Generate a signed URL for the profile image stored in Supabase Storage
+    const { data: signedUrlData, error: signedUrlError } = await supabase
+      .storage
+      .from('profile-images')
+      .createSignedUrl(profileData.profile_image, 60 * 60); // 1-hour expiration
+
+    if (!signedUrlError) {
+      imgPreview.value = signedUrlData.signedUrl; // Update the image preview with the signed URL
+    } else {
+      console.error('Error generating signed URL:', signedUrlError.message);
+    }
+  } else {
+    imgPreview.value = '/images/profile.png'; // Default image if no profile image exists
+  }
+};
+
+// Call the function to fetch the profile image on mount
+fetchProfileImage();
 
 // Handle file change and show image preview
 const onPreview = async (event) => {
   const { fileObject, fileUrl } = await fileExtract(event);
   formData.value.image = fileObject;
-  imgPreview.value = fileUrl;
+  imgPreview.value = fileUrl; // Update preview image immediately
 };
 
-// Reset preview
+// Reset preview to the current profile image
 const onPreviewReset = () => {
-  imgPreview.value = authStore.userData?.image_url || '/images/profile.png';
+  fetchProfileImage(); // Reload the current profile image
 };
 
+// Submit the form
 const onSubmit = async () => {
   formAction.value = { ...formActionDefault, formProcess: true };
 
+  if (!formData.value.image) {
+    formAction.value.formErrorMessage = "Please select an image to upload.";
+    formAction.value.formProcess = false;
+    return;
+  }
+
+  // Upload the image to Supabase Storage
+  const { data: fileData, error: uploadError } = await supabase.storage
+    .from('profile-images')
+    .upload(`${authStore.userData?.id}/${formData.value.image.name}`, formData.value.image);
+
+  if (uploadError) {
+    formAction.value.formErrorMessage = `Error uploading image: ${uploadError.message}`;
+    formAction.value.formProcess = false;
+    return;
+  }
+
+  // Generate a signed URL for the uploaded file
+  const { data: signedUrlData, error: signedUrlError } = await supabase
+    .storage
+    .from('profile-images')
+    .createSignedUrl(fileData.path, 60 * 60); // 1-hour expiration
+
+  if (signedUrlError) {
+    formAction.value.formErrorMessage = `Error creating signed URL: ${signedUrlError.message}`;
+    formAction.value.formProcess = false;
+    return;
+  }
+
+  const imageUrl = signedUrlData.signedUrl;
+
+  // Update the profile image URL in the database
   const { data, error } = await supabase
     .from('profiles')
-    .upsert({
-      user_id: authStore.userData?.id,
-      profile_image: formData.value.image,
-    });
+    .update({
+      profile_image: fileData.path, // Save file path to DB
+    })
+    .eq('user_id', authStore.userData?.id); // Ensure we're updating the correct profile based on user_id
 
   if (error) {
-    formAction.value.formErrorMessage = error.message;
-    formAction.value.formStatus = error.status;
+    formAction.value.formErrorMessage = `Error updating profile: ${error.message}`;
   } else if (data) {
     formAction.value.formSuccessMessage = 'Successfully updated profile image.';
+    imgPreview.value = imageUrl; // Update preview immediately after successful upload
   }
 
   formAction.value.formProcess = false;
@@ -75,7 +141,7 @@ const onFormSubmit = () => {
         <v-img
           width="55%"
           class="mx-auto rounded-circle"
-          color="red-darken-4"
+          color="white-darken-4"
           aspect-ratio="1"
           :src="imgPreview"
           alt="Profile Picture Preview"

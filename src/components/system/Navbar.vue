@@ -29,6 +29,20 @@ onMounted(async () => {
     console.error('Error fetching profile:', error);
   } else {
     userProfile.value = data || { first_name: 'Unknown', last_name: 'User', profile_image: '/default-avatar.jpg' };
+
+    // If there is a profile image, fetch the signed URL
+    if (userProfile.value?.profile_image) {
+      const { data: signedUrlData, error: signedUrlError } = await supabase
+        .storage
+        .from('profile-images') // Assuming 'profile-images' is the storage bucket
+        .createSignedUrl(userProfile.value.profile_image, 60 * 60); // 1-hour expiration
+
+      if (signedUrlError) {
+        console.error('Error fetching signed URL:', signedUrlError.message);
+      } else {
+        userProfile.value.profile_image = signedUrlData.signedUrl; // Update the profile image with the signed URL
+      }
+    }
   }
 });
 
@@ -68,7 +82,6 @@ async function logout() {
   }
 }
 </script>
-
 <template>
   <v-app-bar dark>
     <!-- Logo and Web Name -->
@@ -95,7 +108,7 @@ async function logout() {
     <v-menu offset-y :close-on-content-click="false" class="mdi-account-dropdown">
       <template #activator="{ props }">
         <v-btn v-bind="props" icon>
-          <v-avatar>
+          <v-avatar size="40" class="avatar-img">
             <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Account Icon" />
           </v-avatar>
         </v-btn>
@@ -104,8 +117,11 @@ async function logout() {
       <!-- Main Dropdown Box -->
       <v-sheet rounded elevation="2" width="300" class="pa-4 d-flex flex-column align-start">
         <!-- Profile and Name (Clickable) -->
-        <div class="d-flex align-center mb-3" @click="goToProfile">
-          <v-avatar size="40">
+        <div 
+          class="d-flex align-center clickable-profile mb-3"
+          @click="goToProfile"
+        >
+          <v-avatar size="40" class="avatar-img">
             <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Profile Picture" />
           </v-avatar>
           <span class="ms-3 text-subtitle-1">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</span>
@@ -116,7 +132,7 @@ async function logout() {
         <!-- Switch Appearance Button -->
         <v-btn
           variant="text"
-          class="mt-2"
+          class="mt-2 full-width-btn align-start"
           prepend-icon="mdi-moon"
           @click="switchAppearance"
         >
@@ -127,7 +143,7 @@ async function logout() {
         <v-btn
           variant="text"
           color="error"
-          class="mt-2"
+          class="mt-2 full-width-btn align-start"
           prepend-icon="mdi-logout"
           @click="logout"
         >
@@ -138,19 +154,17 @@ async function logout() {
         <div v-if="showAppearancePage" class="mt-4">
           <v-btn
             text
-            class="d-flex align-center"
+            class="d-flex align-center full-width-btn align-start"
             @click="switchToLightMode"
             prepend-icon="mdi-white-balance-sunny"
-            :hover="true"
           >
             Light Mode
           </v-btn>
           <v-btn
             text
-            class="d-flex align-center mt-2"
+            class="d-flex align-center full-width-btn align-start mt-2"
             @click="switchToDarkMode"
             prepend-icon="mdi-moon"
-            :hover="true"
           >
             Dark Mode
           </v-btn>
@@ -158,7 +172,7 @@ async function logout() {
           <!-- Back Button -->
           <v-btn
             icon
-            class="mt-4"
+            class="mt-4 full-width-btn align-start"
             @click="goBack"
             prepend-icon="mdi-arrow-left"
           ></v-btn>
@@ -169,17 +183,38 @@ async function logout() {
 </template>
 
 <style scoped>
-.account-dropdown {
-  margin-right: 16px; /* Adjust position to avoid the edge */
-  min-width: 300px;
+.avatar-img img {
+  object-fit: cover; /* Ensure the image fits nicely */
+  width: 100%; /* Full width of the avatar container */
+  height: 100%; /* Full height of the avatar container */
+  border-radius: 50%; /* Keep it round */
 }
 
-.dark-mode {
-  background-color: #121212;
-  color: white;
+.clickable-profile {
+  cursor: pointer; /* Change the cursor to a hand when hovering */
+  transition: background-color 0.3s ease; /* Smooth transition */
+  padding: 8px; /* Add some padding for better clickable area */
+  width: 100%; /* Make it stretch to full width of the dropdown */
 }
 
-.v-btn:hover {
-  cursor: pointer;
+.clickable-profile:hover {
+  background-color: #f0f0f0; /* Light grey background on hover */
+}
+
+/* Stretch the buttons to the full width of the dropdown */
+.full-width-btn {
+  width: 100%; /* Make buttons span the full width of the dropdown */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+/* Buttons background change on hover */
+.full-width-btn:hover {
+  background-color: #f0f0f0; /* Subtle grey background on hover */
+}
+
+/* Align buttons to the left */
+.align-start {
+  justify-content: flex-start; /* Align buttons to the left */
+  text-align: left; /* Text alignment to the left */
 }
 </style>
