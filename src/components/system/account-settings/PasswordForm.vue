@@ -4,21 +4,22 @@ import { formActionDefault, supabase } from '@/utils/supabase.js';
 import { requiredValidator, passwordValidator } from '@/utils/validators';
 import { ref, computed } from 'vue';
 
+// Default form data
 const formDataDefault = {
   password: '',
   password_confirmation: '',
 };
-const formData = ref({
-  ...formDataDefault,
-});
-const formAction = ref({
-  ...formActionDefault,
-});
+const formData = ref({ ...formDataDefault });
+const formAction = ref({ ...formActionDefault });
+
+// Dynamic visibility for password fields
 const isPasswordVisible = ref(false);
 const isPasswordConfirmVisible = ref(false);
+
+// Reference to the VForm component for validation
 const refVForm = ref();
 
-// A dynamic validator to check password confirmation
+// Validator for confirming password matches
 const confirmedValidator = computed(() => (value) =>
   value === formData.value.password || 'Passwords do not match.'
 );
@@ -26,25 +27,42 @@ const confirmedValidator = computed(() => (value) =>
 const onSubmit = async () => {
   formAction.value = { ...formActionDefault, formProcess: true };
 
-  const { data, error } = await supabase.auth.updateUser({
-    password: formData.value.password,
-  });
+  // Check if password is valid before submitting
+  const validPassword = passwordValidator(formData.value.password);
 
-  if (error) {
-    formAction.value.formErrorMessage = error.message;
-    formAction.value.formStatus = error.status;
-  } else if (data) {
-    formAction.value.formSuccessMessage = 'Successfully Changed Password.';
+  // Only log success or failure on password validation
+  if (validPassword === true) {
+    // Proceed to update password
+    const { data, error } = await supabase.auth.updateUser({
+      password: formData.value.password,
+    });
+
+    if (error) {
+      formAction.value.formErrorMessage = error.message;
+      formAction.value.formStatus = 'error';
+      console.log('Password update error:', error.message);  // Only log the error message
+    } else {
+      formAction.value.formSuccessMessage = 'Password updated successfully!';
+      formAction.value.formStatus = 'success';
+      console.log('Password update success');  // Success log without sensitive info
+      formData.value = { ...formDataDefault };  // Reset form
+    }
+  } else {
+    // Handle validation failure
+    formAction.value.formErrorMessage = validPassword;
+    formAction.value.formStatus = 'error';
+    console.log('Password validation failed.');
   }
-
-  // Reset form fields after successful submission
-  formData.value = { ...formDataDefault };
-  formAction.value.formProcess = false;
 };
 
+// Handle the form submission
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
-    if (valid) onSubmit();
+    if (valid) {
+      onSubmit();
+    } else {
+      console.log('Form validation failed.');
+    }
   });
 };
 </script>
@@ -58,6 +76,7 @@ const onFormSubmit = () => {
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
     <v-row dense>
       <v-col cols="12" sm="6">
+        <!-- New Password Field -->
         <v-text-field
           v-model="formData.password"
           :type="isPasswordVisible ? 'text' : 'password'"
@@ -70,6 +89,7 @@ const onFormSubmit = () => {
       </v-col>
 
       <v-col cols="12" sm="6">
+        <!-- Confirm Password Field -->
         <v-text-field
           v-model="formData.password_confirmation"
           :type="isPasswordConfirmVisible ? 'text' : 'password'"
