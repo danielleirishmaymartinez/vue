@@ -5,54 +5,57 @@ import { formActionDefault } from '@/utils/supabase.js';
 import { imageValidator, requiredValidator } from '@/utils/validators';
 import { ref } from 'vue';
 import { fileExtract } from '@/utils/helpers';
+import supabase from '@/utils/supabase.js';
 
-// Use Pinia Store
 const authStore = useAuthUserStore();
 
-// Load Variables
 const formDataDefault = {
   image: null,
 };
+
 const formData = ref({
   ...formDataDefault,
 });
+
 const formAction = ref({
   ...formActionDefault,
 });
+
 const refVForm = ref();
 const imgPreview = ref(authStore.userData?.image_url || '/images/profile.png');
 
-// Function to handle file change and show image preview
+// Handle file change and show image preview
 const onPreview = async (event) => {
   const { fileObject, fileUrl } = await fileExtract(event);
-  // Update formData
   formData.value.image = fileObject;
-  // Update imgPreview state
   imgPreview.value = fileUrl;
 };
 
-// Function to reset preview if file-input clear is clicked
+// Reset preview
 const onPreviewReset = () => {
   imgPreview.value = authStore.userData?.image_url || '/images/profile.png';
 };
 
-// Submit Functionality
 const onSubmit = async () => {
   formAction.value = { ...formActionDefault, formProcess: true };
 
-  const { data, error } = await authStore.updateUserImage(formData.value.image);
+  const { data, error } = await supabase
+    .from('profiles')
+    .upsert({
+      user_id: authStore.userData?.id,
+      profile_image: formData.value.image,
+    });
 
   if (error) {
     formAction.value.formErrorMessage = error.message;
     formAction.value.formStatus = error.status;
   } else if (data) {
-    formAction.value.formSuccessMessage = 'Successfully Updated Profile Image.';
+    formAction.value.formSuccessMessage = 'Successfully updated profile image.';
   }
 
   formAction.value.formProcess = false;
 };
 
-// Trigger Validators
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
     if (valid) onSubmit();
