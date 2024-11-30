@@ -43,7 +43,7 @@ onMounted(async () => {
   }
 });
 
-// Function to handle saving a post (this can be customized further as needed)
+// Function to handle saving a post
 const toggleSave = (post) => {
   if (savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name)) {
     savedProductsStore.removeProduct(post.item_name);
@@ -54,10 +54,12 @@ const toggleSave = (post) => {
 
 const isSaved = (post) => savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
-const showPostDetail = ref(null);
+const selectedPost = ref(null); // Holds the currently selected post details
+const isDialogOpen = ref(false); // Controls the dialog visibility
 
 const viewPostDetails = (post) => {
-  showPostDetail.value = post;
+  selectedPost.value = post;
+  isDialogOpen.value = true;
 };
 </script>
 
@@ -109,7 +111,7 @@ const viewPostDetails = (post) => {
             <!-- Post Details -->
             <v-card-text class="text-center">
               <div class="post-name">{{ post.item_name }}</div>
-              <div class="post-seller">by User</div> <!-- Modify this as needed -->
+              <div class="post-seller">by User</div>
               <div class="post-price">{{ post.price }}</div>
             </v-card-text>
           </v-card>
@@ -118,15 +120,15 @@ const viewPostDetails = (post) => {
     </v-container>
 
     <!-- Post Detail Modal -->
-    <v-dialog v-model="showPostDetail" max-width="800px" transition="dialog-bottom-transition">
+    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
       <v-card class="post-detail-card">
         <!-- Header Section -->
         <v-card-title class="post-detail-header">
           <div>
-            <h2 class="post-title">{{ showPostDetail?.item_name }}</h2>
-            <p class="post-seller">by User</p> <!-- Modify this as needed -->
+            <h2 class="post-title">{{ selectedPost?.item_name }}</h2>
+            <p class="post-seller">by User</p>
           </div>
-          <v-btn icon @click="showPostDetail = null" class="close-btn">
+          <v-btn icon @click="isDialogOpen = false" class="close-btn">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -137,7 +139,7 @@ const viewPostDetails = (post) => {
             <!-- Post Image -->
             <v-col cols="12" md="6" class="d-flex justify-center">
               <v-img
-                :src="showPostDetail?.image"
+                :src="selectedPost?.image"
                 class="post-detail-image"
                 cover
                 height="300px"
@@ -148,11 +150,11 @@ const viewPostDetails = (post) => {
             <v-col cols="12" md="6">
               <div class="post-description">
                 <h3>Description</h3>
-                <p>{{ showPostDetail?.description }}</p>
+                <p>{{ selectedPost?.description }}</p>
               </div>
               <div class="post-price">
                 <h3>Price</h3>
-                <p>P{{ showPostDetail?.price }}</p>
+                <p>P{{ selectedPost?.price }}</p>
               </div>
             </v-col>
           </v-row>
@@ -160,15 +162,15 @@ const viewPostDetails = (post) => {
 
         <!-- Footer Section -->
         <v-card-actions class="post-detail-footer">
-          <v-btn block @click="showPostDetail = null" color="primary" outlined>
+          <v-btn block @click="isDialogOpen = false" color="primary" outlined>
             Close
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </v-container>
 </template>
+
 
 
 <style scoped>
