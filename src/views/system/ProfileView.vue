@@ -61,11 +61,11 @@ const savedProducts = savedProductsStore.savedProducts;
     }
 
     userProfile.value = profileData || getDefaultProfile();
-
-    // Fetch posts data (only unsold posts)
+    // Fetch only posts belonging to the logged-in user (filtered by user_id)
     const { data: postData, error: postError } = await supabase
       .from("posts")
       .select("id, item_name, price, description, location, time, type, image, is_sold")
+      .eq("user_id", userId) // Ensure we fetch posts for the logged-in user only
       .eq("is_sold", false); // If you want to fetch only unsold items
 
     if (postError) throw new Error(postError.message);

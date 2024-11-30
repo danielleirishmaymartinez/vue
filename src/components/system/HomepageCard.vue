@@ -346,7 +346,6 @@ const viewPostDetails = (post) => {
   color: #ff5252;
 }
 
-<<<<<<< HEAD
 .product-name {
   color: #ffbf00;
   font-weight: bold;
