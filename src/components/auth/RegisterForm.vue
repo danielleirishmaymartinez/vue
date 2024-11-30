@@ -117,13 +117,14 @@ const onFormSubmit = () => {
     :form-error-message="formAction.formErrorMessage"
   ></AlertNotification>
 
-  <v-form ref="refVForm" @submit.prevent="onFormSubmit">
+  <v-form ref="refVForm" @submit.prevent="onFormSubmit" class="register-form">
     <v-row dense>
       <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.firstname"
           label="Firstname"
           :rules="[requiredValidator]"
+          class="input-field"
         ></v-text-field>
       </v-col>
 
@@ -132,6 +133,7 @@ const onFormSubmit = () => {
           v-model="formData.lastname"
           label="Lastname"
           :rules="[requiredValidator]"
+          class="input-field"
         ></v-text-field>
       </v-col>
 
@@ -141,6 +143,7 @@ const onFormSubmit = () => {
           label="Email"
           prepend-inner-icon="mdi-email-outline"
           :rules="[requiredValidator, emailValidator]"
+          class="input-field"
         ></v-text-field>
       </v-col>
 
@@ -153,6 +156,7 @@ const onFormSubmit = () => {
           :append-inner-icon="isPasswordVisible ? 'mdi-eye-off' : 'mdi-eye'"
           @click:append-inner="isPasswordVisible = !isPasswordVisible"
           :rules="[requiredValidator, passwordValidator]"
+          class="input-field"
         ></v-text-field>
       </v-col>
 
@@ -164,14 +168,15 @@ const onFormSubmit = () => {
           :append-inner-icon="isPasswordConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
           @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
           :rules="[requiredValidator, confirmedValidator(formData.password_confirmation, formData.password)]"
+          class="input-field"
         ></v-text-field>
       </v-col>
     </v-row>
 
     <v-btn
-      class="mt-2"
+      class="mt-2 submit-btn"
       type="submit"
-      color="red-darken-4"
+      color="pink"
       prepend-icon="mdi-account-plus"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"
@@ -181,3 +186,5 @@ const onFormSubmit = () => {
     </v-btn>
   </v-form>
 </template>
+
+

@@ -170,6 +170,7 @@ const viewPostDetails = (post) => {
   </v-container>
 </template>
 
+
 <style scoped>
 /* Carousel Styles */
 .carousel-container {
@@ -177,7 +178,7 @@ const viewPostDetails = (post) => {
 }
 
 .carousel-content {
-  color: white;
+  color: rgb(255, 255, 255);
   text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -193,12 +194,13 @@ const viewPostDetails = (post) => {
 /* Discover Section */
 .discover-title {
   font-size: 2rem;
+  color: rgb(224, 83, 1);
   font-weight: bold;
 }
 
 .discover-subtitle {
   font-size: 1.25rem;
-  color: gray;
+  color: rgb(248, 159, 42);
   margin-bottom: 30px;
 }
 
@@ -214,7 +216,7 @@ const viewPostDetails = (post) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f693c1;
+  background-color: #ffc9e9;
   padding: 16px;
 }
 
@@ -226,12 +228,12 @@ const viewPostDetails = (post) => {
 
 .post-seller {
   font-size: 0.875rem;
-  color: #757575;
+  color: #fd7e34;
   margin-top: 4px;
 }
 
 .close-btn {
-  color: #ff5252;
+  color: #eaeaea;
   transition: transform 0.2s ease;
 }
 
