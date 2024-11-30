@@ -24,8 +24,6 @@ const carouselItems = [
 ];
 
 const posts = ref([]); // This will hold the posts data
-
-// Fetch data from the posts table on component mount
 onMounted(async () => {
   try {
     const { data, error } = await supabase
@@ -36,6 +34,22 @@ onMounted(async () => {
     if (error) {
       console.error('Error fetching posts:', error);
     } else {
+      // Fetch the image for each post if the image exists
+      for (let post of data) {
+        if (post.image) {
+          // Construct the path for the image
+          const { data: signedUrlData, error: signedUrlError } = await supabase
+            .storage
+            .from('post-images') // your bucket name
+            .createSignedUrl(post.image, 60 * 60); // 1-hour expiration for signed URL
+
+          if (signedUrlError) {
+            console.error('Error fetching signed URL:', signedUrlError.message);
+          } else {
+            post.image = signedUrlData.signedUrl; // Update post image with signed URL
+          }
+        }
+      }
       posts.value = data;
     }
   } catch (err) {
