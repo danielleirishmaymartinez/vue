@@ -194,8 +194,8 @@ const viewPostDetails = (post) => {
 }
 
 .carousel-content {
-  color: rgb(255, 255, 255);
-  text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  color: rgb(188, 223, 218);
+  text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
 }
 
 .carousel-title {
@@ -210,7 +210,7 @@ const viewPostDetails = (post) => {
 /* Discover Section */
 .discover-title {
   font-size: 2rem;
-  color: rgb(243, 108, 30);
+  color: rgb(239, 119, 28);
   font-weight: bold;
 }
 
@@ -232,17 +232,15 @@ const viewPostDetails = (post) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ff6bb5;
+  background-color: #fa48a1;
   padding: 16px;
 }
 
-.product-title {
-  color:#2a2a2a;
-}
 .post-title {
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
+  color: #ffffff; /* Updated to a rich lavender */
 }
 
 .post-seller {
@@ -252,11 +250,11 @@ const viewPostDetails = (post) => {
 }
 
 .close-btn {
-  color:#ffc0ef;
   transition: transform 0.2s ease;
 }
 
 .close-btn:hover {
+  color: #ff44d0;
   transform: scale(1.2);
 }
 
@@ -267,17 +265,17 @@ const viewPostDetails = (post) => {
 }
 
 /* Description and Price */
-.post-description h3,
-.post-price h3 {
+.post-description h3 {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 8px;
+  color: rgb(0, 0, 0); /* Updated to soft lavender */
 }
 
 .post-description p,
 .post-price p {
   font-size: 1rem;
-  color: #ff5cd6;
+  color: #353535;
   margin: 0;
 }
 
@@ -291,10 +289,6 @@ const viewPostDetails = (post) => {
   font-weight: bold;
   border-radius: 8px;
   transition: background-color 0.2s ease;
-}
-
-.product-detail-footer .v-btn:hover {
-  background-color: #d87979;
 }
 
 .post-detail-footer .v-btn:hover {
@@ -311,7 +305,7 @@ const viewPostDetails = (post) => {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
-  height: 350px; /* Ensures all cards have the same height */
+  height: 350px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -323,13 +317,14 @@ const viewPostDetails = (post) => {
 
 .post-name {
   font-size: 1.125rem;
+  color: rgb(247, 182, 61);
   font-weight: bold;
   margin-top: 10px;
 }
 
 .post-price {
   font-size: 1rem;
-  color: #ff5252;
+  color: rgb(0, 0, 0);
   font-weight: bold;
   margin-bottom: 10px;
 }
@@ -347,7 +342,7 @@ const viewPostDetails = (post) => {
 }
 
 .product-name {
-  color: #ffbf00;
+  color: #ffffff; /* Matches the modal title for consistency */
   font-weight: bold;
   font-size: 1rem;
 }
@@ -358,18 +353,13 @@ const viewPostDetails = (post) => {
 }
 
 .product-price {
-  color:rgb(33, 32, 32);
+  color: rgb(33, 32, 32);
   font-size: 1.25rem;
-}
-
-.product-detail-image {
-  width: 100%;
-  height: auto;
 }
 
 .product-description {
   margin-top: 10px;
-  color:rgb(33, 32, 32);
+  color: rgb(218, 43, 43);
   font-size: 1rem;
 }
 
@@ -377,3 +367,4 @@ const viewPostDetails = (post) => {
   text-transform: none;
 }
 </style>
+
