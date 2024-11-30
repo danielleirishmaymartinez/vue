@@ -7,6 +7,7 @@ import { useDisplay } from "vuetify";
 import { useRouter } from "vue-router";
 import { useAuthUserStore } from "@/stores/authUser.js";
 import { supabase } from "@/utils/supabase.js"; // Import supabase client
+import { useThemeStore } from '@/stores/theme.js'; // Import the theme store
 
 // State
 const { mobile } = useDisplay();
@@ -17,6 +18,7 @@ const userProfile = ref({});
 const showPostForm = ref(false);
 const activeTab = ref(0);
 const posts = ref([]);
+const themeStore = useThemeStore(); // Access the theme store
 
 // Get saved products from the store
 const savedProducts = savedProductsStore.savedProducts;
@@ -149,7 +151,10 @@ const logout = async () => {
 
 <template>
   <v-responsive class="border rounded">
-    <v-app>
+    <v-app
+    :theme="themeStore.theme"
+      :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
+    >
       <!-- Top Navbar -->
       <Navbar />
 
