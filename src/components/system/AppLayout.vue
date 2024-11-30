@@ -44,21 +44,38 @@ function navigateTo(path) {
         <v-main>
           <v-container>
             <v-row>
-          
               <!-- Left Column: Text -->
               <v-col cols="12" md="7" class="d-flex flex-column justify-center">
-        
               </v-col>
 
               <!-- Right Column: Login Form -->
               <v-col cols="12" md="5" class="d-flex justify-center align-center">
                 <v-card
-                  class="blur-container"
+                  class="form-container"
                   width="100%"
                   max-width="600px"
                   outlined
                 >
-                  <slot name="content"></slot>
+                  <slot name="content">
+                    <v-text-field
+                      label="Email"
+                      type="email"
+                      variant="outlined"
+                      color="red"
+                      class="custom-field"
+                      density="compact"
+                      hide-details
+                    ></v-text-field>
+                    <v-text-field
+                      label="Password"
+                      type="password"
+                      variant="outlined"
+                      color="red"
+                      class="custom-field"
+                      density="compact"
+                      hide-details
+                    ></v-text-field>
+                  </slot>
                 </v-card>
               </v-col>
             </v-row>
@@ -80,31 +97,45 @@ function navigateTo(path) {
   height: 100vh; /* Full viewport height */
 }
 
-/* Blurry Container Styling */
-.blur-container {
-  backdrop-filter: blur(2px); /* Adds blur to the form container */
-  background-color: rgba(245, 243, 246, 0.749); /* Transparent white */
+/* Form Container Styling */
+.form-container {
+  background-color: rgba(245, 243, 246, 0.85); /* Light mode background */
   border-radius: 8px;
-  box-shadow: none; /* Removes any shadow for a cleaner look */
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Transparent Inner Elements */
-.blur-container ::v-deep(.v-card, .v-card__text, input, button, label, .v-btn) {
-  backdrop-filter: blur(5px); /* Apply blur to all inner elements */
-  background-color: rgba(206, 202, 207, 0.385); /* Ensure transparency */
-  border: none; /* Remove borders for consistency */
-  color: inherit; /* Use the theme's text color */
-  box-shadow: none; /* Remove shadows */
+.dark-mode .form-container {
+  background-color: rgba(33, 33, 33, 0.85); /* Dark mode background */
 }
 
-/* Responsiveness for smaller screens */
+/* Custom Field Styles */
+.custom-field .v-input {
+  background-color: transparent !important; /* Transparent background */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove blue focus outline in dark mode */
+.custom-field input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: rgba(255, 0, 0, 0.7) !important; /* Red border on focus */
+}
+
+/* Remove label blue effect */
+.custom-field .v-label {
+  color: rgba(255, 255, 255, 0.8) !important; /* White for dark mode */
+}
+
+.light-mode .custom-field .v-label {
+  color: rgba(0, 0, 0, 0.8) !important; /* Black for light mode */
+}
+
+/* Responsive Design */
 @media (max-width: 600px) {
-  .blur-container {
+  .form-container {
     padding: 10px;
     max-width: 100%;
   }
