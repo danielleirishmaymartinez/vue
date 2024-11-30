@@ -1,6 +1,7 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useSavedProductsStore } from '@/stores/savedProducts';
-import { ref } from 'vue';
+import supabase from '@/utils/supabase.js';
 
 const savedProductsStore = useSavedProductsStore();
 
@@ -22,54 +23,41 @@ const carouselItems = [
   },
 ];
 
-const products = ref([
-  {
-    image: '/images/binder.jpg',
-    name: 'Binder',
-    seller: 'by Dani',
-    price: '179',
-    description: 'for sale only, 4 pcs binder',
-  },
-  {
-    image: '/images/aquaflask.jpg',
-    name: 'Aquaflask',
-    seller: 'by Lola',
-    price: '1200',
-    description: 'for sale only 40oz aquaflask rose pink',
-  },
-  {
-    image: '/images/highlighter.jpg',
-    name: 'Stabilo Boss Highlighter',
-    seller: 'by Wine',
-    price: '150',
-    description: '1 set of highlighter, open for swap to a set of colored pen',
-  },
-  {
-    image: '/images/ballpen.jpg',
-    name: 'Dong-A Fine Tech',
-    seller: 'by Lusi',
-    price: '128',
-    description: 'for sale 5 pcs Dong-A Sign Pen',
-  },
-]);
+const posts = ref([]); // This will hold the posts data
 
-const toggleSave = (product) => {
-  if (savedProductsStore.savedProducts.some((p) => p.name === product.name)) {
-    savedProductsStore.removeProduct(product.name);
+// Fetch data from the posts table on component mount
+onMounted(async () => {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('id, item_name, price, description, location, time, type, image, is_sold')
+      .eq('is_sold', false); // If you want to fetch only unsold items
+
+    if (error) {
+      console.error('Error fetching posts:', error);
+    } else {
+      posts.value = data;
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err);
+  }
+});
+
+// Function to handle saving a post (this can be customized further as needed)
+const toggleSave = (post) => {
+  if (savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name)) {
+    savedProductsStore.removeProduct(post.item_name);
   } else {
-    savedProductsStore.addProduct(product);
+    savedProductsStore.addProduct(post);
   }
 };
 
-const isSaved = (product) => savedProductsStore.savedProducts.some((p) => p.name === product.name);
+const isSaved = (post) => savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
-// State for modal control and product details
-const isDialogOpen = ref(false);
-const showProductDetail = ref(null);
+const showPostDetail = ref(null);
 
-const viewProductDetails = (product) => {
-  showProductDetail.value = product;
-  isDialogOpen.value = true;
+const viewPostDetails = (post) => {
+  showPostDetail.value = post;
 };
 </script>
 
@@ -95,50 +83,50 @@ const viewProductDetails = (product) => {
       </p>
     </div>
 
-    <!-- Product Cards -->
-    <v-container class="product-section mt-5">
-      <v-row justify="center" dense>
+    <!-- Post Cards -->
+    <v-container class="post-section mt-5">
+      <v-row justify="start" dense>
         <v-col
-          v-for="(product, index) in products"
+          v-for="(post, index) in posts"
           :key="index"
           cols="12"
           sm="6"
           md="3"
         >
-          <v-card class="product-card" @click="viewProductDetails(product)">
+          <v-card class="post-card" @click="viewPostDetails(post)">
             <!-- Image with Heart Icon -->
-            <v-img :src="product.image" class="product-image" height="200px">
+            <v-img :src="post.image" class="post-image" height="200px">
               <v-btn
                 icon
-                @click.stop="toggleSave(product)"
+                @click.stop="toggleSave(post)"
                 class="heart-icon"
-                :class="{'saved': isSaved(product)}"
+                :class="{'saved': isSaved(post)}"
               >
-                <v-icon>{{ isSaved(product) ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
+                <v-icon>{{ isSaved(post) ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
               </v-btn>
             </v-img>
 
-            <!-- Product Details -->
+            <!-- Post Details -->
             <v-card-text class="text-center">
-              <div class="product-name">{{ product.name }}</div>
-              <div class="product-seller">{{ product.seller }}</div>
-              <div class="product-price">{{ product.price }}</div>
+              <div class="post-name">{{ post.item_name }}</div>
+              <div class="post-seller">by User</div> <!-- Modify this as needed -->
+              <div class="post-price">{{ post.price }}</div>
             </v-card-text>
           </v-card>
         </v-col>
       </v-row>
     </v-container>
 
-    <!-- Product Detail Modal -->
-    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
-      <v-card class="product-detail-card">
+    <!-- Post Detail Modal -->
+    <v-dialog v-model="showPostDetail" max-width="800px" transition="dialog-bottom-transition">
+      <v-card class="post-detail-card">
         <!-- Header Section -->
-        <v-card-title class="product-detail-header">
+        <v-card-title class="post-detail-header">
           <div>
-            <h2 class="product-title">{{ showProductDetail?.name }}</h2>
-            <p class="product-seller">{{ showProductDetail?.seller }}</p>
+            <h2 class="post-title">{{ showPostDetail?.item_name }}</h2>
+            <p class="post-seller">by User</p> <!-- Modify this as needed -->
           </div>
-          <v-btn icon @click="isDialogOpen = false" class="close-btn">
+          <v-btn icon @click="showPostDetail = null" class="close-btn">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -146,38 +134,39 @@ const viewProductDetails = (product) => {
         <!-- Content Section -->
         <v-card-text>
           <v-row>
-            <!-- Product Image -->
+            <!-- Post Image -->
             <v-col cols="12" md="6" class="d-flex justify-center">
               <v-img
-                :src="showProductDetail?.image"
-                class="product-detail-image"
+                :src="showPostDetail?.image"
+                class="post-detail-image"
                 cover
                 height="300px"
               />
             </v-col>
 
-            <!-- Product Details -->
+            <!-- Post Details -->
             <v-col cols="12" md="6">
-              <div class="product-description">
+              <div class="post-description">
                 <h3>Description</h3>
-                <p>{{ showProductDetail?.description }}</p>
+                <p>{{ showPostDetail?.description }}</p>
               </div>
-              <div class="product-price">
+              <div class="post-price">
                 <h3>Price</h3>
-                <p>P{{ showProductDetail?.price }}</p>
+                <p>P{{ showPostDetail?.price }}</p>
               </div>
             </v-col>
           </v-row>
         </v-card-text>
 
         <!-- Footer Section -->
-        <v-card-actions class="product-detail-footer">
-          <v-btn block @click="isDialogOpen = false" color="primary" outlined>
+        <v-card-actions class="post-detail-footer">
+          <v-btn block @click="showPostDetail = null" color="primary" outlined>
             Close
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+
   </v-container>
 </template>
 
@@ -216,14 +205,14 @@ const viewProductDetails = (product) => {
 }
 
 /* Modal Card */
-.product-detail-card {
+.post-detail-card {
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Header Styles */
-.product-detail-header {
+.post-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -233,12 +222,14 @@ const viewProductDetails = (product) => {
 
 .product-title {
   color:#2a2a2a;
+}
+.post-title {
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
 }
 
-.product-seller {
+.post-seller {
   font-size: 0.875rem;
   color: #1f1b1b;
   margin-top: 4px;
@@ -254,33 +245,33 @@ const viewProductDetails = (product) => {
 }
 
 /* Image Styles */
-.product-detail-image {
+.post-detail-image {
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Description and Price */
-.product-description h3,
-.product-price h3 {
+.post-description h3,
+.post-price h3 {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 8px;
 }
 
-.product-description p,
-.product-price p {
+.post-description p,
+.post-price p {
   font-size: 1rem;
   color: #ff5cd6;
   margin: 0;
 }
 
 /* Footer Styles */
-.product-detail-footer {
+.post-detail-footer {
   padding: 16px;
   background-color: #f5f5f5;
 }
 
-.product-detail-footer .v-btn {
+.post-detail-footer .v-btn {
   font-weight: bold;
   border-radius: 8px;
   transition: background-color 0.2s ease;
@@ -288,15 +279,19 @@ const viewProductDetails = (product) => {
 
 .product-detail-footer .v-btn:hover {
   background-color: #d87979;
+}
+
+.post-detail-footer .v-btn:hover {
+  background-color: #c9c3c3;
   color: white;
 }
 
-/* Product Section */
-.product-section {
+/* Post Section */
+.post-section {
   margin-top: 40px;
 }
 
-.product-card {
+.post-card {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
@@ -304,37 +299,38 @@ const viewProductDetails = (product) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.product-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+.post-image {
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.product-image {
-  position: relative;
-  height: 200px;
-  object-fit: cover;
-  background-color: #f9f9f9;
+.post-name {
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.post-price {
+  font-size: 1rem;
+  color: #ff5252;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .heart-icon {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(255, 255, 255, 0.6);
+  background-color: white;
   border-radius: 50%;
 }
 
-.heart-icon .v-icon {
-  color: red;
-}
-
 .saved {
-  color: #ff4081;
+  color: #ff5252;
 }
 
+<<<<<<< HEAD
 .product-name {
   color: #ffbf00;
   font-weight: bold;

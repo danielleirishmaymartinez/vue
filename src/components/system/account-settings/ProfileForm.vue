@@ -1,22 +1,21 @@
 <script setup>
-import { requiredValidator, integerValidator } from '@/utils/validators';
+import { requiredValidator } from '@/utils/validators';
 import AlertNotification from '@/components/common/AlertNotification.vue';
 import { formActionDefault } from '@/utils/supabase.js';
 import { useAuthUserStore } from '@/stores/authUser';
 import { ref } from 'vue';
+import supabase from '@/utils/supabase.js';
 
 const authStore = useAuthUserStore();
 
 const formData = ref({
-  firstname: authStore.userData?.firstname || '',
-  middlename: authStore.userData?.middlename || '',
-  lastname: authStore.userData?.lastname || '',
+  firstname: authStore.userData?.first_name || '',
+  lastname: authStore.userData?.last_name || '',
   email: authStore.userData?.email || '',
-  phone: authStore.userData?.phone || '',
-  facebookLink: authStore.userData?.facebookLink || '', // Added Facebook link
-  bio: authStore.userData?.bio || '', // Added bio
-  location: authStore.userData?.location || '', // Added location
-  time: authStore.userData?.time || '', // Added time
+  facebookLink: authStore.userData?.fb_link || '',
+  bio: authStore.userData?.bio || '',
+  location: authStore.userData?.preferred_location || '',
+  time: authStore.userData?.preferred_time || '',
 });
 
 const formAction = ref({ ...formActionDefault });
@@ -25,13 +24,34 @@ const refVForm = ref();
 const onSubmit = async () => {
   formAction.value = { ...formActionDefault, formProcess: true };
 
-  const { data, error } = await authStore.updateUserInformation(formData.value);
+  // Use defaults if certain fields are empty
+  const updatedData = {
+    first_name: formData.value.firstname,
+    last_name: formData.value.lastname,
+    fb_link: formData.value.facebookLink,
+    bio: formData.value.bio || 'No bio available.',  // Default bio if empty
+    preferred_location: formData.value.location || 'Not specified', // Default location
+    preferred_time: formData.value.time || 'Not specified', // Default time
+  };
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updatedData)
+    .eq('user_id', authStore.userData?.id); // Ensure the update is for the current user
 
   if (error) {
     formAction.value.formErrorMessage = error.message;
     formAction.value.formStatus = error.status;
   } else if (data) {
-    formAction.value.formSuccessMessage = 'Successfully updated account.';
+    // Optionally update the store with the new data
+    authStore.userData.first_name = formData.value.firstname;
+    authStore.userData.last_name = formData.value.lastname;
+    authStore.userData.fb_link = formData.value.facebookLink;
+    authStore.userData.bio = formData.value.bio;
+    authStore.userData.preferred_location = formData.value.location;
+    authStore.userData.preferred_time = formData.value.time;
+
+    formAction.value.formSuccessMessage = 'Successfully updated account information.';
   }
 
   formAction.value.formProcess = false;
@@ -62,13 +82,6 @@ const onFormSubmit = () => {
 
       <v-col cols="12" sm="4">
         <v-text-field
-          v-model="formData.middlename"
-          label="Middlename"
-        />
-      </v-col>
-
-      <v-col cols="12" sm="4">
-        <v-text-field
           v-model="formData.lastname"
           label="Lastname"
           :rules="[requiredValidator]"
@@ -85,7 +98,6 @@ const onFormSubmit = () => {
         />
       </v-col>
 
-      <!-- Facebook Link Field -->
       <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.facebookLink"
@@ -94,7 +106,6 @@ const onFormSubmit = () => {
         />
       </v-col>
 
-      <!-- Location Field -->
       <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.location"
@@ -104,7 +115,6 @@ const onFormSubmit = () => {
         />
       </v-col>
 
-      <!-- Time Field -->
       <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.time"
@@ -115,7 +125,6 @@ const onFormSubmit = () => {
         />
       </v-col>
 
-      <!-- Bio Field -->
       <v-col cols="12" sm="6">
         <v-textarea
           v-model="formData.bio"
@@ -124,7 +133,6 @@ const onFormSubmit = () => {
           hint="Tell us about yourself"
         />
       </v-col>
-
     </v-row>
 
     <v-btn

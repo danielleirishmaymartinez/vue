@@ -23,38 +23,40 @@ const savedProducts = savedProductsStore.savedProducts;
 
 // Access the Pinia store
 const authUser = useAuthUserStore(); // Initialize the store
-
-// Initialize session and fetch user profile & posts
 onMounted(async () => {
   console.log("Before fetching profile:", userProfile.value);
-  const isLoggedIn = await authUser.isAuthenticated(); // Use the store method
-  if (!isLoggedIn) {
+
+  // Check if the user is authenticated using supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  // If no user or there is an error, redirect to login page
+  if (error || !user) {
     console.error("No active session found. Redirecting to login...");
     router.push("/login");
     return;
   }
 
   try {
-    // Get the current user's ID from the store
-    const userId = authUser.userData.id;
+    // Get user profile from 'profiles' table
+    const userId = user.id; // Get user ID from supabase.auth.getUser()
 
-    // Fetch user profile using user_id from profiles table
+    // Fetch user profile from the 'profiles' table
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("first_name, last_name, profile_image, bio, preferred_location, preferred_time")
-      .eq("user_id", userId) // Use userId from the store
-      .limit(1); // Ensure only one row is returned
+      .eq("user_id", userId)
+      .single(); // Use .single() to get a single record
 
     if (profileError) throw new Error(profileError.message);
 
     // Set user profile or fallback to default profile if no data
-    userProfile.value = profileData && profileData.length ? profileData[0] : getDefaultProfile();
+    userProfile.value = profileData || getDefaultProfile();
 
     // Fetch user posts
     const { data: postData, error: postError } = await supabase
       .from("posts")
       .select("*")
-      .eq("user_id", userId); // Use userId from the store
+      .eq("user_id", userId);
 
     if (postError) throw new Error(postError.message);
     posts.value = postData;
