@@ -23,30 +23,28 @@ const carouselItems = [
   },
 ];
 
-const posts = ref([]); // This will hold the posts data
+const posts = ref([]);
 onMounted(async () => {
   try {
     const { data, error } = await supabase
       .from('posts')
       .select('id, item_name, price, description, location, time, type, image, is_sold')
-      .eq('is_sold', false); // If you want to fetch only unsold items
+      .eq('is_sold', false);
 
     if (error) {
       console.error('Error fetching posts:', error);
     } else {
-      // Fetch the image for each post if the image exists
       for (let post of data) {
         if (post.image) {
-          // Construct the path for the image
           const { data: signedUrlData, error: signedUrlError } = await supabase
             .storage
-            .from('post-images') // your bucket name
-            .createSignedUrl(post.image, 60 * 60); // 1-hour expiration for signed URL
+            .from('post-images')
+            .createSignedUrl(post.image, 60 * 60);
 
           if (signedUrlError) {
             console.error('Error fetching signed URL:', signedUrlError.message);
           } else {
-            post.image = signedUrlData.signedUrl; // Update post image with signed URL
+            post.image = signedUrlData.signedUrl;
           }
         }
       }
@@ -57,7 +55,6 @@ onMounted(async () => {
   }
 });
 
-// Function to handle saving a post
 const toggleSave = (post) => {
   if (savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name)) {
     savedProductsStore.removeProduct(post.item_name);
@@ -66,16 +63,28 @@ const toggleSave = (post) => {
   }
 };
 
-const isSaved = (post) => savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
+const isSaved = (post) =>
+  post
+    ? savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name)
+    : false;
 
-const selectedPost = ref(null); // Holds the currently selected post details
-const isDialogOpen = ref(false); // Controls the dialog visibility
+const selectedPost = ref(null);
+const isDialogOpen = ref(false);
 
 const viewPostDetails = (post) => {
   selectedPost.value = post;
   isDialogOpen.value = true;
 };
+
+const contactSeller = () => {
+  if (selectedPost.value) {
+    console.log(`Contact seller for: ${selectedPost.value.item_name}`);
+    // Placeholder action
+    alert("Contacting seller...");
+  }
+};
 </script>
+
 
 <template>
   <v-container>
@@ -110,22 +119,11 @@ const viewPostDetails = (post) => {
           md="3"
         >
           <v-card class="post-card" @click="viewPostDetails(post)">
-            <!-- Image with Heart Icon -->
-            <v-img :src="post.image" class="post-image" height="200px">
-              <v-btn
-                icon
-                @click.stop="toggleSave(post)"
-                class="heart-icon"
-                :class="{'saved': isSaved(post)}"
-              >
-                <v-icon>{{ isSaved(post) ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
-              </v-btn>
-            </v-img>
-
+            <!-- Image -->
+            <v-img :src="post.image" class="post-image" height="200px" />
             <!-- Post Details -->
             <v-card-text class="text-center">
               <div class="post-name">{{ post.item_name }}</div>
-              <div class="post-seller">by User</div>
               <div class="post-price">{{ post.price }}</div>
             </v-card-text>
           </v-card>
@@ -135,53 +133,56 @@ const viewPostDetails = (post) => {
 
     <!-- Post Detail Modal -->
     <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
-      <v-card class="post-detail-card">
-        <!-- Header Section -->
-        <v-card-title class="post-detail-header">
-          <div>
-            <h2 class="post-title">{{ selectedPost?.item_name }}</h2>
-            <p class="post-seller">by User</p>
+  <v-card class="post-detail-card">
+    <!-- Header Section -->
+    <v-card-title class="post-detail-header">
+      <v-btn icon @click="isDialogOpen = false" class="close-btn">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-card-title>
+
+    <!-- Content Section -->
+    <v-card-text>
+      <v-row>
+        <!-- Post Image -->
+        <v-col cols="12" md="6" class="d-flex justify-center">
+          <v-img
+            :src="selectedPost?.image"
+            class="post-detail-image"
+            cover
+            height="300px"
+          />
+        </v-col>
+
+        <!-- Post Details -->
+        <v-col cols="12" md="6">
+          <div class="post-title">{{ selectedPost?.item_name }}</div>
+          <div class="post-seller">by User</div>
+          <div class="post-description">
+            <h3>Description</h3>
+            <p>{{ selectedPost?.description }}</p>
           </div>
-          <v-btn icon @click="isDialogOpen = false" class="close-btn">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
+          <div class="post-price">
+            <h3>Price</h3>
+            <p>P{{ selectedPost?.price }}</p>
+          </div>
+          <!-- Buttons Below Price -->
+          <v-row justify="start" class="mt-4 button-row">
+             <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
+             <v-icon left>mdi-bookmark-outline</v-icon>
+              {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+           </v-btn>
+           <v-btn class="custom-button mx-2" @click="contactSeller">
+             <v-icon left>mdi-email-outline</v-icon>
+                 Contact Seller
+                 </v-btn>
+              </v-row>
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+</v-dialog>
 
-        <!-- Content Section -->
-        <v-card-text>
-          <v-row>
-            <!-- Post Image -->
-            <v-col cols="12" md="6" class="d-flex justify-center">
-              <v-img
-                :src="selectedPost?.image"
-                class="post-detail-image"
-                cover
-                height="300px"
-              />
-            </v-col>
-
-            <!-- Post Details -->
-            <v-col cols="12" md="6">
-              <div class="post-description">
-                <h3>Description</h3>
-                <p>{{ selectedPost?.description }}</p>
-              </div>
-              <div class="post-price">
-                <h3>Price</h3>
-                <p>P{{ selectedPost?.price }}</p>
-              </div>
-            </v-col>
-          </v-row>
-        </v-card-text>
-
-        <!-- Footer Section -->
-        <v-card-actions class="post-detail-footer">
-          <v-btn block @click="isDialogOpen = false" color="primary" outlined>
-            Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
@@ -209,7 +210,7 @@ const viewPostDetails = (post) => {
 
 /* Discover Section */
 .discover-title {
-  font-size: 2rem;
+  font-size: 1.50rem;
   color: rgb(239, 119, 28);
   font-weight: bold;
 }
@@ -220,87 +221,7 @@ const viewPostDetails = (post) => {
   margin-bottom: 30px;
 }
 
-/* Modal Card */
-.post-detail-card {
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* Header Styles */
-.post-detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fa48a1;
-  padding: 16px;
-}
-
-.post-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0;
-  color: #ffffff; /* Updated to a rich lavender */
-}
-
-.post-seller {
-  font-size: 0.875rem;
-  color: #1f1b1b;
-  margin-top: 4px;
-}
-
-.close-btn {
-  transition: transform 0.2s ease;
-}
-
-.close-btn:hover {
-  color: #ff44d0;
-  transform: scale(1.2);
-}
-
-/* Image Styles */
-.post-detail-image {
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Description and Price */
-.post-description h3 {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 8px;
-  color: rgb(0, 0, 0); /* Updated to soft lavender */
-}
-
-.post-description p,
-.post-price p {
-  font-size: 1rem;
-  color: #353535;
-  margin: 0;
-}
-
-/* Footer Styles */
-.post-detail-footer {
-  padding: 16px;
-  background-color: #f5f5f5;
-}
-
-.post-detail-footer .v-btn {
-  font-weight: bold;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.post-detail-footer .v-btn:hover {
-  background-color: #c9c3c3;
-  color: white;
-}
-
 /* Post Section */
-.post-section {
-  margin-top: 40px;
-}
-
 .post-card {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -329,42 +250,87 @@ const viewPostDetails = (post) => {
   margin-bottom: 10px;
 }
 
-.heart-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: white;
-  border-radius: 50%;
+/* Modal Styles */
+.post-detail-card {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+  padding: 20px;
 }
 
-.saved {
-  color: #ff5252;
+.post-detail-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: #fab9d9;
+  padding: 16px;
 }
 
-.product-name {
-  color: #ffffff; /* Matches the modal title for consistency */
+.post-title {
+  font-size: 1.50rem;
+  font-weight: bolder;
+  color: rgb(239, 119, 28);
+}
+
+.post-seller {
+  font-size: 0.8rem;
+  color: rgb(46, 45, 46);
+  margin-bottom: 10px;
+}
+
+.post-description h3 {
+  font-size: 1rem;
   font-weight: bold;
+  color: rgb(0, 0, 0);
+}
+
+.post-description p {
+  font-size: 0.9rem;
+  font-weight: normal; /* Non-bold text for the product description */
+  color: #353535;
+}
+
+.post-price h3 {
   font-size: 1rem;
+  font-weight: bold; /* Bold label for price */
+  color: rgb(0, 0, 0);
 }
 
-.product-seller {
-  color: rgb(24, 24, 24);
-  font-size: 0.875rem;
+.post-price p {
+  font-size: 0.9rem;
+  font-weight: bolder; /* Non-bold text for the price value */
+  color: #353535;
 }
 
-.product-price {
-  color: rgb(33, 32, 32);
-  font-size: 1.25rem;
+/* Ensure buttons are positioned properly */
+.button-row {
+  margin-top: 20px;
+  gap: 10px;
 }
 
-.product-description {
-  margin-top: 10px;
-  color: rgb(218, 43, 43);
-  font-size: 1rem;
+/* Buttons */
+.custom-button {
+  background-color: #d3d3d3;
+  color: #000;
+  transition: background-color 0.3s ease;
 }
 
-.v-btn {
-  text-transform: none;
+.custom-button:hover {
+  background-color: #ffc0cb;
+}
+
+/* Post Image Styling */
+.post-detail-image {
+  border-radius: 8px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 600px) {
+  .button-row {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 </style>
+
 
