@@ -23,20 +23,23 @@ const themeStore = useThemeStore(); // Access the theme store
 // Get saved products from the store
 const savedProducts = savedProductsStore.savedProducts;
 
-// Access the Pinia store
-const authUser = useAuthUserStore(); // Initialize the store
-onMounted(async () => {
+  // Access the Pinia store
+  const authUser = useAuthUserStore(); // Initialize the store
+  onMounted(async () => {
   console.log("Before fetching profile:", userProfile.value);
 
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
-    console.error("No active session found. Redirecting to login...");
-    router.push("/login");
-    return;
-  }
-
   try {
+    // Fetch user data from auth
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      console.error("No active session found. Redirecting to login...");
+      router.push("/login");
+      return;
+    }
+
     const userId = user.id;
+
+    // Fetch profile data
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("first_name, last_name, profile_image, bio, preferred_location, preferred_time")
@@ -53,23 +56,42 @@ onMounted(async () => {
         .createSignedUrl(profileData.profile_image, 60 * 60); // 1-hour expiration
 
       if (signedUrlError) {
-        console.error("Error fetching signed URL:", signedUrlError.message);
+        console.error("Error fetching signed URL for profile image:", signedUrlError.message);
       } else {
-        profileData.profile_image = signedUrlData.signedUrl; // Update the profile image with the signed URL
+        profileData.profile_image = signedUrlData.signedUrl; // Update with signed URL
       }
     }
 
     userProfile.value = profileData || getDefaultProfile();
-
+    // Fetch only posts belonging to the logged-in user (filtered by user_id)
     const { data: postData, error: postError } = await supabase
       .from("posts")
-      .select("*")
-      .eq("user_id", userId);
+      .select("id, item_name, price, description, location, time, type, image, is_sold")
+      .eq("user_id", userId) // Ensure we fetch posts for the logged-in user only
+      .eq("is_sold", false); // If you want to fetch only unsold items
 
     if (postError) throw new Error(postError.message);
-    posts.value = postData;
-  } catch (error) {
-    console.error("Error:", error.message);
+
+    // Process posts and fetch signed URLs for each post image
+    posts.value = await Promise.all(postData.map(async (post) => {
+      if (post.image) {
+        // Construct the path for the post image
+        const { data: signedUrlData, error: signedUrlError } = await supabase
+          .storage
+          .from('post-images') // your bucket name
+          .createSignedUrl(post.image, 60 * 60); // 1-hour expiration for signed URL
+
+        if (signedUrlError) {
+          console.error('Error fetching signed URL for post image:', signedUrlError.message);
+        } else {
+          post.image = signedUrlData.signedUrl; // Update the post image with the signed URL
+        }
+      }
+      return post;
+    }));
+
+  } catch (err) {
+    console.error("Unexpected error:", err);
   }
 });
 
@@ -103,11 +125,32 @@ const newPost = ref({
   time: "",
   image: null,
 });
-
 const submitPost = async () => {
   try {
     const userId = authUser.userData.id; // Get userId from the store
-    const { error } = await supabase.from("posts").insert([ 
+
+    // Check if an image is selected and ensure it's a valid File object
+    if (newPost.value.image && newPost.value.image instanceof File) {
+      const userFolder = `user_${userId}`; // Folder name for the user
+      const filePath = `${userFolder}/${newPost.value.image.name}`; // Path inside the user’s folder
+
+      // Upload the image to Supabase Storage
+      const { data, error: uploadError } = await supabase
+        .storage
+        .from('post-images')
+        .upload(filePath, newPost.value.image);
+
+      if (uploadError) throw new Error(uploadError.message);
+
+      // Once the image is uploaded, update the post's image field with the file path
+      newPost.value.image = filePath; // Only set the file path here after successful upload
+    } else {
+      // Handle the case where no image is selected or file is invalid
+      newPost.value.image = null; // Optionally set a default image or leave it null
+    }
+
+    // Insert the new post into the posts table
+    const { error } = await supabase.from('posts').insert([
       {
         ...newPost.value,
         user_id: userId, // Ensure user_id is linked to the post
@@ -119,9 +162,9 @@ const submitPost = async () => {
     // Close form and refresh posts
     togglePostForm();
     posts.value = await refreshPosts();
-    console.log("Post created successfully!");
+    console.log('Post created successfully!');
   } catch (error) {
-    console.error("Error submitting post:", error.message);
+    console.error('Error submitting post:', error.message);
   }
 };
 
@@ -213,28 +256,30 @@ const logout = async () => {
           <div v-if="activeTab === 'posts'">
             <!-- Posts Grid -->
             <v-row>
-              <v-col v-for="post in posts" :key="post.post_id" cols="12" md="4">
-                <v-card :class="{ 'sold-overlay': post.is_sold }">
-                  <v-img :src="post.image" aspect-ratio="1.5"></v-img>
-                  <v-card-title>{{ post.item_name }}</v-card-title>
-                  <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
-                  <v-card-text>
-                    <p>{{ post.description }}</p>
-                    <p><strong>Type:</strong> {{ post.type }}</p>
-                    <p v-if="post.is_sold" class="text-danger">Sold Out</p>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn
-                      v-if="!post.is_sold"
-                      @click="markAsSold(post.post_id)"
-                      color="green"
-                    >
-                      Mark as Sold
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-            </v-row>
+  <v-col v-for="post in posts" :key="post.post_id" cols="12" md="4">
+    <v-card :class="{ 'sold-overlay': post.is_sold }">
+      <!-- Ensure the src is the updated public URL of the image -->
+      <v-img :src="post.image" aspect-ratio="1.5"></v-img>
+      <v-card-title>{{ post.item_name }}</v-card-title>
+      <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
+      <v-card-text>
+        <p>{{ post.description }}</p>
+        <p><strong>Type:</strong> {{ post.type }}</p>
+        <p v-if="post.is_sold" class="text-danger">Sold Out</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn
+          v-if="!post.is_sold"
+          @click="markAsSold(post.post_id)"
+          color="green"
+        >
+          Mark as Sold
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-col>
+</v-row>
+
           </div>
 
           <div v-else-if="activeTab === 'saved'">
@@ -256,47 +301,48 @@ const logout = async () => {
 
       <!-- Post Form (Floating Form) -->
       <v-dialog v-model="showPostForm" max-width="500px" persistent>
-        <v-card>
-          <v-card-title>
-            Create New Post
-            <v-btn icon @click="togglePostForm" class="ml-auto">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text>
-            <v-form @submit.prevent="submitPost">
-              <v-text-field
-                v-model="newPost.item_name"
-                label="Item Name"
-                required
-              ></v-text-field>
-              <v-textarea
-                v-model="newPost.description"
-                label="Description"
-                required
-              ></v-textarea>
-              <v-text-field
-                v-model="newPost.price"
-                label="Price"
-                type="number"
-                required
-              ></v-text-field>
-              <v-select
-                v-model="newPost.type"
-                :items="['For Sale', 'For Trade']"
-                label="Type"
-                required
-              ></v-select>
-              <v-file-input
-                v-model="newPost.image"
-                label="Product Image"
-                required
-              ></v-file-input>
-              <v-btn type="submit" color="green">Post</v-btn>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
+  <v-card>
+    <v-card-title>
+      Create New Post
+      <v-btn icon @click="togglePostForm" class="ml-auto">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-card-title>
+    <v-card-text>
+      <v-form @submit.prevent="submitPost">
+        <v-text-field
+          v-model="newPost.item_name"
+          label="Item Name"
+          required
+        ></v-text-field>
+        <v-textarea
+          v-model="newPost.description"
+          label="Description"
+          required
+        ></v-textarea>
+        <v-text-field
+          v-model="newPost.price"
+          label="Price"
+          type="number"
+          required
+        ></v-text-field>
+        <v-select
+          v-model="newPost.type"
+          :items="['For Sale', 'For Trade']"
+          label="Type"
+          required
+        ></v-select>
+        <v-file-input
+          v-model="newPost.image"
+          label="Product Image"
+          accept="image/*"
+          required
+        ></v-file-input>
+        <v-btn type="submit" color="green">Post</v-btn>
+      </v-form>
+    </v-card-text>
+  </v-card>
+</v-dialog>
     </v-app>
   </v-responsive>
 </template>
