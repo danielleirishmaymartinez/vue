@@ -62,11 +62,15 @@ const logout = async () => {
 };
 </script>
 
-
 <template>
   <v-app-bar dark>
     <v-container class="d-flex align-center">
-      <img src="/images/logo.png" alt="Logo" class="me-2" style="width: 40px; height: 40px;" />
+      <img
+        src="/images/logo.png"
+        alt="Logo"
+        class="me-2"
+        style="width: 40px; height: 40px;"
+      />
       <span class="text-h6">STASH</span>
     </v-container>
 
@@ -92,39 +96,52 @@ const logout = async () => {
       @click="themeStore.toggleTheme"
       variant="elevated"
       class="me-3"
-    >
-      
-    </v-btn>
+    ></v-btn>
 
     <!-- User Menu -->
     <v-menu offset-y :close-on-content-click="false" class="mdi-account-dropdown">
       <template #activator="{ props }">
-        <v-btn v-bind="props" icon>
+        <v-btn v-bind="props" icon class="avatar-btn">
           <v-avatar size="40" class="avatar-img">
             <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Account Icon" />
+            <v-icon class="chevron-icon" size="18">mdi-chevron-down</v-icon>
           </v-avatar>
         </v-btn>
       </template>
-      <v-sheet rounded elevation="2" width="300" class="pa-4 d-flex flex-column align-start">
-        <div
-          class="d-flex align-center clickable-profile mb-3"
+
+      <v-sheet
+        rounded="lg"
+        elevation="2"
+        width="300"
+        class="pa-4 d-flex flex-column align-start custom-rounded-sheet"
+      >
+        <v-card
+          elevation="2"
+          class="profile-card d-flex align-center pa-3 ml-4 my-4"
           @click="goToProfile"
         >
-          <v-avatar size="40" class="avatar-img">
-            <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Profile Picture" />
+          <v-avatar size="50" class="avatar-img">
+            <img
+              :src="userProfile.profile_image || '/default-avatar.jpg'"
+              alt="Profile Picture"
+            />
           </v-avatar>
-          <span class="ms-3 text-subtitle-1">
+          <span class="ms-3 text-subtitle-1 underlined-name">
             {{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}
           </span>
-        </div>
+        </v-card>
+
         <v-divider></v-divider>
+
         <v-btn
           variant="text"
           color="error"
-          class="mt-2 full-width-btn align-start"
-          prepend-icon="mdi-logout"
+          class="mt-2 full-width-btn align-start custom-btn my-2"
           @click="logout"
         >
+          <div class="icon-circle">
+            <v-icon>mdi-logout</v-icon>
+          </div>
           Logout
         </v-btn>
       </v-sheet>
@@ -132,9 +149,7 @@ const logout = async () => {
   </v-app-bar>
 </template>
 
-
 <style scoped>
-
 .dark-mode {
   background-color: #121212;
   color: #ffffff;
@@ -146,37 +161,98 @@ const logout = async () => {
 }
 
 .avatar-img img {
-  object-fit: cover; /* Ensure the image fits nicely */
-  width: 100%; /* Full width of the avatar container */
-  height: 100%; /* Full height of the avatar container */
-  border-radius: 50%; /* Keep it round */
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.avatar-img {
+  position: relative;
+}
+
+.chevron-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 50%;
+  padding: 2px;
+  color: black;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .clickable-profile {
-  cursor: pointer; /* Change the cursor to a hand when hovering */
-  transition: background-color 0.3s ease; /* Smooth transition */
-  padding: 8px; /* Add some padding for better clickable area */
-  width: 100%; /* Make it stretch to full width of the dropdown */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 8px;
+  width: 100%;
 }
 
 .clickable-profile:hover {
-  background-color: #f0f0f0; /* Light grey background on hover */
+  background-color: #ebe2e2;
 }
 
-/* Stretch the buttons to the full width of the dropdown */
+.profile-card {
+  cursor: pointer;
+  border-radius: 15px;
+  transition: box-shadow 0.3s ease-in-out;
+  padding: 16px;
+}
+
+.profile-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.underlined-name {
+  position: relative;
+  font-weight: bold;
+}
+
+.underlined-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  width: 100%;
+  height: 2px;
+  background-color: #746667;
+}
+
 .full-width-btn {
-  width: 100%; /* Make buttons span the full width of the dropdown */
-  transition: background-color 0.3s ease; /* Smooth background color transition */
+  width: 100%;
+  transition: background-color 0.3s ease;
 }
 
-/* Buttons background change on hover */
-.full-width-btn:hover {
-  background-color: #f0f0f0; /* Subtle grey background on hover */
-}
-
-/* Align buttons to the left */
 .align-start {
-  justify-content: flex-start; /* Align buttons to the left */
-  text-align: left; /* Text alignment to the left */
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.icon-circle v-icon {
+  color: #a70212;
+  font-size: 24px;
+}
+
+.custom-btn {
+  display: flex;
+  align-items: center;
+  text-transform: none;
+  font-weight: bold;
+}
+
+.custom-btn:hover .icon-circle {
+  background-color: #dc3545;
+  color: white;
 }
 </style>
