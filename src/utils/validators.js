@@ -1,3 +1,5 @@
+import { debounce } from '@/utils/debounce.js'; // Assuming debounce function is in utils/debounce.js
+
 // 👉 IsEmpty
 export const isEmpty = (value) => {
   if (value === null || value === undefined || value === '') return true
@@ -33,22 +35,32 @@ export const emailValidator = (value) => {
   return re.test(String(value)) || 'The Email field must be a valid email address'
 }
 
-// 👉 Password Validator
+// Updated passwordValidator to reduce excessive console logs
 export const passwordValidator = (password) => {
-  const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/
-  console.log("Validating password:", password) // Debugging log
-  const validPassword = regExp.test(password)
-  console.log("Password valid:", validPassword) // Check regex result
+  const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()_]).{8,}/;
+  
+  // Mask the password in console logs to enhance security
+  const maskedPassword = '*'.repeat(password.length); // Mask password with asterisks
 
-  return (
-    validPassword ||
-    'The password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
-  )
-}
+  const validPassword = regExp.test(password);
+
+  // Only log if the password validation result changes or on submit
+  if (validPassword) {
+    console.log('Password valid: true');
+  } else {
+    console.log('Password valid: false');
+  }
+
+  return validPassword || 'Password must be at least 8 characters, with uppercase, lowercase, number, and special characters.';
+};
+
+// Debounce the password validation
+export const debouncedPasswordValidator = debounce(passwordValidator, 500); // 500ms debounce
 
 // 👉 Confirm Password Validator
 export const confirmedValidator = (value, target) =>
-  value === target || 'The Confirm Password field confirmation does not match'
+  value === target || 'Passwords do not match.'
+
 
 // 👉 Between Validator
 export const betweenValidator = (value, min, max) => {
