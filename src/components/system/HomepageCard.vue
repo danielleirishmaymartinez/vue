@@ -89,16 +89,24 @@ const contactSeller = () => {
 <template>
   <v-container>
     <!-- Carousel -->
-    <v-carousel class="carousel-container" hide-delimiters height="400">
-      <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
-        <v-img :src="item.image" cover>
-          <v-container class="carousel-content">
-            <h1 class="carousel-title">{{ item.title }}</h1>
-            <h3 class="carousel-subtitle">{{ item.subtitle }}</h3>
-          </v-container>
-        </v-img>
-      </v-carousel-item>
-    </v-carousel>
+    <v-carousel
+  height="400"
+  show-arrows="hover"
+  cycle
+  hide-delimiter-background
+>
+  <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
+    <v-img :src="item.image" cover height="100%">
+      <div class="d-flex fill-height justify-center align-center">
+        <div class="carousel-content">
+          <h1 class="carousel-title">{{ item.title }}</h1>
+          <h3 class="carousel-subtitle">{{ item.subtitle }}</h3>
+        </div>
+      </div>
+    </v-img>
+  </v-carousel-item>
+</v-carousel>
+
 
     <!-- Discover Section -->
     <div class="text-center mt-5">
@@ -195,7 +203,7 @@ const contactSeller = () => {
 }
 
 .carousel-content {
-  color: rgb(188, 223, 218);
+  color: rgb(255, 255, 255);
   text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
 }
 
