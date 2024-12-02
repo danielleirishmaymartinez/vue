@@ -205,15 +205,21 @@ const contactSeller = () => {
 .carousel-content {
   color: rgb(255, 255, 255);
   text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+  position: absolute; /* Positioning relative to the parent */
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust position to be truly centered */
+  text-align: center; /* Ensures the text is centered */
 }
 
 .carousel-title {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: bolder;
 }
 
 .carousel-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 /* Discover Section */
