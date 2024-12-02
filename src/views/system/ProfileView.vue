@@ -63,12 +63,12 @@ const savedProducts = savedProductsStore.savedProducts;
     }
 
     userProfile.value = profileData || getDefaultProfile();
+    
     // Fetch only posts belonging to the logged-in user (filtered by user_id)
     const { data: postData, error: postError } = await supabase
       .from("posts")
       .select("id, item_name, price, description, location, time, type, image, is_sold")
-      .eq("user_id", userId) // Ensure we fetch posts for the logged-in user only
-      .eq("is_sold", false); // If you want to fetch only unsold items
+      .eq("user_id", userId); // Ensure we fetch posts for the logged-in user only
 
     if (postError) throw new Error(postError.message);
 
@@ -89,6 +89,13 @@ const savedProducts = savedProductsStore.savedProducts;
       }
       return post;
     }));
+
+    // Sort posts with sold ones at the bottom
+    posts.value = posts.value.sort((a, b) => {
+      if (a.is_sold && !b.is_sold) return 1;  // Sold posts go to the bottom
+      if (!a.is_sold && b.is_sold) return -1; // Unsold posts go to the top
+      return 0; // No change for posts with the same `is_sold` status
+    });
 
   } catch (err) {
     console.error("Unexpected error:", err);
@@ -125,6 +132,7 @@ const newPost = ref({
   time: "",
   image: null,
 });
+
 const submitPost = async () => {
   try {
     const userId = authUser.userData.id; // Get userId from the store
@@ -143,21 +151,30 @@ const submitPost = async () => {
       if (uploadError) throw new Error(uploadError.message);
 
       // Once the image is uploaded, update the post's image field with the file path
-      newPost.value.image = filePath; // Only set the file path here after successful upload
+      newPost.value.image = filePath; // Update with the file path after successful upload
     } else {
       // Handle the case where no image is selected or file is invalid
       newPost.value.image = null; // Optionally set a default image or leave it null
     }
 
     // Insert the new post into the posts table
-    const { error } = await supabase.from('posts').insert([
-      {
-        ...newPost.value,
-        user_id: userId, // Ensure user_id is linked to the post
-      },
-    ]);
+    const { error } = await supabase.from('posts').insert([{
+      ...newPost.value,
+      user_id: userId, // Ensure user_id is linked to the post
+    }]);
 
     if (error) throw new Error(error.message);
+
+    // Reset the form after successful submission
+    newPost.value = {
+      item_name: "",
+      description: "",
+      price: "",
+      type: "",
+      location: "",
+      time: "",
+      image: null,
+    };
 
     // Close form and refresh posts
     togglePostForm();
@@ -168,15 +185,141 @@ const submitPost = async () => {
   }
 };
 
-// Refresh user posts
-const refreshPosts = async () => {
-  const userId = authUser.userData.id; // Get userId from the store
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("user_id", userId); // Refresh posts for current user
+const showEditModal = ref(false);  // Modal visibility
+const editedPost = ref({
+  id: null,
+  item_name: '',
+  description: '',
+  price: '',
+  type: '',
+  image: null
+});
+const deletePost = async (postId, imagePath) => {
+  try {
+    // Delete the post from the database
+    const { error: deletePostError } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', postId);
 
-  if (error) throw new Error(error.message);
+    if (deletePostError) throw new Error(deletePostError.message);
+
+    // Now delete the image from Supabase Storage
+    if (imagePath) {
+      const { error: deleteImageError } = await supabase
+        .storage
+        .from('post-images')
+        .remove([imagePath]);
+
+      if (deleteImageError) throw new Error(deleteImageError.message);
+    }
+
+    console.log("Post and image deleted successfully!");
+    // Refresh the posts after deletion
+    posts.value = await refreshPosts();
+  } catch (error) {
+    console.error('Error deleting post:', error.message);
+  }
+};
+
+const editPost = (post) => {
+  // Pre-fill the modal with post data
+  editedPost.value = { ...post };
+  showEditModal.value = true;
+};
+
+const submitEditPost = async () => {
+  try {
+    // Handle image upload if it's a new image
+    if (editedPost.value.image instanceof File) {
+      const userId = authUser.userData.id;
+      const filePath = `user_${userId}/${editedPost.value.image.name}`;
+      const { data, error: uploadError } = await supabase
+        .storage
+        .from('post-images')
+        .upload(filePath, editedPost.value.image);
+
+      if (uploadError) throw new Error(uploadError.message);
+      editedPost.value.image = filePath;
+    }
+
+    // Update the post in the database
+    const { error: updateError } = await supabase
+      .from('posts')
+      .update({
+        item_name: editedPost.value.item_name,
+        description: editedPost.value.description,
+        price: editedPost.value.price,
+        type: editedPost.value.type,
+        image: editedPost.value.image,
+      })
+      .eq('id', editedPost.value.id);
+
+    if (updateError) throw new Error(updateError.message);
+
+    // Close the modal and refresh the posts list
+    showEditModal.value = false;
+    posts.value = await refreshPosts();
+    console.log('Post edited successfully!');
+  } catch (error) {
+    console.error('Error editing post:', error.message);
+  }
+};
+const markAsSold = async (postId) => {
+  try {
+    // Fetch the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No active user session found.");
+      return;
+    }
+
+    const userId = user.id;
+
+    // Mark the post as sold in the database
+    const { data: updatedPost, error: updateError } = await supabase
+      .from('posts')
+      .update({ is_sold: true })
+      .eq('id', postId)
+      .eq('user_id', userId) // Ensure the user is the owner of the post
+      .single();
+
+    if (updateError) {
+      console.error("Error marking post as sold:", updateError.message);
+      return;
+    }
+
+    // Update the local posts list
+    posts.value = posts.value.map(post => 
+      post.id === postId ? { ...post, is_sold: true } : post
+    );
+
+    // Re-sort the posts after marking as sold
+    posts.value = posts.value.sort((a, b) => {
+      if (a.is_sold && !b.is_sold) return 1;  // Sold posts go to the bottom
+      if (!a.is_sold && b.is_sold) return -1; // Unsold posts go to the top
+      return 0; // No change for posts with the same `is_sold` status
+    });
+
+    console.log("Post marked as sold:", updatedPost);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+  }
+};
+
+
+// Fetch posts from the database, sorting by 'is_sold' so sold items are at the bottom
+const refreshPosts = async () => {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('user_id', authUser.userData.id)  // Assuming you're fetching posts for the logged-in user
+    .order('is_sold', { ascending: true });  // Sold posts appear last
+
+  if (error) {
+    console.error('Error refreshing posts:', error.message);
+  }
   return data;
 };
 
@@ -252,35 +395,73 @@ const logout = async () => {
             <v-tab value="saved" prepend-icon="mdi-bookmark">Saved</v-tab>
           </v-tabs>
 
-          <!-- Tab Content -->
           <div v-if="activeTab === 'posts'">
-            <!-- Posts Grid -->
-            <v-row>
-  <v-col v-for="post in posts" :key="post.post_id" cols="12" md="4">
-    <v-card :class="{ 'sold-overlay': post.is_sold }">
-      <!-- Ensure the src is the updated public URL of the image -->
-      <v-img :src="post.image" aspect-ratio="1.5"></v-img>
-      <v-card-title>{{ post.item_name }}</v-card-title>
-      <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
+  <v-row>
+    <v-col v-for="post in posts" :key="post.post_id" cols="12" md="4">
+  <v-card :class="{ 'sold-overlay': post.is_sold }">
+    <v-img :src="post.image" aspect-ratio="1.5"></v-img>
+    <v-card-title>{{ post.item_name }}</v-card-title>
+    <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
+    <v-card-text>
+      <p>{{ post.description }}</p>
+      <p><strong>Type:</strong> {{ post.type }}</p>
+      <p v-if="post.is_sold" class="text-danger">Sold Out</p>
+    </v-card-text>
+
+    <v-card-actions>
+      <!-- Options Menu for Edit/Delete -->
+      <v-menu v-if="!post.is_sold" offset-y transition="slide-y-reverse-transition" bottom>
+        <template #activator="{ props }">
+          <v-btn icon v-bind="props">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="editPost(post)">
+            <v-list-item-title>Edit</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="deletePost(post.id, post.image)">
+            <v-list-item-title>Delete</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+      <v-btn v-if="!post.is_sold" @click="markAsSold(post.id)" color="green">
+  Mark as Sold
+</v-btn>
+
+    </v-card-actions>
+  </v-card>
+
+  <!-- Sold Overlay -->
+  <v-overlay v-if="post.is_sold" absolute z-index="1" class="sold-overlay">
+    <v-row justify="center" align="center" class="sold-text">
+      SOLD
+    </v-row>
+  </v-overlay>
+</v-col>
+
+  </v-row>
+
+  <!-- Edit Post Modal -->
+  <v-dialog v-model="showEditModal" persistent max-width="600px">
+    <v-card>
+      <v-card-title>Edit Post</v-card-title>
       <v-card-text>
-        <p>{{ post.description }}</p>
-        <p><strong>Type:</strong> {{ post.type }}</p>
-        <p v-if="post.is_sold" class="text-danger">Sold Out</p>
+        <v-text-field v-model="editedPost.item_name" label="Item Name"></v-text-field>
+        <v-textarea v-model="editedPost.description" label="Description"></v-textarea>
+        <v-text-field v-model="editedPost.price" label="Price" type="number"></v-text-field>
+        <v-text-field v-model="editedPost.type" label="Type"></v-text-field>
+        <v-file-input v-model="editedPost.image" label="Upload Image" accept="image/*"></v-file-input>
       </v-card-text>
       <v-card-actions>
-        <v-btn
-          v-if="!post.is_sold"
-          @click="markAsSold(post.post_id)"
-          color="green"
-        >
-          Mark as Sold
-        </v-btn>
+        <v-btn @click="showEditModal = false" color="red">Cancel</v-btn>
+        <v-btn @click="submitEditPost" color="green">Save Changes</v-btn>
       </v-card-actions>
     </v-card>
-  </v-col>
-</v-row>
+  </v-dialog>
+</div>
 
-          </div>
 
           <div v-else-if="activeTab === 'saved'">
             <v-row>
@@ -362,10 +543,24 @@ const logout = async () => {
   text-transform: uppercase;
 }
 .sold-overlay {
-  background: rgba(255, 255, 255, 0.607);
   position: relative;
-  z-index: 1;
 }
+
+.sold-text {
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .profile-avatar img {
   object-fit: cover; /* This ensures the image is properly cropped to fill the space without stretching */
   width: 100%;       /* Make the image fill the container */
