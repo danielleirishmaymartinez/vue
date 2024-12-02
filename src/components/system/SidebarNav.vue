@@ -10,11 +10,10 @@ const drawer = ref(!mobile.value);
 const themeStore = useThemeStore(); // Access the theme store
 
 // Define reactive data
-const open = ref(['Account Settings']);
 const admins = ref([
-  ['Profile Picture', 'mdi-account'],
-  ['Profile Info', 'mdi-account-edit'],
-  ['Change Password', 'mdi-shield'],
+  { title: 'Profile Picture', icon: 'mdi-account', path: '/picture' },
+  { title: 'Profile Info', icon: 'mdi-account-edit', path: '/profile-info' },
+  { title: 'Change Password', icon: 'mdi-shield', path: '/password' },
 ]);
 
 // Function to navigate to different routes
@@ -24,7 +23,6 @@ function navigateTo(path) {
 </script>
 
 <template>
-
   <v-navigation-drawer
     v-model="drawer"
     :permanent="!mobile"
@@ -35,7 +33,7 @@ function navigateTo(path) {
     :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
     class="border border-e-lg"
   > 
-      <v-container class="d-flex align-center">
+    <v-container class="d-flex align-center">
       <img
         src="/images/logo.png"
         alt="Logo"
@@ -57,6 +55,7 @@ function navigateTo(path) {
           <v-icon class="icon-circle">mdi-home</v-icon>
         </template>
       </v-list-item>
+
       <v-list-item
         prepend-icon="mdi-account"
         title="Profile"
@@ -69,7 +68,7 @@ function navigateTo(path) {
         </template>
       </v-list-item>
 
-      <v-list-group value="Account Settings">
+      <v-list-group>
         <template v-slot:activator="{ props }">
           <v-list-item
             v-bind="props"
@@ -78,13 +77,13 @@ function navigateTo(path) {
           ></v-list-item>
         </template>
 
-          <v-list-item
-            v-for="([title, icon], i) in admins"
-            :key="i"
-            :prepend-icon="icon"
-            :title="title"
-            :value="title"
-          ></v-list-item>
+        <v-list-item
+          v-for="admin in admins"
+          :key="admin.title"
+          :prepend-icon="admin.icon"
+          :title="admin.title"
+          @click="navigateTo(admin.path)"
+        ></v-list-item>
       </v-list-group>
     </v-list>
   </v-navigation-drawer>
@@ -106,8 +105,6 @@ function navigateTo(path) {
   background-size: contain;
   background-position: center;
 }
-
-
 
 .v-list-item {
   transition: all 0.3s ease;
