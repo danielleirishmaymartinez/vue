@@ -89,16 +89,21 @@ const contactSeller = () => {
 <template>
   <v-container>
     <!-- Carousel -->
-    <v-carousel class="carousel-container" hide-delimiters height="400">
-      <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
-        <v-img :src="item.image" cover>
-          <v-container class="carousel-content">
-            <h1 class="carousel-title">{{ item.title }}</h1>
-            <h3 class="carousel-subtitle">{{ item.subtitle }}</h3>
-          </v-container>
-        </v-img>
-      </v-carousel-item>
-    </v-carousel>
+<v-carousel 
+  class="carousel-container rounded-carousel"
+  hide-delimiters 
+  height="400"
+>
+  <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
+    <v-img :src="item.image" cover>
+      <v-container class="carousel-content">
+        <h1 class="carousel-title">{{ item.title }}</h1>
+        <h3 class="carousel-subtitle">{{ item.subtitle }}</h3>
+      </v-container>
+    </v-img>
+  </v-carousel-item>
+</v-carousel>
+
 
     <!-- Discover Section -->
     <div class="text-center mt-5">
@@ -190,6 +195,13 @@ const contactSeller = () => {
 
 <style scoped>
 /* Carousel Styles */
+
+.rounded-carousel {
+  border: 5px solid #000; /* Thick border */
+  border-radius: 20px; /* Rounded corners */
+  overflow: hidden; /* Ensure content doesn't overflow rounded edges */
+}
+
 .carousel-container {
   margin-bottom: 40px;
 }

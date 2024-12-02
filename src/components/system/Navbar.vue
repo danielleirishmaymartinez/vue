@@ -63,16 +63,10 @@ const logout = async () => {
 </script>
 
 <template>
+<v-container>
   <v-app-bar dark>
-    <v-container class="d-flex align-center">
-      <img
-        src="/images/logo.png"
-        alt="Logo"
-        class="me-2"
-        style="width: 40px; height: 40px;"
-      />
-      <span class="text-h6">STASH</span>
-    </v-container>
+    
+
 
     <v-spacer></v-spacer>
 
@@ -147,6 +141,7 @@ const logout = async () => {
       </v-sheet>
     </v-menu>
   </v-app-bar>
+  </v-container>
 </template>
 
 <style scoped>
