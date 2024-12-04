@@ -30,15 +30,32 @@ onMounted(async () => {
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select('id, item_name, price, description, location, time, type, image, is_sold')
-      .eq('is_sold', false);
+      .select('id, item_name, price, description, location, time, type, image, is_sold, user_id'); // Fetching user_id
 
     if (error) {
       console.error('Error fetching posts:', error);
       return;
     }
 
+    // Loop through each post to fetch the user's fb_link and image
     for (const post of data) {
+      // Fetch Facebook link using user_id from profiles table
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('fb_link, first_name, last_name, preferred_location, preferred_time, profile_image')
+        .eq('user_id', post.user_id)
+        .single(); // Assuming one profile per user_id
+
+      if (!userError && userData) {
+        post.fb_link = userData.fb_link; // Add fb_link to post object
+        post.first_name = userData.first_name;
+        post.last_name = userData.last_name;
+        post.preferred_location = userData.preferred_location;
+        post.preferred_time = userData.preferred_time;
+        post.profile_image = userData.profile_image;
+      }
+
+      // Fetch signed URL for post image from storage
       if (post.image) {
         const { data: signedUrlData, error: signedUrlError } = await supabase
           .storage
@@ -56,9 +73,48 @@ onMounted(async () => {
   }
 });
 
-const toggleSave = (post) => {
-  const saved = savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
-  saved ? savedProductsStore.removeProduct(post.item_name) : savedProductsStore.addProduct(post);
+const toggleSave = async (post) => {
+  try {
+    const isPostSaved = savedProductsStore.savedProducts.some(
+      (p) => p.item_name === post.item_name  // This stays the same
+    );
+
+    console.log('Is post already saved?', isPostSaved);
+
+    if (isPostSaved) {
+      // Unsave the post
+      const { error } = await supabase
+        .from('saved_posts')
+        .delete()
+        .eq('user_id', post.user_id)
+        .eq('post_id', post.id);
+
+      if (error) {
+        console.error('Error unsaving post:', error);
+        return;
+      }
+
+      // Remove from the store
+      savedProductsStore.removeProduct(post.item_name);  // This stays the same
+      console.log('Post unsaved successfully');
+    } else {
+      // Save the post
+      const { error } = await supabase
+        .from('saved_posts')
+        .insert([{ user_id: post.user_id, post_id: post.id }]);
+
+      if (error) {
+        console.error('Error saving post:', error);
+        return;
+      }
+
+      // Add to the store
+      savedProductsStore.addProduct(post);  // This stays the same
+      console.log('Post saved successfully');
+    }
+  } catch (error) {
+    console.error('Error toggling save:', error);
+  }
 };
 
 const isSaved = (post) =>
@@ -72,17 +128,19 @@ const viewPostDetails = (post) => {
   isDialogOpen.value = true;
 };
 
-const contactSeller = () => {
-  if (selectedPost.value) {
-    alert(`Contacting seller for: ${selectedPost.value.item_name}`);
+// Redirect to Facebook profile
+const redirectToFacebookProfile = (post) => {
+  if (post.fb_link) {
+    window.open(post.fb_link, '_blank');
+  } else {
+    alert('Facebook profile link is not available for this user.');
   }
 };
 </script>
 
-
 <template>
+  <!-- Carousel Section (Unchanged) -->
   <v-container>
-    <!-- Carousel -->
     <v-carousel height="400" show-arrows="hover" cycle hide-delimiter-background>
       <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
         <v-img :src="item.image" cover height="100%">
@@ -96,7 +154,7 @@ const contactSeller = () => {
       </v-carousel-item>
     </v-carousel>
 
-    <!-- Discover Section -->
+    <!-- Discover Section (Unchanged) -->
     <div class="text-center mt-5">
       <h2 class="discover-title">Shop smart, save big!</h2>
       <p class="discover-subtitle">
@@ -141,13 +199,8 @@ const contactSeller = () => {
     </v-container>
 
     <!-- Post Detail Modal -->
-    <v-dialog
-      v-model="isDialogOpen"
-      max-width="800px"
-      transition="dialog-bottom-transition"
-    >
+    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
       <v-card class="post-detail-card">
-        <!-- Header Section -->
         <v-card-title class="post-detail-header">
           <v-btn icon @click="isDialogOpen = false" class="close-btn">
             <v-icon>mdi-close</v-icon>
@@ -162,7 +215,9 @@ const contactSeller = () => {
             </v-col>
             <v-col cols="12" md="6">
               <div class="post-title">{{ selectedPost?.item_name }}</div>
-              <div class="post-seller">by User</div>
+              <div class="post-seller">
+                <strong>Seller:</strong> {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+              </div>
               <div class="post-description">
                 <h3>Description</h3>
                 <p>{{ selectedPost?.description }}</p>
@@ -171,13 +226,17 @@ const contactSeller = () => {
                 <h3>Price</h3>
                 <p>₱{{ selectedPost?.price }}</p>
               </div>
+              <div>
+                <p><strong>Preferred Location:</strong> {{ selectedPost?.preferred_location }}</p>
+                <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
+              </div>
               <v-row justify="start" class="mt-4 button-row">
                 <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
-                  <v-icon left>mdi-bookmark-outline</v-icon>
-                  {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
-                </v-btn>
-                <v-btn class="custom-button mx-2" @click="contactSeller">
-                  <v-icon left>mdi-email-outline</v-icon>
+  <v-icon left>mdi-bookmark-outline</v-icon>
+  {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+</v-btn>
+                <v-btn class="custom-button mx-2" @click="redirectToFacebookProfile(selectedPost)">
+                  <v-icon left>mdi-facebook</v-icon>
                   Contact Seller
                 </v-btn>
               </v-row>
@@ -188,9 +247,6 @@ const contactSeller = () => {
     </v-dialog>
   </v-container>
 </template>
-
-
-
 
 <style scoped>
 /* General Styles */
@@ -324,4 +380,3 @@ const contactSeller = () => {
   background-color: #fecfb6;
 }
 </style>
-

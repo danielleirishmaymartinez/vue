@@ -6,14 +6,14 @@ export const useSavedProductsStore = defineStore('savedProducts', () => {
 
   // Add product to saved list
   const addProduct = (product) => {
-    if (!savedProducts.value.some((p) => p.name === product.name)) {
+    if (!savedProducts.value.some((p) => p.item_name === product.item_name)) {  // changed from name to item_name
       savedProducts.value.push(product);
     }
   };
 
   // Remove product from saved list
   const removeProduct = (productName) => {
-    savedProducts.value = savedProducts.value.filter((p) => p.name !== productName);
+    savedProducts.value = savedProducts.value.filter((p) => p.item_name !== productName);  // changed from name to item_name
   };
 
   return { savedProducts, addProduct, removeProduct };

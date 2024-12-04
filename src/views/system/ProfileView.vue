@@ -16,7 +16,7 @@ const savedProductsStore = useSavedProductsStore(); // Access saved products sto
 const router = useRouter();
 const userProfile = ref({});
 const showPostForm = ref(false);
-const activeTab = ref(0);
+const activeTab = ref('posts');
 const posts = ref([]);
 const themeStore = useThemeStore(); // Access the theme store
 
@@ -473,14 +473,20 @@ const logout = async () => {
         </v-main>
       </v-container>
 
-      <!-- Bottom Navigation with Plus Button -->
-      <v-bottom-navigation app>
-        <v-btn @click="togglePostForm" color="primary">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-bottom-navigation>
+<v-bottom-navigation app>
+  <v-tooltip :location="'top'" :origin="'center'" no-click-animation>
+    <template v-slot:activator="{ props }">
+      <v-btn v-bind="props" @click="togglePostForm" color="primary">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
+    </template>
+    <div>Create a Post</div>
+  </v-tooltip>
+</v-bottom-navigation>
 
-      <!-- Post Form (Floating Form) -->
+
+
+      <!-- Post Form (Floating Form) -->  
       <v-dialog v-model="showPostForm" max-width="500px" persistent>
   <v-card>
     <v-card-title>
