@@ -1,5 +1,4 @@
 <script setup>
-import { requiredValidator } from '@/utils/validators';
 import AlertNotification from '@/components/common/AlertNotification.vue';
 import { formActionDefault } from '@/utils/supabase.js';
 import { useAuthUserStore } from '@/stores/authUser';
@@ -76,7 +75,6 @@ const onFormSubmit = () => {
         <v-text-field
           v-model="formData.firstname"
           label="Firstname"
-          :rules="[requiredValidator]"
         />
       </v-col>
 
@@ -84,7 +82,6 @@ const onFormSubmit = () => {
         <v-text-field
           v-model="formData.lastname"
           label="Lastname"
-          :rules="[requiredValidator]"
         />
       </v-col>
 

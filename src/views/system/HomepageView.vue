@@ -3,7 +3,7 @@ import SidebarNav from '@/components/system/SidebarNav.vue';
 import HomepageCard from '@/components/system/HomepageCard.vue';
 import Navbar from '@/components/system/Navbar.vue';
 import { useDisplay } from 'vuetify';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import supabase from '@/utils/supabase.js';
 import { useRouter } from 'vue-router';
 import { useThemeStore } from '@/stores/theme.js'; // Import the theme store
@@ -12,6 +12,30 @@ const { mobile } = useDisplay();
 const drawerVisible = ref(!mobile.value);
 const router = useRouter();
 const themeStore = useThemeStore(); // Access the theme store
+const profile = ref(null); // Default profile is null
+
+// Fetch user data on mount
+onMounted(async () => {
+  try {
+    const user = supabase.auth.user;
+    if (user) {
+      // Fetch the profile data here, and assign it to the profile ref
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching user data:', error);
+      } else {
+        profile.value = data;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+  }
+});
 
 // Logout function
 async function logout() {
@@ -27,7 +51,6 @@ async function logout() {
 <template>
   <v-responsive class="border rounded">
     <v-app
-    
       :theme="themeStore.theme"
       :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
     >
@@ -42,7 +65,7 @@ async function logout() {
         <!-- Main Content -->
         <v-main class="mt-5 pt-3">
           <!-- Page Content -->
-          <HomepageCard />
+          <HomepageCard :profile="profile" />
         </v-main>
       </v-container>
     </v-app>
@@ -59,6 +82,4 @@ async function logout() {
   background-color: #ffffff;
   color: #000000;
 }
-
-/* Optional: Add styling for buttons or other elements to match the dark/light theme */
 </style>
