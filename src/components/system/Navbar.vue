@@ -64,7 +64,7 @@ const logout = async () => {
 
 <template>
 <v-container>
-  <v-app-bar dark>
+  <v-app-bar color="brown-lighten-2" dark>
     
         <v-container class="d-flex align-center">
       <img
@@ -73,7 +73,9 @@ const logout = async () => {
         class="me-2"
         style="width: 40px; height: 40px;"
       />
-      <span class="text-h6">STASH</span>
+  <a href="/home" class="text-h6" style="text-decoration: none; color: white; ">
+    <span>STASH</span>
+  </a>
     </v-container>
 
     <v-spacer></v-spacer>
@@ -103,6 +105,7 @@ const logout = async () => {
         elevation="2"
         width="300"
         class="pa-4 d-flex flex-column align-start custom-rounded-sheet"
+        color="brown-lighten-4"
       >
       <v-container class="justify-center align-center">
         <v-card
@@ -144,7 +147,7 @@ const logout = async () => {
 <style scoped>
 .dark-mode {
   background-color: #121212;
-  color: #ffffff;
+  color: #e76317;
 }
 
 .light-mode {
@@ -177,7 +180,7 @@ const logout = async () => {
 .clickable-profile {
   cursor: pointer;
   transition: background-color 0.3s ease;
-  padding: 8px;
+
   width: 100%;
 }
 
