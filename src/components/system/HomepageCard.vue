@@ -1,11 +1,22 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useSavedProductsStore } from '@/stores/savedProducts';
 import supabase from '@/utils/supabase.js';
-import { useThemeStore } from '@/stores/theme.js'; // Import the theme store
+import { useThemeStore } from '@/stores/theme.js'; 
 
 const savedProductsStore = useSavedProductsStore();
-const themeStore = useThemeStore(); // Access the theme store
+const themeStore = useThemeStore();
+
+const searchQuery = ref('');  // Search query reactive variable
+const posts = ref([]);
+const filteredPosts = computed(() => {
+  if (!searchQuery.value) return posts.value; // If no search query, show all posts
+  return posts.value.filter(post => 
+    post.item_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    post.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    post.location.toLowerCase().includes(searchQuery.value.toLowerCase())
+  ); // Filter based on item name, description, or location
+});
 
 const carouselItems = [
   {
@@ -25,29 +36,26 @@ const carouselItems = [
   },
 ];
 
-const posts = ref([]);
 onMounted(async () => {
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select('id, item_name, price, description, location, time, type, image, is_sold, user_id'); // Fetching user_id
+      .select('id, item_name, price, description, location, time, type, image, is_sold, user_id');
 
     if (error) {
       console.error('Error fetching posts:', error);
       return;
     }
 
-    // Loop through each post to fetch the user's fb_link and image
     for (const post of data) {
-      // Fetch Facebook link using user_id from profiles table
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('fb_link, first_name, last_name, preferred_location, preferred_time, profile_image')
         .eq('user_id', post.user_id)
-        .single(); // Assuming one profile per user_id
+        .single();
 
       if (!userError && userData) {
-        post.fb_link = userData.fb_link; // Add fb_link to post object
+        post.fb_link = userData.fb_link;
         post.first_name = userData.first_name;
         post.last_name = userData.last_name;
         post.preferred_location = userData.preferred_location;
@@ -55,7 +63,6 @@ onMounted(async () => {
         post.profile_image = userData.profile_image;
       }
 
-      // Fetch signed URL for post image from storage
       if (post.image) {
         const { data: signedUrlData, error: signedUrlError } = await supabase
           .storage
@@ -76,13 +83,10 @@ onMounted(async () => {
 const toggleSave = async (post) => {
   try {
     const isPostSaved = savedProductsStore.savedProducts.some(
-      (p) => p.item_name === post.item_name  // This stays the same
+      (p) => p.item_name === post.item_name
     );
 
-    console.log('Is post already saved?', isPostSaved);
-
     if (isPostSaved) {
-      // Unsave the post
       const { error } = await supabase
         .from('saved_posts')
         .delete()
@@ -94,11 +98,8 @@ const toggleSave = async (post) => {
         return;
       }
 
-      // Remove from the store
-      savedProductsStore.removeProduct(post.item_name);  // This stays the same
-      console.log('Post unsaved successfully');
+      savedProductsStore.removeProduct(post.item_name);
     } else {
-      // Save the post
       const { error } = await supabase
         .from('saved_posts')
         .insert([{ user_id: post.user_id, post_id: post.id }]);
@@ -108,16 +109,14 @@ const toggleSave = async (post) => {
         return;
       }
 
-      // Add to the store
-      savedProductsStore.addProduct(post);  // This stays the same
-      console.log('Post saved successfully');
+      savedProductsStore.addProduct(post);
     }
   } catch (error) {
     console.error('Error toggling save:', error);
   }
 };
 
-const isSaved = (post) =>
+const isSaved = (post) => 
   savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
 const selectedPost = ref(null);
@@ -128,7 +127,6 @@ const viewPostDetails = (post) => {
   isDialogOpen.value = true;
 };
 
-// Redirect to Facebook profile
 const redirectToFacebookProfile = (post) => {
   if (post.fb_link) {
     window.open(post.fb_link, '_blank');
@@ -137,10 +135,9 @@ const redirectToFacebookProfile = (post) => {
   }
 };
 </script>
-
 <template>
-  <!-- Carousel Section (Unchanged) -->
   <v-container>
+    <!-- Carousel Section (Unchanged) -->
     <v-carousel height="400" show-arrows="hover" cycle hide-delimiter-background>
       <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
         <v-img :src="item.image" cover height="100%">
@@ -162,10 +159,23 @@ const redirectToFacebookProfile = (post) => {
       </p>
     </div>
 
+    <!-- Search Bar (Centered) -->
+    <v-container class="mx-auto d-flex justify-center align-center my-4">
+      <v-text-field
+        v-model="searchQuery"
+        rounded
+        outlined
+        density="comfortable"
+        label="Search for an item"
+        append-inner-icon="mdi-magnify"
+        class="search-bar"
+      ></v-text-field>
+    </v-container>
+    
     <!-- Post Cards -->
     <v-container class="post-section mt-5">
       <v-row justify="start" dense>
-        <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="4">
+        <v-col v-for="(post, index) in filteredPosts" :key="index" cols="12" sm="6" md="4">
           <v-card class="post-card">
             <!-- Image Section -->
             <v-img :src="post.image" class="post-image" height="200px">
@@ -207,7 +217,6 @@ const redirectToFacebookProfile = (post) => {
           </v-btn>
         </v-card-title>
 
-        <!-- Content Section -->
         <v-card-text>
           <v-row>
             <v-col cols="12" md="6" class="d-flex justify-center">
@@ -232,9 +241,9 @@ const redirectToFacebookProfile = (post) => {
               </div>
               <v-row justify="start" class="mt-4 button-row">
                 <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
-  <v-icon left>mdi-bookmark-outline</v-icon>
-  {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
-</v-btn>
+                  <v-icon left>mdi-bookmark-outline</v-icon>
+                  {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+                </v-btn>
                 <v-btn class="custom-button mx-2" @click="redirectToFacebookProfile(selectedPost)">
                   <v-icon left>mdi-facebook</v-icon>
                   Contact Seller

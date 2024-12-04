@@ -75,19 +75,6 @@ const logout = async () => {
     </v-container>
 
     <v-spacer></v-spacer>
-
-    <!-- Search Bar -->
-    <v-container class="mx-auto" max-width="600px">
-      <v-text-field
-        rounded
-        outlined
-        density="comfortable"
-        label="Search"
-        hide-details
-        append-inner-icon="mdi-magnify"
-      ></v-text-field>
-    </v-container>
-
     <v-spacer></v-spacer>
 
     <!-- Theme Toggle Button -->
