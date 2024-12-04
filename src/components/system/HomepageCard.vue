@@ -209,51 +209,78 @@ const redirectToFacebookProfile = (post) => {
     </v-container>
 
     <!-- Post Detail Modal -->
-    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
-      <v-card class="post-detail-card">
-        <v-card-title class="post-detail-header">
-          <v-btn icon @click="isDialogOpen = false" class="close-btn">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
+    <v-dialog
+  v-model="isDialogOpen"
+  max-width="800px"
+  transition="dialog-bottom-transition"
+>
+  <v-card class="post-detail-card">
+    <!-- Updated Header Section -->
+    <v-card-title class="post-detail-header d-flex align-center">
+      <v-avatar
+        size="40"
+        class="me-3"
+        v-if="selectedPost?.profile_image"
+        color="grey lighten-2"
+      >
+        <v-img :src="selectedPost?.profile_image" />
+      </v-avatar>
+      <div>
+        <div class="seller-name">
+          {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+        </div>
+        <div class="seller-location">
+          {{ selectedPost?.preferred_location }}
+        </div>
+      </div>
+      <v-spacer />
+      <v-btn icon @click="isDialogOpen = false" class="close-btn">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-card-title>
 
-        <v-card-text>
-          <v-row>
-            <v-col cols="12" md="6" class="d-flex justify-center">
-              <v-img :src="selectedPost?.image" class="post-detail-image" cover height="300px" />
-            </v-col>
-            <v-col cols="12" md="6">
-              <div class="post-title">{{ selectedPost?.item_name }}</div>
-              <div class="post-seller">
-                <strong>Seller:</strong> {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
-              </div>
-              <div class="post-description">
-                <h3>Description</h3>
-                <p>{{ selectedPost?.description }}</p>
-              </div>
-              <div class="post-price">
-                <h3>Price</h3>
-                <p>₱{{ selectedPost?.price }}</p>
-              </div>
-              <div>
-                <p><strong>Preferred Location:</strong> {{ selectedPost?.preferred_location }}</p>
-                <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
-              </div>
-              <v-row justify="start" class="mt-4 button-row">
-                <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
-                  <v-icon left>mdi-bookmark-outline</v-icon>
-                  {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
-                </v-btn>
-                <v-btn class="custom-button mx-2" @click="redirectToFacebookProfile(selectedPost)">
-                  <v-icon left>mdi-facebook</v-icon>
-                  Contact Seller
-                </v-btn>
-              </v-row>
-            </v-col>
+    <v-card-text>
+      <v-row>
+        <v-col cols="12" md="6" class="d-flex justify-center">
+          <v-img
+            :src="selectedPost?.image"
+            class="post-detail-image"
+            cover
+            height="300px"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <div class="post-title">{{ selectedPost?.item_name }}</div>
+          <div class="post-description">
+            <h3>Description</h3>
+            <p>{{ selectedPost?.description }}</p>
+          </div>
+          <div class="post-price">
+            <h3>Price</h3>
+            <p>₱{{ selectedPost?.price }}</p>
+          </div>
+          <div>
+            <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
+          </div>
+          <v-row justify="start" class="mt-4 button-row">
+            <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
+              <v-icon left>mdi-bookmark-outline</v-icon>
+              {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+            </v-btn>
+            <v-btn
+              class="custom-button mx-2"
+              @click="redirectToFacebookProfile(selectedPost)"
+            >
+              <v-icon left>mdi-facebook</v-icon>
+              Contact Seller
+            </v-btn>
           </v-row>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+</v-dialog>
+
   </v-container>
 </template>
 
@@ -323,7 +350,26 @@ const redirectToFacebookProfile = (post) => {
 }
 
 .post-detail-header {
+  display: flex;
+  align-items: center;
   background-color: rgb(216, 128, 101);
+  color: white;
+  padding: 16px;
+  border-radius: 5px 5px 0 0;
+}
+
+.seller-name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.seller-location {
+  font-size: 0.8rem;
+  color: #f3e6e0;
+}
+
+.close-btn {
+  color: rgb(105, 53, 53);
 }
 
 .post-title {
