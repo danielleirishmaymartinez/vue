@@ -66,7 +66,15 @@ const logout = async () => {
 <v-container>
   <v-app-bar dark>
     
-
+        <v-container class="d-flex align-center">
+      <img
+        src="/images/logo.png"
+        alt="Logo"
+        class="me-2"
+        style="width: 40px; height: 40px;"
+      />
+      <span class="text-h6">STASH</span>
+    </v-container>
 
     <v-spacer></v-spacer>
 
@@ -109,9 +117,10 @@ const logout = async () => {
         width="300"
         class="pa-4 d-flex flex-column align-start custom-rounded-sheet"
       >
+      <v-container class="justify-center align-center">
         <v-card
           elevation="2"
-          class="profile-card d-flex align-center pa-3 ml-4 my-4"
+          class="profile-card d-flex align-center "
           @click="goToProfile"
         >
           <v-avatar size="50" class="avatar-img">
@@ -124,6 +133,7 @@ const logout = async () => {
             {{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}
           </span>
         </v-card>
+        </v-container>
 
         <v-divider></v-divider>
 
@@ -189,6 +199,9 @@ const logout = async () => {
 }
 
 .profile-card {
+ width: 250px; /* Ensures a fixed width */ 
+  min-width: 200px; /* Ensures minimum width for flexibility */
+  max-width: 800px; /* Prevents expansion beyond this width */
   cursor: pointer;
   border-radius: 15px;
   transition: box-shadow 0.3s ease-in-out;
@@ -202,6 +215,9 @@ const logout = async () => {
 .underlined-name {
   position: relative;
   font-weight: bold;
+  white-space: nowrap; /* Prevents text from wrapping */
+  text-overflow: ellipsis; /* Adds '...' for truncated text */
+  width: 250px; /* Ensures a fixed width */ 
 }
 
 .underlined-name::after {

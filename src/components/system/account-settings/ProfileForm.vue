@@ -72,7 +72,7 @@ const onFormSubmit = () => {
 
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
     <v-row dense>
-      <v-col cols="12" sm="4">
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.firstname"
           label="Firstname"
@@ -80,7 +80,7 @@ const onFormSubmit = () => {
         />
       </v-col>
 
-      <v-col cols="12" sm="4">
+      <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.lastname"
           label="Lastname"

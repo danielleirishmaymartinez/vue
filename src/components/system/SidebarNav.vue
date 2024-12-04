@@ -12,7 +12,7 @@ const themeStore = useThemeStore(); // Access the theme store
 // Define reactive data
 const admins = ref([
   { title: 'Profile Picture', icon: 'mdi-account', path: '/picture' },
-  { title: 'Profile Info', icon: 'mdi-account-edit', path: '/profile-info' },
+  { title: 'Profile Information', icon: 'mdi-account-edit', path: '/profile-info' },
   { title: 'Change Password', icon: 'mdi-shield', path: '/password' },
 ]);
 
@@ -33,17 +33,9 @@ function navigateTo(path) {
     :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
     class="border border-e-lg"
   > 
-    <v-container class="d-flex align-center">
-      <img
-        src="/images/logo.png"
-        alt="Logo"
-        class="me-2"
-        style="width: 40px; height: 40px;"
-      />
-      <span class="text-h6">STASH</span>
-    </v-container>
 
-    <v-list class="d-flex flex-column mt-15 flex-row mx-6 pt-12">
+
+    <v-list class=" mt-15 flex-row  pt-12">
       <v-list-item
         prepend-icon="mdi-home"
         title="Home"
