@@ -239,53 +239,56 @@ const redirectToFacebookProfile = (post) => {
       </v-btn>
     </v-card-title>
 
-    <v-card-text>
-      <v-row>
-        <v-col cols="12" md="6" class="d-flex justify-center">
-          <v-img
-            :src="selectedPost?.image"
-            class="post-detail-image"
-            cover
-            height="300px"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <div class="post-title">{{ selectedPost?.item_name }}</div>
-          <div class="post-description">
-            <h3>Description</h3>
-            <p>{{ selectedPost?.description }}</p>
-          </div>
-          <div class="post-price">
-            <h3>Price</h3>
-            <p>₱{{ selectedPost?.price }}</p>
-          </div>
-          <div>
-            <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
-          </div>
-          <v-row justify="start" class="mt-4 button-row">
-            <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
-              <v-icon left>mdi-bookmark-outline</v-icon>
-              {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
-            </v-btn>
-            <v-btn
-              class="custom-button mx-2"
-              @click="redirectToFacebookProfile(selectedPost)"
-            >
-              <v-icon left>mdi-facebook</v-icon>
-              Contact Seller
-            </v-btn>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="6" class="d-flex justify-center">
+              <v-img :src="selectedPost?.image" class="post-detail-image" cover height="300px" />
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="post-title">{{ selectedPost?.item_name }}</div>
+              <div class="post-seller">
+                <strong>Seller:</strong> {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+              </div>
+              <div class="post-description">
+                <h3>Description</h3>
+                <p>{{ selectedPost?.description }}</p>
+              </div>
+              <div class="post-price">
+                <h3>Price</h3>
+                <p>₱{{ selectedPost?.price }}</p>
+              </div>
+              <div>
+                <p><strong>Preferred Location:</strong> {{ selectedPost?.preferred_location }}</p>
+                <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
+              </div>
+              <v-row justify="start" class="mt-4 button-row">
+                <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
+                  <v-icon left>mdi-bookmark-outline</v-icon>
+                  {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+                </v-btn>
+                <v-btn class="custom-button mx-2" @click="redirectToFacebookProfile(selectedPost)">
+                  <v-icon left>mdi-facebook</v-icon>
+                  Contact Seller
+                </v-btn>
+              </v-row>
+            </v-col>
           </v-row>
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
-</v-dialog>
-
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <style scoped>
 /* General Styles */
+
+.dark-mode {
+  color: #ffffff;
+}
+
+.light-mode {
+  color: #000000;
+}
 
 .carousel-card {
   border: 3px; /* Dark brown border */
@@ -323,7 +326,6 @@ const redirectToFacebookProfile = (post) => {
 
 .discover-subtitle {
   font-size: 1.25rem;
-  color: #2e2d2e;
   margin-bottom: 30px;
 }
 
@@ -397,7 +399,6 @@ const redirectToFacebookProfile = (post) => {
   padding: 4px 8px;
   border: 1px solid rgb(239, 176, 186);
   border-radius: 5px;
-  background-color: #fff;
   display: flex;
   align-items: center;
 }
@@ -409,25 +410,23 @@ const redirectToFacebookProfile = (post) => {
 
 .post-description p {
   font-size: 0.9rem;
-  color: hsl(0, 3%, 13%);
 }
 
 .post-price {
   font-size: 1rem;
   font-weight: bold;
-  color: hsl(0, 22%, 44%);
+
 }
 
 .post-price h3 {
   font-size: 1rem;
   font-weight: bold;
-  color: hsl(0, 22%, 44%);
+
 }
 
 .post-price p {
   font-size: 1rem;
   font-weight: bolder;
-  color: hsl(0, 10%, 15%);
 }
 
 .post-detail-card {
