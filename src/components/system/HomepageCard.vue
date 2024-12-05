@@ -246,9 +246,6 @@ const redirectToFacebookProfile = (post) => {
             </v-col>
             <v-col cols="12" md="6">
               <div class="post-title">{{ selectedPost?.item_name }}</div>
-              <div class="post-seller">
-                <strong>Seller:</strong> {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
-              </div>
               <div class="post-description">
                 <h3>Description</h3>
                 <p>{{ selectedPost?.description }}</p>
@@ -258,7 +255,6 @@ const redirectToFacebookProfile = (post) => {
                 <p>₱{{ selectedPost?.price }}</p>
               </div>
               <div>
-                <p><strong>Preferred Location:</strong> {{ selectedPost?.preferred_location }}</p>
                 <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
               </div>
               <v-row justify="start" class="mt-4 button-row">

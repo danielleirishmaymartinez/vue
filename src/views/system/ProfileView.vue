@@ -570,7 +570,7 @@ const logout = async () => {
   text-transform: uppercase;
 }
 .sold-overlay {
-  position: relative;
+opacity: 0.5;
 }
 
 .sold-text {
