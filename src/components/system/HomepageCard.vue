@@ -231,8 +231,10 @@ const redirectToFacebookProfile = (post) => {
                 <h3>Description</h3>
                 <p>{{ selectedPost?.description }}</p>
               </div>
-              <div class="post-price">
-                <h3>Price</h3>
+              <div class="post-price" >
+                <h3>Price
+                  
+                </h3>
                 <p>₱{{ selectedPost?.price }}</p>
               </div>
               <div>
@@ -259,6 +261,14 @@ const redirectToFacebookProfile = (post) => {
 
 <style scoped>
 /* General Styles */
+
+.dark-mode {
+  color: #ffffff;
+}
+
+.light-mode {
+  color: #000000;
+}
 
 .carousel-card {
   border: 3px; /* Dark brown border */
@@ -296,7 +306,6 @@ const redirectToFacebookProfile = (post) => {
 
 .discover-subtitle {
   font-size: 1.25rem;
-  color: #2e2d2e;
   margin-bottom: 30px;
 }
 
@@ -351,7 +360,6 @@ const redirectToFacebookProfile = (post) => {
   padding: 4px 8px;
   border: 1px solid rgb(239, 176, 186);
   border-radius: 5px;
-  background-color: #fff;
   display: flex;
   align-items: center;
 }
@@ -363,25 +371,23 @@ const redirectToFacebookProfile = (post) => {
 
 .post-description p {
   font-size: 0.9rem;
-  color: hsl(0, 3%, 13%);
 }
 
 .post-price {
   font-size: 1rem;
   font-weight: bold;
-  color: hsl(0, 22%, 44%);
+
 }
 
 .post-price h3 {
   font-size: 1rem;
   font-weight: bold;
-  color: hsl(0, 22%, 44%);
+
 }
 
 .post-price p {
   font-size: 1rem;
   font-weight: bolder;
-  color: hsl(0, 10%, 15%);
 }
 
 .post-detail-card {
