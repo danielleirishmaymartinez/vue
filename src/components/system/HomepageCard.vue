@@ -209,13 +209,35 @@ const redirectToFacebookProfile = (post) => {
     </v-container>
 
     <!-- Post Detail Modal -->
-    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
-      <v-card class="post-detail-card">
-        <v-card-title class="post-detail-header">
-          <v-btn icon @click="isDialogOpen = false" class="close-btn">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
+    <v-dialog
+  v-model="isDialogOpen"
+  max-width="800px"
+  transition="dialog-bottom-transition"
+>
+  <v-card class="post-detail-card">
+    <!-- Updated Header Section -->
+    <v-card-title class="post-detail-header d-flex align-center">
+      <v-avatar
+        size="40"
+        class="me-3"
+        v-if="selectedPost?.profile_image"
+        color="grey lighten-2"
+      >
+        <v-img :src="selectedPost?.profile_image" />
+      </v-avatar>
+      <div>
+        <div class="seller-name">
+          {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+        </div>
+        <div class="seller-location">
+          {{ selectedPost?.preferred_location }}
+        </div>
+      </div>
+      <v-spacer />
+      <v-btn icon @click="isDialogOpen = false" class="close-btn">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-card-title>
 
         <v-card-text>
           <v-row>
@@ -231,10 +253,8 @@ const redirectToFacebookProfile = (post) => {
                 <h3>Description</h3>
                 <p>{{ selectedPost?.description }}</p>
               </div>
-              <div class="post-price" >
-                <h3>Price
-                  
-                </h3>
+              <div class="post-price">
+                <h3>Price</h3>
                 <p>₱{{ selectedPost?.price }}</p>
               </div>
               <div>
@@ -341,7 +361,26 @@ const redirectToFacebookProfile = (post) => {
 }
 
 .post-detail-header {
+  display: flex;
+  align-items: center;
   background-color: rgb(216, 128, 101);
+  color: white;
+  padding: 16px;
+  border-radius: 5px 5px 0 0;
+}
+
+.seller-name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.seller-location {
+  font-size: 0.8rem;
+  color: #f3e6e0;
+}
+
+.close-btn {
+  color: rgb(105, 53, 53);
 }
 
 .post-title {
