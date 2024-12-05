@@ -344,12 +344,12 @@ const logout = async () => {
       <!-- Top Navbar -->
       <Navbar />
 
-      <v-container fluid class="d-flex">
+      <v-container fluid class="d-flex page-layout">
         <!-- Sidebar Navigation -->
         <SidebarNav v-model:drawer="drawerVisible" />
 
         <!-- Main Content -->
-        <v-main class="mt-10 pt-12">
+        <v-main class="main-content scroll-hidden mt-10 pt-12">
           <v-container class="profile-container pb-11">
             <!-- Profile Section -->
             <v-row>
@@ -535,6 +535,27 @@ const logout = async () => {
 </template>
 
 <style scoped>
+.page-layout {
+  display: flex;
+  height: 100vh; /* Full viewport height to match sidebar */
+  overflow: hidden; /* Prevent parent container scrolling */
+}
+
+/* Hide scrollbar for main content */
+.main-content::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
+
+.main-content {
+  scrollbar-width: none; /* For Firefox */
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto; /* Allow scrolling within the main content */
+  padding: 20px;
+}
+
 .profile-avatar {
   border: 5px solid #4caf50;
   background-color: #e0f2f1;

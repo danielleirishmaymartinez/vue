@@ -140,7 +140,7 @@ const redirectToFacebookProfile = (post) => {
     <!-- Carousel Section (Unchanged) -->
     <v-carousel height="400" show-arrows="hover" cycle hide-delimiter-background>
       <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
-        <v-img :src="item.image" cover height="100%">
+        <v-img :src="item.image" cover height="100%" class="carousel-card border-accent " > 
           <div class="d-flex fill-height justify-center align-center">
             <div class="carousel-content">
               <h1 class="carousel-title">{{ item.title }}</h1>
@@ -286,6 +286,15 @@ const redirectToFacebookProfile = (post) => {
 
 <style scoped>
 /* General Styles */
+
+.carousel-card {
+  border: 3px; /* Dark brown border */
+  box-sizing: border-box; /* Ensures border doesn't affect size */
+  border-radius: 12px; /* Optional: Adds rounded corners */
+  border-color: #9e7749f8; /* Replace with your preferred color */
+  border-style: solid;
+}
+
 .carousel-content {
   color: rgb(242, 214, 206);
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);

@@ -9,6 +9,13 @@ const { mobile } = useDisplay();
 const drawer = ref(!mobile.value);
 const themeStore = useThemeStore(); // Access the theme store
 
+// Define reactive data
+const admins = ref([
+  { title: 'Profile Picture', icon: 'mdi-account', path: '/picture' },
+  { title: 'Profile Information', icon: 'mdi-account-edit', path: '/profile-info' },
+  { title: 'Change Password', icon: 'mdi-shield', path: '/password' },
+]);
+
 // Function to navigate to different routes
 function navigateTo(path) {
   router.push(path);
@@ -16,52 +23,54 @@ function navigateTo(path) {
 </script>
 
 <template>
-  <v-navigation-drawer
-    v-model="drawer"
-    :permanent="!mobile"
-    :temporary="mobile"
-    app
-    width="280"
-    :theme="themeStore.theme"
-    :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-    class="border border-e-lg"
-  >
-    <v-list class="d-flex flex-column mt-15 flex-row mx-6 pt-12">
-      <v-list-item
-        prepend-icon="mdi-home"
-        title="Home"
-        @click="navigateTo('/home')"
+  <v-card>
+    <v-layout>
+      <v-navigation-drawer
+        floating
+        v-model="drawer"
+        :permanent="!mobile"
+        :temporary="mobile"
+        width="300"
+        app
         :theme="themeStore.theme"
         :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
+        class="border border-sm"
       >
-        <template v-slot:prepend>
-          <v-icon class="icon-circle">mdi-home</v-icon>
-        </template>
-      </v-list-item>
-      <v-list-item
-        prepend-icon="mdi-account"
-        title="Profile"
-        @click="navigateTo('/profile')"
-        :theme="themeStore.theme"
-        :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-      >
-        <template v-slot:prepend>
-          <v-icon class="icon-circle" :theme="themeStore.theme" :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'">mdi-account</v-icon>
-        </template>
-      </v-list-item>
-      <v-list-item
-        prepend-icon="mdi-cog"
-        title="Account Settings"
-        @click="navigateTo('/settings')"
-        :theme="themeStore.theme"
-        :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-      >
-        <template v-slot:prepend>
-          <v-icon class="icon-circle">mdi-cog</v-icon>
-        </template>
-      </v-list-item>
-    </v-list>
-  </v-navigation-drawer>
+        <v-list density="compact" nav class=" mt-15 flex-row  pt-12">
+          <v-list-item
+            prepend-icon="mdi-home"
+            title="Home"
+            @click="navigateTo('/home')"
+          ></v-list-item>
+
+          <v-list-item
+            prepend-icon="mdi-account"
+            title="Profile"
+            @click="navigateTo('/profile')"
+          ></v-list-item>
+
+          <v-list-group>
+            <template v-slot:activator="{ props }">
+              <v-list-item
+                v-bind="props"
+                prepend-icon="mdi-cog-outline"
+                title="Account Settings"
+              ></v-list-item>
+            </template>
+
+            <v-list-item
+              v-for="admin in admins"
+              :key="admin.title"
+              :prepend-icon="admin.icon"
+              :title="admin.title"
+              @click="navigateTo(admin.path)"
+            ></v-list-item>
+          </v-list-group>
+        </v-list>
+      </v-navigation-drawer>
+      <v-main style="height: 800px"></v-main>
+    </v-layout>
+  </v-card>
 </template>
 
 <style scoped>
@@ -77,7 +86,7 @@ function navigateTo(path) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
 }
 
@@ -88,15 +97,12 @@ function navigateTo(path) {
 }
 
 .v-list-item:hover {
-
   border-radius: 15px;
   transform: scale(1.1);
   font-weight: 800;
 }
 
-.v-navigation-drawer--is-mobile .v-list {
-  align-items: center;
-}
+
 
 .icon-circle {
   border-radius: 50%;
