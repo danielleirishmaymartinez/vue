@@ -1,10 +1,24 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useSavedProductsStore } from '@/stores/savedProducts';
 import supabase from '@/utils/supabase.js';
 import { useThemeStore } from '@/stores/theme.js'; 
+import { useThemeStore } from '@/stores/theme.js'; 
 
 const savedProductsStore = useSavedProductsStore();
+const themeStore = useThemeStore();
+
+const searchQuery = ref('');  // Search query reactive variable
+const posts = ref([]);
+const filteredPosts = computed(() => {
+  if (!searchQuery.value) return posts.value; // If no search query, show all posts
+  return posts.value.filter(post => 
+    post.item_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    post.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    post.location.toLowerCase().includes(searchQuery.value.toLowerCase())
+  ); // Filter based on item name, description, or location
+});
 const themeStore = useThemeStore();
 
 const searchQuery = ref('');  // Search query reactive variable
@@ -41,6 +55,7 @@ onMounted(async () => {
     const { data, error } = await supabase
       .from('posts')
       .select('id, item_name, price, description, location, time, type, image, is_sold, user_id');
+      .select('id, item_name, price, description, location, time, type, image, is_sold, user_id');
 
     if (error) {
       console.error('Error fetching posts:', error);
@@ -53,8 +68,10 @@ onMounted(async () => {
         .select('fb_link, first_name, last_name, preferred_location, preferred_time, profile_image')
         .eq('user_id', post.user_id)
         .single();
+        .single();
 
       if (!userError && userData) {
+        post.fb_link = userData.fb_link;
         post.fb_link = userData.fb_link;
         post.first_name = userData.first_name;
         post.last_name = userData.last_name;
@@ -82,9 +99,9 @@ onMounted(async () => {
 
 const toggleSave = async (post) => {
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();    const isPostSaved = savedProductsStore.savedProducts.some(
-      (p) => p.item_name === post.item_name
-    );
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    (p) => p.item_name === post.item_name
+  );
 
     if (isPostSaved) {
       const { error } = await supabase
@@ -99,6 +116,7 @@ const toggleSave = async (post) => {
       }
 
       savedProductsStore.removeProduct(post.item_name); // Update store
+      savedProductsStore.removeProduct(post.item_name);
     } else {
       const { error } = await supabase
         .from('saved_posts')
@@ -110,12 +128,14 @@ const toggleSave = async (post) => {
       }
 
       savedProductsStore.addProduct(post); // Update store
+      savedProductsStore.addProduct(post);
     }
   } catch (error) {
     console.error('Error toggling save:', error);
   }
 };
 
+const isSaved = (post) => 
 const isSaved = (post) => 
   savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
@@ -138,8 +158,10 @@ const redirectToFacebookProfile = (post) => {
 <template>
   <v-container>
     <!-- Carousel Section (Unchanged) -->
+    <!-- Carousel Section (Unchanged) -->
     <v-carousel height="400" show-arrows="hover" cycle hide-delimiter-background>
       <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
+        <v-img :src="item.image" cover height="100%" class="carousel-card border-accent " > 
         <v-img :src="item.image" cover height="100%" class="carousel-card border-accent " > 
           <div class="d-flex fill-height justify-center align-center">
             <div class="carousel-content">
@@ -172,9 +194,24 @@ const redirectToFacebookProfile = (post) => {
       ></v-text-field>
     </v-container>
     
+
+    <!-- Search Bar (Centered) -->
+    <v-container class="mx-auto d-flex justify-center align-center my-4">
+      <v-text-field
+        v-model="searchQuery"
+        rounded
+        outlined
+        density="comfortable"
+        label="Search for an item"
+        append-inner-icon="mdi-magnify"
+        class="search-bar"
+      ></v-text-field>
+    </v-container>
+    
     <!-- Post Cards -->
     <v-container class="post-section mt-5">
       <v-row justify="start" dense>
+        <v-col v-for="(post, index) in filteredPosts" :key="index" cols="12" sm="6" md="4">
         <v-col v-for="(post, index) in filteredPosts" :key="index" cols="12" sm="6" md="4">
           <v-card class="post-card">
             <!-- Image Section -->
@@ -209,13 +246,35 @@ const redirectToFacebookProfile = (post) => {
     </v-container>
 
     <!-- Post Detail Modal -->
-    <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
-      <v-card class="post-detail-card">
-        <v-card-title class="post-detail-header">
-          <v-btn icon @click="isDialogOpen = false" class="close-btn">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
+    <v-dialog
+  v-model="isDialogOpen"
+  max-width="800px"
+  transition="dialog-bottom-transition"
+>
+  <v-card class="post-detail-card">
+    <!-- Updated Header Section -->
+    <v-card-title class="post-detail-header d-flex align-center">
+      <v-avatar
+        size="40"
+        class="me-3"
+        v-if="selectedPost?.profile_image"
+        color="grey lighten-2"
+      >
+        <v-img :src="selectedPost?.profile_image" />
+      </v-avatar>
+      <div>
+        <div class="seller-name">
+          {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+        </div>
+        <div class="seller-location">
+          {{ selectedPost?.preferred_location }}
+        </div>
+      </div>
+      <v-spacer />
+      <v-btn icon @click="isDialogOpen = false" class="close-btn">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-card-title>
 
         <v-card-text>
           <v-row>
@@ -244,6 +303,9 @@ const redirectToFacebookProfile = (post) => {
                   <v-icon left>mdi-bookmark-outline</v-icon>
                   {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
                 </v-btn>
+                  <v-icon left>mdi-bookmark-outline</v-icon>
+                  {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+                </v-btn>
                 <v-btn class="custom-button mx-2" @click="redirectToFacebookProfile(selectedPost)">
                   <v-icon left>mdi-facebook</v-icon>
                   Contact Seller
@@ -259,6 +321,23 @@ const redirectToFacebookProfile = (post) => {
 
 <style scoped>
 /* General Styles */
+
+.carousel-card {
+  border: 3px; /* Dark brown border */
+  box-sizing: border-box; /* Ensures border doesn't affect size */
+  border-radius: 12px; /* Optional: Adds rounded corners */
+  border-color: #9e7749f8; /* Replace with your preferred color */
+  border-style: solid;
+}
+
+
+.dark-mode {
+  color: #ffffff;
+}
+
+.light-mode {
+  color: #000000;
+}
 
 .carousel-card {
   border: 3px; /* Dark brown border */
@@ -296,7 +375,6 @@ const redirectToFacebookProfile = (post) => {
 
 .discover-subtitle {
   font-size: 1.25rem;
-  color: #2e2d2e;
   margin-bottom: 30px;
 }
 
@@ -332,7 +410,26 @@ const redirectToFacebookProfile = (post) => {
 }
 
 .post-detail-header {
+  display: flex;
+  align-items: center;
   background-color: rgb(216, 128, 101);
+  color: white;
+  padding: 16px;
+  border-radius: 5px 5px 0 0;
+}
+
+.seller-name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.seller-location {
+  font-size: 0.8rem;
+  color: #f3e6e0;
+}
+
+.close-btn {
+  color: rgb(105, 53, 53);
 }
 
 .post-title {
@@ -351,7 +448,6 @@ const redirectToFacebookProfile = (post) => {
   padding: 4px 8px;
   border: 1px solid rgb(239, 176, 186);
   border-radius: 5px;
-  background-color: #fff;
   display: flex;
   align-items: center;
 }
@@ -363,25 +459,23 @@ const redirectToFacebookProfile = (post) => {
 
 .post-description p {
   font-size: 0.9rem;
-  color: hsl(0, 3%, 13%);
 }
 
 .post-price {
   font-size: 1rem;
   font-weight: bold;
-  color: hsl(0, 22%, 44%);
+
 }
 
 .post-price h3 {
   font-size: 1rem;
   font-weight: bold;
-  color: hsl(0, 22%, 44%);
+
 }
 
 .post-price p {
   font-size: 1rem;
   font-weight: bolder;
-  color: hsl(0, 10%, 15%);
 }
 
 .post-detail-card {

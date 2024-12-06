@@ -58,12 +58,12 @@ async function logout() {
       <Navbar />
 
       <!-- Page Container -->
-      <v-container fluid class="d-flex">
+      <v-container fluid class="d-flex page-layout">
         <!-- Sidebar -->
         <SidebarNav v-model:drawer="drawerVisible" />
 
         <!-- Main Content -->
-        <v-main class="mt-5 pt-3">
+        <v-main class="main-content scroll-hidden mt-5 pt-3">
           <!-- Page Content -->
           <HomepageCard :profile="profile" />
         </v-main>
