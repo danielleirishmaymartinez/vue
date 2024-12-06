@@ -73,6 +73,28 @@ async function logout() {
 </template>
 
 <style scoped>
+
+.page-layout {
+  display: flex;
+  height: 100vh; /* Full viewport height to match sidebar */
+  overflow: hidden; /* Prevent parent container scrolling */
+}
+
+/* Hide scrollbar for main content */
+.main-content::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
+
+.main-content {
+  scrollbar-width: none; /* For Firefox */
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto; /* Allow scrolling within the main content */
+  padding: 20px;
+}
+
 .dark-mode {
   background-color: #121212;
   color: #ffffff;

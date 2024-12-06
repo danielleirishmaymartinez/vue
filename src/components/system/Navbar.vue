@@ -63,31 +63,22 @@ const logout = async () => {
 </script>
 
 <template>
-  <v-app-bar dark>
-    <v-container class="d-flex align-center">
+<v-container>
+  <v-app-bar color="brown-lighten-2" dark>
+    
+        <v-container class="d-flex align-center">
       <img
         src="/images/logo.png"
         alt="Logo"
         class="me-2"
         style="width: 40px; height: 40px;"
       />
-      <span class="text-h6">STASH</span>
+  <a href="/home" class="text-h6" style="text-decoration: none; color: white; ">
+    <span>STASH</span>
+  </a>
     </v-container>
 
     <v-spacer></v-spacer>
-
-    <!-- Search Bar -->
-    <v-container class="mx-auto" max-width="600px">
-      <v-text-field
-        rounded
-        outlined
-        density="comfortable"
-        label="Search"
-        hide-details
-        append-inner-icon="mdi-magnify"
-      ></v-text-field>
-    </v-container>
-
     <v-spacer></v-spacer>
 
     <!-- Theme Toggle Button -->
@@ -114,10 +105,12 @@ const logout = async () => {
         elevation="2"
         width="300"
         class="pa-4 d-flex flex-column align-start custom-rounded-sheet"
+        color="brown-lighten-4"
       >
+      <v-container class="justify-center align-center">
         <v-card
           elevation="2"
-          class="profile-card d-flex align-center pa-3 ml-4 my-4"
+          class="profile-card d-flex align-center "
           @click="goToProfile"
         >
           <v-avatar size="50" class="avatar-img">
@@ -130,6 +123,7 @@ const logout = async () => {
             {{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}
           </span>
         </v-card>
+        </v-container>
 
         <v-divider></v-divider>
 
@@ -147,12 +141,13 @@ const logout = async () => {
       </v-sheet>
     </v-menu>
   </v-app-bar>
+  </v-container>
 </template>
 
 <style scoped>
 .dark-mode {
   background-color: #121212;
-  color: #ffffff;
+  color: #e76317;
 }
 
 .light-mode {
@@ -185,7 +180,7 @@ const logout = async () => {
 .clickable-profile {
   cursor: pointer;
   transition: background-color 0.3s ease;
-  padding: 8px;
+
   width: 100%;
 }
 
@@ -194,6 +189,9 @@ const logout = async () => {
 }
 
 .profile-card {
+ width: 250px; /* Ensures a fixed width */ 
+  min-width: 200px; /* Ensures minimum width for flexibility */
+  max-width: 800px; /* Prevents expansion beyond this width */
   cursor: pointer;
   border-radius: 15px;
   transition: box-shadow 0.3s ease-in-out;
@@ -207,6 +205,9 @@ const logout = async () => {
 .underlined-name {
   position: relative;
   font-weight: bold;
+  white-space: nowrap; /* Prevents text from wrapping */
+  text-overflow: ellipsis; /* Adds '...' for truncated text */
+  width: 250px; /* Ensures a fixed width */ 
 }
 
 .underlined-name::after {

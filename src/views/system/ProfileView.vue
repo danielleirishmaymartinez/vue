@@ -23,9 +23,9 @@ const themeStore = useThemeStore(); // Access the theme store
 // Get saved products from the store
 const savedProducts = savedProductsStore.savedProducts;
 
-  // Access the Pinia store
-  const authUser = useAuthUserStore(); // Initialize the store
-  onMounted(async () => {
+// Access the Pinia store
+const authUser = useAuthUserStore(); // Initialize the store
+onMounted(async () => {
   console.log("Before fetching profile:", userProfile.value);
 
   try {
@@ -102,25 +102,6 @@ const savedProducts = savedProductsStore.savedProducts;
   }
 });
 
-// Default user profile if not found
-const getDefaultProfile = () => ({
-  first_name: "Unknown",
-  last_name: "User",
-  bio: "No bio available.",
-  preferred_location: "Not specified",
-  preferred_time: "Not specified",
-  profile_image: "/default-avatar.jpg",
-});
-
-// Get user initials for avatar
-const getInitials = (name) => {
-  if (!name) return "??";
-  const names = name.split(" ");
-  return names.map((n) => n.charAt(0)).join("").toUpperCase().slice(0, 2);
-};
-
-// Toggle Post Form visibility
-const togglePostForm = () => (showPostForm.value = !showPostForm.value);
 
 // Submit New Post
 const newPost = ref({
@@ -308,6 +289,61 @@ const markAsSold = async (postId) => {
   }
 };
 
+const toggleSave = async (post) => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();    const isPostSaved = savedProductsStore.savedProducts.some(
+      (p) => p.item_name === post.item_name
+    );
+
+    if (isPostSaved) {
+      const { error } = await supabase
+        .from('saved_posts')
+        .delete()
+        .eq('user_id', user.id) // Use logged-in user's ID
+        .eq('post_id', post.id);
+
+      if (error) {
+        console.error('Error unsaving post:', error);
+        return;
+      }
+
+      savedProductsStore.removeProduct(post.item_name); // Update store
+    } else {
+      const { error } = await supabase
+        .from('saved_posts')
+        .insert([{ user_id: user.id, post_id: post.id }]);
+
+      if (error) {
+        console.error('Error saving post:', error);
+        return;
+      }
+
+      savedProductsStore.addProduct(post); // Update store
+    }
+  } catch (error) {
+    console.error('Error toggling save:', error);
+  }
+};
+
+// Default user profile if not found
+const getDefaultProfile = () => ({
+  first_name: "Unknown",
+  last_name: "User",
+  bio: "No bio available.",
+  preferred_location: "Not specified",
+  preferred_time: "Not specified",
+  profile_image: "/default-avatar.jpg",
+});
+
+// Get user initials for avatar
+const getInitials = (name) => {
+  if (!name) return "??";
+  const names = name.split(" ");
+  return names.map((n) => n.charAt(0)).join("").toUpperCase().slice(0, 2);
+};
+
+// Toggle Post Form visibility
+const togglePostForm = () => (showPostForm.value = !showPostForm.value);
 
 // Fetch posts from the database, sorting by 'is_sold' so sold items are at the bottom
 const refreshPosts = async () => {
@@ -323,6 +359,17 @@ const refreshPosts = async () => {
   return data;
 };
 
+const isSaved = (post) => 
+  savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
+
+const selectedPost = ref(null);
+const isDialogOpen = ref(false);
+
+const viewPostDetails = (post) => {
+  selectedPost.value = post;
+  isDialogOpen.value = true;
+};
+
 // Logout function
 const logout = async () => {
   try {
@@ -335,6 +382,7 @@ const logout = async () => {
 };
 </script>
 
+
 <template>
   <v-responsive class="border rounded">
     <v-app
@@ -344,12 +392,12 @@ const logout = async () => {
       <!-- Top Navbar -->
       <Navbar />
 
-      <v-container fluid class="d-flex">
+      <v-container fluid class="d-flex page-layout">
         <!-- Sidebar Navigation -->
         <SidebarNav v-model:drawer="drawerVisible" />
 
         <!-- Main Content -->
-        <v-main class="mt-10 pt-12">
+        <v-main class="main-content scroll-hidden mt-10 pt-12">
           <v-container class="profile-container pb-11">
             <!-- Profile Section -->
             <v-row>
@@ -398,15 +446,15 @@ const logout = async () => {
           <div v-if="activeTab === 'posts'">
   <v-row>
     <v-col v-for="post in posts" :key="post.post_id" cols="12" md="4">
-  <v-card :class="{ 'sold-overlay': post.is_sold }">
-    <v-img :src="post.image" aspect-ratio="1.5"></v-img>
-    <v-card-title>{{ post.item_name }}</v-card-title>
-    <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
-    <v-card-text>
-      <p>{{ post.description }}</p>
-      <p><strong>Type:</strong> {{ post.type }}</p>
-      <p v-if="post.is_sold" class="text-danger">Sold Out</p>
-    </v-card-text>
+      <v-card :class="{ 'sold-overlay': post.is_sold }">
+  <v-img :src="post.image" aspect-ratio="1.5"></v-img>
+  <v-card-title>{{ post.item_name }}</v-card-title>
+  <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
+  <v-card-text>
+    <p>{{ post.description }}</p>
+    <p><strong>Type:</strong> {{ post.type }}</p>
+    <p v-if="post.is_sold" class="text-danger">Sold Out</p>
+  </v-card-text>
 
     <v-card-actions>
       <!-- Options Menu for Edit/Delete -->
@@ -462,14 +510,94 @@ const logout = async () => {
   </v-dialog>
 </div>
 
+<div v-else-if="activeTab === 'saved'">
+  <!-- Display message if no saved items -->
+  <p v-if="savedProducts.length === 0" class="text-center">You have no saved items.</p>
 
-          <div v-else-if="activeTab === 'saved'">
-            <v-row>
-              <v-col cols="12">
-                <p class="text-center">Saved items will appear here.</p>
-              </v-col>
+  <!-- Post Cards -->
+  <v-container class="post-section mt-5" v-else>
+    <v-row justify="start" dense>
+      <v-col v-for="(post, index) in savedProducts" :key="index" cols="12" sm="6" md="4">
+        <v-card class="post-card">
+          <!-- Image Section -->
+          <v-img :src="post.image" class="post-image" height="200px">
+            <v-btn
+              class="view-button"
+              color="brown"
+              @click.stop="viewPostDetails(post)"
+              absolute
+              top
+              right
+            >
+              View
+            </v-btn>
+          </v-img>
+
+          <!-- Details Section -->
+          <v-card-text class="post-details">
+            <div class="d-flex justify-space-between">
+              <div>
+                <div class="post-title">{{ post.item_name }}</div>
+                <div class="post-type">{{ post.type }}</div>
+              </div>
+              <div class="post-price-box">
+                <div class="post-price">₱{{ post.price }}</div>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <!-- Post Detail Modal -->
+  <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
+    <v-card class="post-detail-card">
+      <v-card-title class="post-detail-header">
+        <v-btn icon @click="isDialogOpen = false" class="close-btn">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
+
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="6" class="d-flex justify-center">
+            <v-img :src="selectedPost?.image" class="post-detail-image" cover height="300px" />
+          </v-col>
+          <v-col cols="12" md="6">
+            <div class="post-title">{{ selectedPost?.item_name }}</div>
+            <div class="post-seller">
+              <strong>Seller:</strong> {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+            </div>
+            <div class="post-description">
+              <h3>Description</h3>
+              <p>{{ selectedPost?.description }}</p>
+            </div>
+            <div class="post-price">
+              <h3>Price</h3>
+              <p>₱{{ selectedPost?.price }}</p>
+            </div>
+            <div>
+              <p><strong>Preferred Location:</strong> {{ selectedPost?.preferred_location }}</p>
+              <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
+            </div>
+            <v-row justify="start" class="mt-4 button-row">
+              <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
+                <v-icon left>mdi-bookmark-outline</v-icon>
+                {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+              </v-btn>
+              <v-btn class="custom-button mx-2" @click="redirectToFacebookProfile(selectedPost)">
+                <v-icon left>mdi-facebook</v-icon>
+                Contact Seller
+              </v-btn>
             </v-row>
-          </div>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</div>
+
         </v-main>
       </v-container>
 
@@ -535,6 +663,27 @@ const logout = async () => {
 </template>
 
 <style scoped>
+.page-layout {
+  display: flex;
+  height: 100vh; /* Full viewport height to match sidebar */
+  overflow: hidden; /* Prevent parent container scrolling */
+}
+
+/* Hide scrollbar for main content */
+.main-content::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
+
+.main-content {
+  scrollbar-width: none; /* For Firefox */
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto; /* Allow scrolling within the main content */
+  padding: 20px;
+}
+
 .profile-avatar {
   border: 5px solid #4caf50;
   background-color: #e0f2f1;

@@ -139,7 +139,7 @@ const onFormSubmit = () => {
     <v-row>
       <v-col cols="12" sm="6" md="5">
         <v-img
-          width="55%"
+          width="50%"
           class="mx-auto rounded-circle"
           color="white-darken-4"
           aspect-ratio="1"
@@ -149,7 +149,7 @@ const onFormSubmit = () => {
         />
       </v-col>
 
-      <v-col cols="12" sm="6" md="7">
+      <v-col cols="12" sm="6" md="5">
         <v-file-input
           class="mt-5"
           :rules="[requiredValidator, imageValidator]"
