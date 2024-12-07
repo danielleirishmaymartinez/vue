@@ -1,12 +1,100 @@
+<template>
+  <v-container>
+    <v-app-bar color="brown-lighten-2" dark>
+      <v-container class="d-flex align-center">
+        <img
+          src="/images/logo.png"
+          alt="Logo"
+          class="me-2"
+          style="width: 40px; height: 40px;"
+        />
+        
+        <a href="/home" class="text-h6" style="text-decoration: none; color: white;">
+          <span>STASH</span>
+        </a>
+
+        <!-- Sidebar Toggle Button, now next to STASH -->
+        <v-btn @click="toggleSidebar" icon class="ms-3">
+          <v-icon>mdi-menu</v-icon> <!-- Using mdi-menu for toggle -->
+        </v-btn>
+      </v-container>
+      
+      <v-spacer></v-spacer>
+
+      <!-- Theme Toggle Button -->
+      <v-btn
+        :icon="themeStore.theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+        @click="themeStore.toggleTheme"
+        variant="elevated"
+        class="me-3"
+      ></v-btn>
+
+      <!-- User Menu -->
+      <v-menu offset-y :close-on-content-click="false" class="mdi-account-dropdown">
+        <template #activator="{ props }">
+          <v-btn v-bind="props" icon class="avatar-btn">
+            <v-avatar size="40" class="avatar-img">
+              <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Account Icon" />
+              <v-icon class="chevron-icon" size="18">mdi-chevron-down</v-icon>
+            </v-avatar>
+          </v-btn>
+        </template>
+
+        <v-sheet
+          rounded="lg"
+          elevation="2"
+          width="300"
+          class="pa-4 d-flex flex-column align-start custom-rounded-sheet"
+          color="brown-lighten-4"
+        >
+          <v-container class="justify-center align-center">
+            <v-card
+              elevation="2"
+              class="profile-card d-flex align-center "
+              @click="goToProfile"
+            >
+              <v-avatar size="50" class="avatar-img">
+                <img
+                  :src="userProfile.profile_image || '/default-avatar.jpg'"
+                  alt="Profile Picture"
+                />
+              </v-avatar>
+              <span class="ms-3 text-subtitle-1 underlined-name">
+                {{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}
+              </span>
+            </v-card>
+          </v-container>
+
+          <v-divider></v-divider>
+
+          <v-btn
+            variant="text"
+            color="error"
+            class="mt-2 full-width-btn align-start custom-btn my-2"
+            @click="logout"
+          >
+            <div class="icon-circle">
+              <v-icon>mdi-logout</v-icon>
+            </div>
+            Logout
+          </v-btn>
+        </v-sheet>
+      </v-menu>
+    </v-app-bar>
+  </v-container>
+</template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthUserStore } from '@/stores/authUser.js';
-import { useThemeStore } from '@/stores/theme.js'; // Add theme store
+import { useThemeStore } from '@/stores/theme.js';
+import { useSidebarStore } from '@/stores/sidebarStore'; // Sidebar store import
 import supabase from '@/utils/supabase.js';
 
 const router = useRouter();
-const themeStore = useThemeStore(); // Theme store for dark/light mode
+const themeStore = useThemeStore();
+const sidebarStore = useSidebarStore(); // Sidebar store access
 const showAppearancePage = ref(false);
 const userProfile = ref({});
 
@@ -60,89 +148,12 @@ const logout = async () => {
     console.error('Logout error:', error);
   }
 };
+
+const toggleSidebar = () => {
+  sidebarStore.toggleSidebar(); // Toggle sidebar state using the store
+};
 </script>
 
-<template>
-<v-container>
-  <v-app-bar color="brown-lighten-2" dark>
-    
-        <v-container class="d-flex align-center">
-      <img
-        src="/images/logo.png"
-        alt="Logo"
-        class="me-2"
-        style="width: 40px; height: 40px;"
-      />
-  <a href="/home" class="text-h6" style="text-decoration: none; color: white; ">
-    <span>STASH</span>
-  </a>
-    </v-container>
-
-    <v-spacer></v-spacer>
-    <v-spacer></v-spacer>
-
-    <!-- Theme Toggle Button -->
-    <v-btn
-      :icon="themeStore.theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-      @click="themeStore.toggleTheme"
-      variant="elevated"
-      class="me-3"
-    ></v-btn>
-
-    <!-- User Menu -->
-    <v-menu offset-y :close-on-content-click="false" class="mdi-account-dropdown">
-      <template #activator="{ props }">
-        <v-btn v-bind="props" icon class="avatar-btn">
-          <v-avatar size="40" class="avatar-img">
-            <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Account Icon" />
-            <v-icon class="chevron-icon" size="18">mdi-chevron-down</v-icon>
-          </v-avatar>
-        </v-btn>
-      </template>
-
-      <v-sheet
-        rounded="lg"
-        elevation="2"
-        width="300"
-        class="pa-4 d-flex flex-column align-start custom-rounded-sheet"
-        color="brown-lighten-4"
-      >
-      <v-container class="justify-center align-center">
-        <v-card
-          elevation="2"
-          class="profile-card d-flex align-center "
-          @click="goToProfile"
-        >
-          <v-avatar size="50" class="avatar-img">
-            <img
-              :src="userProfile.profile_image || '/default-avatar.jpg'"
-              alt="Profile Picture"
-            />
-          </v-avatar>
-          <span class="ms-3 text-subtitle-1 underlined-name">
-            {{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}
-          </span>
-        </v-card>
-        </v-container>
-
-        <v-divider></v-divider>
-
-        <v-btn
-          variant="text"
-          color="error"
-          class="mt-2 full-width-btn align-start custom-btn my-2"
-          @click="logout"
-        >
-          <div class="icon-circle">
-            <v-icon>mdi-logout</v-icon>
-          </div>
-          Logout
-        </v-btn>
-      </v-sheet>
-    </v-menu>
-  </v-app-bar>
-  </v-container>
-</template>
 
 <style scoped>
 .dark-mode {
