@@ -76,8 +76,21 @@ async function logout() {
 
 .page-layout {
   display: flex;
-  height: 100vh; /* Full viewport height to match sidebar */
+  height: 100vh; /* Full viewport height */
   overflow: hidden; /* Prevent parent container scrolling */
+  
+  /* Gradient Background Styling */
+  background-color: linear-gradient(
+    180deg, /* Angle of the gradient */
+    #ffc95f,
+    #ed9bbd /* Color 1 */
+    #b0041a, /* Color 2 */
+    #500711, /* Color 3 */
+  );
+  background-size: cover; /* Ensure gradient covers the area */
+  background-repeat: no-repeat; /* Prevent tiling */
+  background-position: center; /* Center the gradient */
+  background-attachment: fixed; /* Fix the gradient during scrolling */
 }
 
 /* Hide scrollbar for main content */

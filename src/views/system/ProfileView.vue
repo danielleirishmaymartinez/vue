@@ -612,8 +612,6 @@ const logout = async () => {
   </v-tooltip>
 </v-bottom-navigation>
 
-
-
       <!-- Post Form (Floating Form) -->  
       <v-dialog v-model="showPostForm" max-width="500px" persistent>
   <v-card>
