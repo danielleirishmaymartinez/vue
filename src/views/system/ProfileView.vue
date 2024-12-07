@@ -428,8 +428,8 @@ const logout = async () => {
                   <!-- Preferred Locations -->
                   <div class="mb-3">
                     <br>
-                    <strong>Preferred Locations:</strong> {{ userProfile.preferred_location || "Not specified" }}<br>
-                    <strong>Available Times:</strong> {{ userProfile.preferred_time || "Not specified" }}
+                    <strong>Preferred Location:</strong> {{ userProfile.preferred_location || "Not specified" }}<br>
+                    <strong>Available Time:</strong> {{ userProfile.preferred_time || "Not specified" }}
                   </div>
                 </div>
               </v-col>
@@ -450,10 +450,11 @@ const logout = async () => {
   <v-img :src="post.image" aspect-ratio="1.5"></v-img>
   <v-card-title>{{ post.item_name }}</v-card-title>
   <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
-  <v-card-text>
+  <v-card-text class="card-content">
     <p>{{ post.description }}</p>
     <p><strong>Type:</strong> {{ post.type }}</p>
-    <p v-if="post.is_sold" class="text-danger">Sold Out</p>
+    <!-- "Sold Out" text centered if the post is sold -->
+    <p v-if="post.is_sold" class="sold-out-text">Sold</p>
   </v-card-text>
 
     <v-card-actions>
@@ -614,12 +615,12 @@ const logout = async () => {
 
       <!-- Post Form (Floating Form) -->  
       <v-dialog v-model="showPostForm" max-width="500px" persistent>
-  <v-card>
-    <v-card-title>
-      Create New Post
-      <v-btn icon @click="togglePostForm" class="ml-auto">
+<v-card class="pa-4" rounded="xl">
+          <v-btn icon @click="togglePostForm" class="ml-auto">
         <v-icon>mdi-close</v-icon>
       </v-btn>
+    <v-card-title>
+      Create New Post
     </v-card-title>
     <v-card-text>
       <v-form @submit.prevent="submitPost">
@@ -627,31 +628,43 @@ const logout = async () => {
           v-model="newPost.item_name"
           label="Item Name"
           required
+          variant="outlined"
+          rounded="lg"
         ></v-text-field>
         <v-textarea
           v-model="newPost.description"
           label="Description"
           required
+          variant="outlined"
+          rounded="lg"
         ></v-textarea>
         <v-text-field
           v-model="newPost.price"
           label="Price"
           type="number"
           required
+          variant="outlined"
+          rounded="lg"
         ></v-text-field>
         <v-select
           v-model="newPost.type"
           :items="['For Sale', 'For Trade']"
           label="Type"
           required
+          variant="outlined"
+          rounded="lg"
         ></v-select>
         <v-file-input
           v-model="newPost.image"
           label="Product Image"
           accept="image/*"
           required
+          variant="outlined"
+          rounded="lg"
         ></v-file-input>
-        <v-btn type="submit" color="green">Post</v-btn>
+        <v-btn type="submit" color="green" class="mt-4" elevation="2" block rounded="lg">
+          Post
+        </v-btn>
       </v-form>
     </v-card-text>
   </v-card>
@@ -676,10 +689,26 @@ const logout = async () => {
   scrollbar-width: none; /* For Firefox */
 }
 
+.custom-card {
+  border-radius: 16px;
+}
+
 .main-content {
   flex: 1;
   overflow-y: auto; /* Allow scrolling within the main content */
   padding: 20px;
+}
+
+.sold-out-text {
+  position: absolute; 
+  top: 40%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  font-size: 3.5rem; 
+  font-weight: bold; 
+  color: rgba(14, 2, 2, 0.541); 
+  text-transform: uppercase; 
+  z-index: 1; 
 }
 
 .profile-avatar {

@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <v-app-bar color="brown-lighten-2" dark>
+    <v-app-bar
+      color="transparent"
+      dark
+      variant="outlined"
+      elevation="0"
+    >
       <v-container class="d-flex align-center">
         <img
           src="/images/logo.png"
@@ -8,17 +13,16 @@
           class="me-2"
           style="width: 40px; height: 40px;"
         />
-        
-        <a href="/home" class="text-h6" style="text-decoration: none; color: white;">
+        <a href="/home" class="text-h6" style="text-decoration: none; color: black;">
           <span>STASH</span>
         </a>
 
-        <!-- Sidebar Toggle Button, now next to STASH -->
+        <!-- Sidebar Toggle Button -->
         <v-btn @click="toggleSidebar" icon class="ms-3">
-          <v-icon>mdi-menu</v-icon> <!-- Using mdi-menu for toggle -->
+          <v-icon>mdi-menu</v-icon>
         </v-btn>
       </v-container>
-      
+
       <v-spacer></v-spacer>
 
       <!-- Theme Toggle Button -->
@@ -30,36 +34,29 @@
       ></v-btn>
 
       <!-- User Menu -->
-      <v-menu offset-y :close-on-content-click="false" class="mdi-account-dropdown">
+      <v-menu offset-y :close-on-content-click="false">
         <template #activator="{ props }">
-          <v-btn v-bind="props" icon class="avatar-btn">
-            <v-avatar size="40" class="avatar-img">
+          <v-btn v-bind="props" icon>
+            <v-avatar size="40">
               <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Account Icon" />
-              <v-icon class="chevron-icon" size="18">mdi-chevron-down</v-icon>
             </v-avatar>
           </v-btn>
         </template>
 
-        <v-sheet
-          rounded="lg"
-          elevation="2"
-          width="300"
-          class="pa-4 d-flex flex-column align-start custom-rounded-sheet"
-          color="brown-lighten-4"
-        >
+        <v-sheet rounded="lg" elevation="2" width="300" class="pa-4">
           <v-container class="justify-center align-center">
             <v-card
               elevation="2"
-              class="profile-card d-flex align-center "
+              class="profile-card d-flex align-center"
               @click="goToProfile"
             >
-              <v-avatar size="50" class="avatar-img">
+              <v-avatar size="50">
                 <img
                   :src="userProfile.profile_image || '/default-avatar.jpg'"
                   alt="Profile Picture"
                 />
               </v-avatar>
-              <span class="ms-3 text-subtitle-1 underlined-name">
+              <span class="ms-3 text-subtitle-1">
                 {{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}
               </span>
             </v-card>
@@ -70,12 +67,10 @@
           <v-btn
             variant="text"
             color="error"
-            class="mt-2 full-width-btn align-start custom-btn my-2"
+            class="mt-2 full-width-btn"
             @click="logout"
           >
-            <div class="icon-circle">
-              <v-icon>mdi-logout</v-icon>
-            </div>
+            <v-icon>mdi-logout</v-icon>
             Logout
           </v-btn>
         </v-sheet>
@@ -83,6 +78,7 @@
     </v-app-bar>
   </v-container>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';
