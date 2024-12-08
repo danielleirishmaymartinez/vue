@@ -49,10 +49,4 @@ const themeStore = useThemeStore();
   text-align: left;  /* Align content to the left */
   align-items: flex-start;    /* Align items to the left vertically */
 }
-
-.sidebar {
-  border-right: 1px solid #e0e0e0;
-  padding: 16px;
-  background-color: #f9f9f9;
-}
 </style>

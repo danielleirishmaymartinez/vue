@@ -1,59 +1,96 @@
 <script setup>
-import AlertNotification from '@/components/common/AlertNotification.vue';
-import { formActionDefault } from '@/utils/supabase.js';
+import { ref, onMounted } from 'vue';
 import { useAuthUserStore } from '@/stores/authUser';
-import { ref } from 'vue';
+import AlertNotification from '@/components/common/AlertNotification.vue';
 import supabase from '@/utils/supabase.js';
+import { formActionDefault } from '@/utils/supabase.js';
 
 const authStore = useAuthUserStore();
 
 const formData = ref({
-  firstname: authStore.userData?.first_name || '',
-  lastname: authStore.userData?.last_name || '',
+  firstname: '',
+  lastname: '',
   email: authStore.userData?.email || '',
-  facebookLink: authStore.userData?.fb_link || '',
-  bio: authStore.userData?.bio || '',
-  location: authStore.userData?.preferred_location || '',
-  time: authStore.userData?.preferred_time || '',
+  facebookLink: '',
+  bio: '',
+  location: '',
+  time: '',
 });
 
 const formAction = ref({ ...formActionDefault });
 const refVForm = ref();
 
+const fetchUserData = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, fb_link, bio, preferred_location, preferred_time')
+      .eq('user_id', authStore.userData?.id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching profile data:', error.message);
+    } else if (data) {
+      formData.value = {
+        firstname: data.first_name || '',
+        lastname: data.last_name || '',
+        email: authStore.userData?.email || '',
+        facebookLink: data.fb_link || '',
+        bio: data.bio || '',
+        location: data.preferred_location || '',
+        time: data.preferred_time || '',
+      };
+    }
+  } catch (error) {
+    console.error('Unexpected error:', error.message);
+  }
+};
+
 const onSubmit = async () => {
   formAction.value = { ...formActionDefault, formProcess: true };
 
-  // Use defaults if certain fields are empty
-  const updatedData = {
-    first_name: formData.value.firstname,
-    last_name: formData.value.lastname,
-    fb_link: formData.value.facebookLink,
-    bio: formData.value.bio || 'No bio available.',  // Default bio if empty
-    preferred_location: formData.value.location || 'Not specified', // Default location
-    preferred_time: formData.value.time || 'Not specified', // Default time
-  };
+  try {
+    // Fetch the existing profile data to ensure no fields are lost
+    const { data: existingData, error: fetchError } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, fb_link, bio, preferred_location, preferred_time')
+      .eq('user_id', authStore.userData?.id)
+      .single();
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(updatedData)
-    .eq('user_id', authStore.userData?.id); // Ensure the update is for the current user
+    if (fetchError) {
+      throw new Error(fetchError.message);
+    }
 
-  if (error) {
-    formAction.value.formErrorMessage = error.message;
-    formAction.value.formStatus = error.status;
-  } else if (data) {
-    // Optionally update the store with the new data
-    authStore.userData.first_name = formData.value.firstname;
-    authStore.userData.last_name = formData.value.lastname;
-    authStore.userData.fb_link = formData.value.facebookLink;
-    authStore.userData.bio = formData.value.bio;
-    authStore.userData.preferred_location = formData.value.location;
-    authStore.userData.preferred_time = formData.value.time;
+    // Merge existing data with the new form values
+    const updatedData = {
+      first_name: formData.value.firstname || existingData.first_name,
+      last_name: formData.value.lastname || existingData.last_name,
+      fb_link: formData.value.facebookLink || existingData.fb_link,
+      bio: formData.value.bio || existingData.bio || 'No bio available.',
+      preferred_location: formData.value.location || existingData.preferred_location || 'Not specified',
+      preferred_time: formData.value.time || existingData.preferred_time || 'Not specified',
+    };
+
+    // Update the database
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update(updatedData)
+      .eq('user_id', authStore.userData?.id);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    // Update local store with new data
+    authStore.userData = { ...authStore.userData, ...updatedData };
 
     formAction.value.formSuccessMessage = 'Successfully updated account information.';
+  } catch (error) {
+    formAction.value.formErrorMessage = error.message;
+    formAction.value.formStatus = 'error';
+  } finally {
+    formAction.value.formProcess = false;
   }
-
-  formAction.value.formProcess = false;
 };
 
 const onFormSubmit = () => {
@@ -61,6 +98,11 @@ const onFormSubmit = () => {
     if (valid) onSubmit();
   });
 };
+
+// Pre-fill form when component is mounted
+onMounted(() => {
+  fetchUserData();
+});
 </script>
 
 <template>
@@ -122,7 +164,7 @@ const onFormSubmit = () => {
         />
       </v-col>
 
-      <v-col cols="12" sm="6">
+      <v-col cols="12">
         <v-textarea
           v-model="formData.bio"
           label="Bio"
