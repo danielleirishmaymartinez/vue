@@ -2,10 +2,8 @@
 import { ref, computed, onMounted } from 'vue';  // Fixed duplicate imports
 import { useSavedProductsStore } from '@/stores/savedProducts';
 import supabase from '@/utils/supabase.js';
-import { useThemeStore } from '@/stores/theme.js';
 
 const savedProductsStore = useSavedProductsStore();
-const themeStore = useThemeStore();
 const searchQuery = ref('');  // Search query reactive variable
 const posts = ref([]);
 
@@ -294,13 +292,6 @@ const redirectToFacebookProfile = (post) => {
   border-style: solid;
 }
 
-.dark-mode {
-  color: #ffffff;
-}
-
-.light-mode {
-  color: #000000;
-}
 
 
 .carousel-card {

@@ -25,14 +25,6 @@
 
       <v-spacer></v-spacer>
 
-      <!-- Theme Toggle Button -->
-      <v-btn
-        :icon="themeStore.theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-        @click="themeStore.toggleTheme"
-        variant="elevated"
-        class="me-3"
-      ></v-btn>
-
       <!-- User Menu -->
       <v-menu offset-y :close-on-content-click="false">
         <template #activator="{ props }">
@@ -84,12 +76,10 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthUserStore } from '@/stores/authUser.js';
-import { useThemeStore } from '@/stores/theme.js';
 import { useSidebarStore } from '@/stores/sidebarStore'; // Sidebar store import
 import supabase from '@/utils/supabase.js';
 
 const router = useRouter();
-const themeStore = useThemeStore();
 const sidebarStore = useSidebarStore(); // Sidebar store access
 const showAppearancePage = ref(false);
 const userProfile = ref({});
@@ -152,15 +142,6 @@ const toggleSidebar = () => {
 
 
 <style scoped>
-.dark-mode {
-  background-color: #121212;
-  color: #e76317;
-}
-
-.light-mode {
-  background-color: #ffffff;
-  color: #000000;
-}
 
 .avatar-img img {
   object-fit: cover;

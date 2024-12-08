@@ -6,12 +6,10 @@ import { useDisplay } from 'vuetify';
 import { ref, onMounted } from 'vue';
 import supabase from '@/utils/supabase.js';
 import { useRouter } from 'vue-router';
-import { useThemeStore } from '@/stores/theme.js'; // Import the theme store
 
 const { mobile } = useDisplay();
 const drawerVisible = ref(!mobile.value);
 const router = useRouter();
-const themeStore = useThemeStore(); // Access the theme store
 const profile = ref(null); // Default profile is null
 
 // Fetch user data on mount
@@ -50,15 +48,12 @@ async function logout() {
 
 <template>
   <v-responsive class="border rounded">
-    <v-app
-      :theme="themeStore.theme"
-      :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-    >
+    <v-app>
       <!-- Navbar -->
       <Navbar />
 
       <!-- Page Container -->
-      <v-container fluid class="d-flex page-layout">
+      <v-container fluid class="d-flex page-layout" >
         <!-- Sidebar -->
         <SidebarNav v-model:drawer="drawerVisible" />
 
@@ -106,15 +101,5 @@ async function logout() {
   flex: 1;
   overflow-y: auto; /* Allow scrolling within the main content */
   padding: 20px;
-}
-
-.dark-mode {
-  background-color: #121212;
-  color: #ffffff;
-}
-
-.light-mode {
-  background-color: #ffffff;
-  color: #000000;
 }
 </style>

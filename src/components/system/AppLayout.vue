@@ -1,8 +1,6 @@
 <script setup>
-import { useThemeStore } from '@/stores/theme.js';
 import { useRouter } from 'vue-router';
 
-const themeStore = useThemeStore();
 const router = useRouter();
 
 function navigateTo(path) {
@@ -12,10 +10,7 @@ function navigateTo(path) {
 
 <template>
   <v-responsive>
-    <v-app
-      :theme="themeStore.theme"
-      :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-    >
+    <v-app>
       <!-- Background Image -->
       <div class="background-wrapper">
         <!-- App Bar -->
@@ -32,12 +27,6 @@ function navigateTo(path) {
 
           <v-spacer></v-spacer>
 
-          <v-btn
-            :icon="themeStore.theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-            @click="themeStore.toggleTheme"
-            variant="elevated"
-            slim
-          ></v-btn>
         </v-app-bar>
 
         <!-- Main Content -->
@@ -105,9 +94,6 @@ function navigateTo(path) {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.dark-mode .form-container {
-  background-color: rgba(33, 33, 33, 0.85); /* Dark mode background */
-}
 
 /* Custom Field Styles */
 .custom-field .v-input {
@@ -129,9 +115,6 @@ function navigateTo(path) {
   color: rgba(255, 255, 255, 0.8) !important; /* White for dark mode */
 }
 
-.light-mode .custom-field .v-label {
-  color: rgba(0, 0, 0, 0.8) !important; /* Black for light mode */
-}
 
 /* Responsive Design */
 @media (max-width: 600px) {

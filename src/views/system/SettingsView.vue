@@ -7,11 +7,9 @@ import PictureForm from "@/components/system/account-settings/PictureForm.vue";
 import ProfileForm from "@/components/system/account-settings/ProfileForm.vue";
 import PasswordForm from "@/components/system/account-settings/PasswordForm.vue";
 import supabase from "@/utils/supabase.js";
-import { useThemeStore } from '@/stores/theme.js'; // Import the theme store
 
 const drawerVisible = ref(true);
 const router = useRouter();
-const themeStore = useThemeStore(); // Access the theme store
 
 async function logout() {
   try {
@@ -23,10 +21,7 @@ async function logout() {
 }
 </script>
 <template>  
-  <v-app
-  :theme="themeStore.theme"
-      :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-  >
+  <v-app>
     <!-- Navbar -->
     <Navbar @logout="logout" />
 

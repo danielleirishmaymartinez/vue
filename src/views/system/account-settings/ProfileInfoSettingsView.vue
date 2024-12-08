@@ -3,17 +3,12 @@ import { ref } from "vue";
 import SidebarNav from "@/components/system/SidebarNav.vue";
 import Navbar from "@/components/system/Navbar.vue";
 import ProfileForm from "@/components/system/account-settings/ProfileForm.vue";
-import { useThemeStore } from '@/stores/theme.js';
 
 const drawerVisible = ref(true);
-const themeStore = useThemeStore();
 </script>
 
 <template>
-  <v-app
-    :theme="themeStore.theme"
-    :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-  >
+  <v-app>
     <Navbar />
     <v-container fluid>
       <v-row>
