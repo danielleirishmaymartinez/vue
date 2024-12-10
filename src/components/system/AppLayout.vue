@@ -10,8 +10,7 @@ function navigateTo(path) {
 
 <template>
   <v-responsive>
-    <v-app>
-      <!-- Background Image -->
+    <v-app>      <!-- Background Image -->
       <div class="background-wrapper">
         <!-- Transparent App Bar -->
         <v-app-bar flat class="transparent-navbar">

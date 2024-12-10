@@ -21,9 +21,11 @@
         </a>
       </v-container>
 
+
       <v-spacer></v-spacer>
 
       <!-- User Menu -->
+      <v-menu offset-y :close-on-content-click="false">
       <v-menu offset-y :close-on-content-click="false">
         <template #activator="{ props }">
           <v-btn v-bind="props" icon class="no-shadow mr-6">
@@ -66,6 +68,7 @@
     </v-app-bar>
   </v-container>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';

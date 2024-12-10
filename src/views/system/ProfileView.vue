@@ -696,11 +696,11 @@ const logout = async () => {
 
 .sold-out-text {
   position: absolute; 
-  top: 30%; 
+  top: 40%; 
   left: 50%; 
   transform: translate(-50%, -50%); 
   font-size: 3.5rem; 
-  font-weight:bolder; 
+  font-weight: bold; 
   color: rgba(14, 2, 2, 0.541); 
   text-transform: uppercase; 
   z-index: 1; 
