@@ -9,12 +9,12 @@ const posts = ref([]);
 
 const filteredPosts = computed(() => {
   const query = searchQuery.value.trim().toLowerCase(); // Trim and normalize the search query
-  
+
   if (!query) return posts.value; // If no search query, show all posts
-  
+
   return posts.value.filter(post => {
     const itemName = post.item_name ? post.item_name.toLowerCase().trim() : '';
-    
+
     // Check if query matches any part of item_name, description, or location
     const itemMatches = itemName.includes(query);
     // Return true only if any of the matches are true
@@ -25,17 +25,17 @@ const filteredPosts = computed(() => {
 
 const carouselItems = [
   {
-    image: '/images/car-1.jpg',
+    image: '/images/car1.jpg',
     title: 'Discover unbeatable prices',
     subtitle: 'And swap opportunities right here on campus!',
   },
   {
-    image: '/images/car-2.jpg',
+    image: '/images/car2.jpg',
     title: 'Unlock incredible deals at our virtual marketplace',
     subtitle: 'where every purchase and swap saves you more!',
   },
   {
-    image: '/images/car-3.jpg',
+    image: '/images/car3.jpg',
     title: 'Buy what you need, swap what you don’t',
     subtitle: 'Check out our newest collections.',
   },
@@ -128,7 +128,7 @@ const toggleSave = async (post) => {
   }
 };
 
-const isSaved = (post) => 
+const isSaved = (post) =>
   savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
 const selectedPost = ref(null);
