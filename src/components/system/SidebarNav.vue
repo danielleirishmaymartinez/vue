@@ -2,13 +2,12 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
-import { useThemeStore } from '@/stores/theme.js'; // Import the theme store
 import { useSidebarStore } from '@/stores/sidebarStore'; // Import sidebar store
 
 const router = useRouter();
 const { mobile } = useDisplay();
 const sidebarStore = useSidebarStore(); // Access the sidebar store
-const themeStore = useThemeStore(); // Access the theme store
+
 
 // Watch for changes in the sidebar state and update the drawer visibility
 const drawer = ref(false);
@@ -36,8 +35,6 @@ function navigateTo(path) {
     :temporary="mobile.value"
     width="260"
     app
-    :theme="themeStore.theme"
-    :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
     class="border border-sm"
   >
     <v-list density="compact" nav class=" mt-15 flex-row pt-12">
@@ -75,13 +72,6 @@ function navigateTo(path) {
 </template>
 
 <style scoped>
-.light-mode {
-  background-color: #ffffff;
-}
-
-.dark-mode {
-  background-color: #121212;
-}
 
 .v-navigation-drawer {
   display: flex;

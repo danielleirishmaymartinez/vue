@@ -25,6 +25,7 @@ function navigateTo(path) {
             <span class="ml-1">Campus Deals</span>
           </v-btn>
           <v-spacer></v-spacer>
+
         </v-app-bar>
 
         <!-- Main Content -->
@@ -120,6 +121,12 @@ function navigateTo(path) {
   box-shadow: none !important;
   border-color: rgba(255, 0, 0, 0.7) !important; /* Red border on focus */
 }
+
+/* Remove label blue effect */
+.custom-field .v-label {
+  color: rgba(255, 255, 255, 0.8) !important; /* White for dark mode */
+}
+
 
 /* Responsive Design */
 @media (max-width: 600px) {

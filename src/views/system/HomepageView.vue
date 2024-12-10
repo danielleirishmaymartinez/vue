@@ -6,12 +6,10 @@ import { useDisplay } from 'vuetify';
 import { ref, onMounted } from 'vue';
 import supabase from '@/utils/supabase.js';
 import { useRouter } from 'vue-router';
-import { useThemeStore } from '@/stores/theme.js'; // Import the theme store
 
 const { mobile } = useDisplay();
 const drawerVisible = ref(!mobile.value);
 const router = useRouter();
-const themeStore = useThemeStore(); // Access the theme store
 const profile = ref(null); // Default profile is null
 
 // Fetch user data on mount
@@ -50,15 +48,12 @@ async function logout() {
 
 <template>
   <v-responsive class="border rounded">
-    <v-app
-      :theme="themeStore.theme"
-      :class="themeStore.theme === 'dark' ? 'dark-mode' : 'light-mode'"
-    >
+    <v-app>
       <!-- Navbar -->
       <Navbar />
 
       <!-- Page Container -->
-      <v-container fluid class="d-flex page-layout">
+      <v-container fluid class="layout" >
         <!-- Sidebar -->
         <SidebarNav v-model:drawer="drawerVisible" />
 
@@ -74,24 +69,10 @@ async function logout() {
 
 <style scoped>
 
-.page-layout {
-  display: flex;
-  height: 100vh; /* Full viewport height */
-  overflow: hidden; /* Prevent parent container scrolling */
-  
-  /* Gradient Background Styling */
-  background-color: linear-gradient(
-    180deg, /* Angle of the gradient */
-    #ffc95f,
-    #ed9bbd /* Color 1 */
-    #b0041a, /* Color 2 */
-    #500711, /* Color 3 */
-  );
-  background-size: cover; /* Ensure gradient covers the area */
-  background-repeat: no-repeat; /* Prevent tiling */
-  background-position: center; /* Center the gradient */
-  background-attachment: fixed; /* Fix the gradient during scrolling */
+.layout {
+  background-color: #210440;
 }
+
 
 /* Hide scrollbar for main content */
 .main-content::-webkit-scrollbar {
@@ -103,18 +84,7 @@ async function logout() {
 }
 
 .main-content {
-  flex: 1;
   overflow-y: auto; /* Allow scrolling within the main content */
-  padding: 20px;
-}
 
-.dark-mode {
-  background-color: #121212;
-  color: #ffffff;
-}
-
-.light-mode {
-  background-color: #ffffff;
-  color: #000000;
 }
 </style>
