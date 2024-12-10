@@ -26,7 +26,6 @@
 
       <!-- User Menu -->
       <v-menu offset-y :close-on-content-click="false">
-      <v-menu offset-y :close-on-content-click="false">
         <template #activator="{ props }">
           <v-btn v-bind="props" icon class="no-shadow mr-6">
             <v-avatar size="50">
