@@ -35,9 +35,4 @@ const drawerVisible = ref(true);
   padding: 50px;
   margin: 30px;
 }
-.sidebar {
-  border-right: 1px solid #e0e0e0;
-  padding: 16px;
-  background-color: #f9f9f9;
-}
 </style>
