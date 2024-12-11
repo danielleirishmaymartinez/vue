@@ -1,26 +1,38 @@
 <script setup>
-import { ref } from "vue";
+import { useSidebarStore } from "@/stores/sidebarStore"; // Import the Pinia store
 import SidebarNav from "@/components/system/SidebarNav.vue";
 import Navbar from "@/components/system/Navbar.vue";
 import PictureForm from "@/components/system/account-settings/PictureForm.vue";
 
-const drawerVisible = ref(true);
+// Access the Pinia store
+const sidebarStore = useSidebarStore();
 </script>
 
 <template>
   <v-app>
+    <!-- Navbar -->
     <Navbar />
-    <v-container fluid>
+
+    <!-- Main Container -->
+    <v-container
+      fluid
+      class="custom-container"
+      :class="{'sidebar-closed': !sidebarStore.isSidebarOpen }"
+    >
       <v-row>
-        <v-col cols="12" md="2" lg="2" class="sidebar">
-          <SidebarNav v-model:drawer="drawerVisible" />
+        <!-- Sidebar -->
+        <v-col cols="12" md="2" lg="2" class="sidebar"
+                  v-show="sidebarStore.isSidebarOpen">
+          <SidebarNav />
         </v-col>
-        <v-col cols="12" md="9" lg="10">
-          <div class="content-wrapper ">
-            <v-card class="mb-5 ml-8 extended-card border-lg ">
-              <v-card-title class= "pa-12">Profile Picture</v-card-title>
+
+        <!-- Main Content -->
+        <v-col cols="12" :md="sidebarStore.isSidebarOpen ? 9 : 12" :lg="sidebarStore.isSidebarOpen ? 10 : 12">
+          <div class="content-wrapper rounded-lg">
+            <v-card class="mb-5 ml-8 extended-card rounded-lg">
+              <v-card-title class="pa-12">Profile Picture</v-card-title>
               <v-card-text>
-                <div >
+                <div>
                   <PictureForm />
                 </div>
               </v-card-text>
@@ -33,15 +45,32 @@ const drawerVisible = ref(true);
 </template>
 
 <style scoped>
-.extended-card {
-  height: 400px; /* Adjust height as needed */
+/* Ensure the container covers the entire page */
+.custom-container {
+  background-color: #210440;
+  transition: margin-left 0.3s ease; /* Smooth transition for sidebar movement */
+  min-height: 100vh;
 }
 
+/* Styles when sidebar is open */
+.sidebar-open {
+  margin-left: 0; /* Adjust based on your sidebar width */
+}
+
+/* Styles when sidebar is closed */
+.sidebar-closed {
+  margin-left: 0;
+}
+
+/* Additional styles for the content */
+.extended-card {
+  height: 450px; /* Adjust height as needed */
+  border: 2px solid #e8657f;
+}
 
 .content-wrapper {
   padding: 50px;
   margin: 30px;
-  text-align: left;  /* Align content to the left */
-  align-items: flex-start;    /* Align items to the left vertically */
+  background-color: #210440;
 }
 </style>

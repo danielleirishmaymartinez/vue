@@ -140,7 +140,7 @@ const onFormSubmit = () => {
       <v-col cols="12" sm="6" md="5">
         <v-img
           width="50%"
-          class="mx-auto rounded-circle"
+          class=" profile-avatar mx-auto rounded-circle"
           color="white-darken-4"
           aspect-ratio="1"
           :src="imgPreview"
@@ -166,7 +166,7 @@ const onFormSubmit = () => {
         <v-btn
           class="mt-2"
           type="submit"
-          color="red-darken-4"
+          color="pink-accent-2"
           rounded="pill"
           prepend-icon="mdi-image-edit"
           :disabled="formAction.formProcess"
@@ -178,3 +178,4 @@ const onFormSubmit = () => {
     </v-row>
   </v-form>
 </template>
+

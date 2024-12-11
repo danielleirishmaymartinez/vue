@@ -105,7 +105,7 @@ const onFormSubmit = () => {
     <v-btn
       class="mt-2"
       type="submit"
-      color="red-darken-4"
+      color="pink-accent-2"
       rounded="pill"
       prepend-icon="mdi-key-variant"
       :disabled="formAction.formProcess"

@@ -8,7 +8,6 @@ const router = useRouter();
 const { mobile } = useDisplay();
 const sidebarStore = useSidebarStore(); // Access the sidebar store
 
-
 // Watch for changes in the sidebar state and update the drawer visibility
 const drawer = ref(false);
 watch(() => sidebarStore.isSidebarOpen, (newState) => {
