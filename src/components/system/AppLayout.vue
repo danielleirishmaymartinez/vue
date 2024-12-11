@@ -10,27 +10,21 @@ function navigateTo(path) {
 
 <template>
   <v-responsive>
-    <v-app>
-      <!-- Background Wrapper -->
-=======
     <v-app>      <!-- Background Image -->
->>>>>>> cfbd0dacc7ce9deb06025a6cc394fb2ac7871cd4
       <div class="background-wrapper">
         <!-- Transparent App Bar -->
         <v-app-bar flat class="transparent-navbar">
           <v-btn text class="d-flex align-center" @click="navigateTo('/')">
-            <v-img
+            <img
               src="/images/logo.png"
-              alt="STASH logo"
-              class="mr-2 logo-img"
               alt="Campus Logo logo"
               class="mr-2"
               width="25"
-              contain
             />
             <span class="ml-1">Campus Deals</span>
           </v-btn>
           <v-spacer></v-spacer>
+
         </v-app-bar>
 
         <!-- Main Content -->
@@ -58,7 +52,7 @@ function navigateTo(path) {
                       label="Email"
                       type="email"
                       variant="outlined"
-                      color="purple"
+                      color="red"
                       class="custom-field"
                       density="compact"
                       hide-details
@@ -67,14 +61,11 @@ function navigateTo(path) {
                       label="Password"
                       type="password"
                       variant="outlined"
-                      color="purple"
+                      color="red"
                       class="custom-field"
                       density="compact"
                       hide-details
                     ></v-text-field>
-                    <v-btn color="purple" class="mt-4" block>
-                      Login
-                    </v-btn>
                   </slot>
                 </v-card>
               </v-col>
@@ -96,14 +87,6 @@ function navigateTo(path) {
   background-attachment: fixed; /* Keeps the background fixed */
   width: 100%;
   height: 100vh; /* Full viewport height */
-  position: relative;
-}
-
-/* Logo Image Styling */
-.logo-img {
-  max-height: 25px;
-  width: auto;
-  display: block;
 }
 
 /* Transparent Navbar */
@@ -117,9 +100,6 @@ function navigateTo(path) {
 
 /* Form Container Styling */
 .form-container {
-  background: rgba(255, 255, 255, 0.4); /* Semi-transparent white */
-  backdrop-filter: blur(10px); /* Apply blur effect */
-  border-radius: 16px;
   background-color: rgba(206, 124, 124, 0.19); /* Slightly transparent white */
   border-radius: 8px;
   padding: 20px;
@@ -129,24 +109,23 @@ function navigateTo(path) {
 
 /* Custom Field Styles */
 .custom-field .v-input {
-  background-color: transparent !important;
+  background-color: transparent !important; /* Transparent background */
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
 }
 
-
-/* Remove blue focus outline */
 .custom-field input:focus {
   outline: none !important;
   box-shadow: none !important;
-  border-color: rgba(128, 0, 128, 0.7) !important; /* Purple border on focus */
+  border-color: rgba(255, 0, 0, 0.7) !important; /* Red border on focus */
 }
 
 /* Remove label blue effect */
 .custom-field .v-label {
-  color: rgba(0, 0, 0, 0.8) !important; /* Darker label color */
+  color: rgba(255, 255, 255, 0.8) !important; /* White for dark mode */
 }
+
 
 /* Responsive Design */
 @media (max-width: 600px) {
