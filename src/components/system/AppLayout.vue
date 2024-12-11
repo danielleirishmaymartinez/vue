@@ -80,7 +80,7 @@ function navigateTo(path) {
 <style scoped>
 /* Background Wrapper */
 .background-wrapper {
-  background-image: url('/images/lr1-form.png'); /* Path to your background image */
+  background-image: url('/images/lr-gif.gif'); /* Path to your background image */
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
