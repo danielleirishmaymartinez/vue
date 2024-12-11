@@ -11,22 +11,22 @@ function navigateTo(path) {
 <template>
   <v-responsive>
     <v-app>
-      <!-- Background Image -->
+      <!-- Background Wrapper -->
       <div class="background-wrapper">
         <!-- App Bar -->
         <v-app-bar flat>
           <v-btn text class="d-flex align-center" @click="navigateTo('/')">
-            <img
+            <v-img
               src="/images/logo.png"
               alt="STASH logo"
-              class="mr-2"
+              class="mr-2 logo-img"
               width="25"
+              contain
             />
             <span class="ml-1">STASH</span>
           </v-btn>
 
           <v-spacer></v-spacer>
-
         </v-app-bar>
 
         <!-- Main Content -->
@@ -50,7 +50,7 @@ function navigateTo(path) {
                       label="Email"
                       type="email"
                       variant="outlined"
-                      color="red"
+                      color="purple"
                       class="custom-field"
                       density="compact"
                       hide-details
@@ -59,11 +59,14 @@ function navigateTo(path) {
                       label="Password"
                       type="password"
                       variant="outlined"
-                      color="red"
+                      color="purple"
                       class="custom-field"
                       density="compact"
                       hide-details
                     ></v-text-field>
+                    <v-btn color="purple" class="mt-4" block>
+                      Login
+                    </v-btn>
                   </slot>
                 </v-card>
               </v-col>
@@ -78,43 +81,50 @@ function navigateTo(path) {
 <style scoped>
 /* Background Wrapper */
 .background-wrapper {
-  background-image: url('/images/lr1-form.png'); /* Path to your background image */
+  background-image: url('/images/lr-gif.gif'); /* Path to your background image */
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   width: 100%;
   height: 100vh; /* Full viewport height */
+  position: relative;
+}
+
+/* Logo Image Styling */
+.logo-img {
+  max-height: 25px;
+  width: auto;
+  display: block;
 }
 
 /* Form Container Styling */
 .form-container {
-  background-color: rgba(245, 243, 246, 0.85); /* Light mode background */
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.4); /* Semi-transparent white */
+  backdrop-filter: blur(10px); /* Apply blur effect */
+  border-radius: 16px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-
 /* Custom Field Styles */
 .custom-field .v-input {
-  background-color: transparent !important; /* Transparent background */
+  background-color: transparent !important;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
 }
 
-/* Remove blue focus outline in dark mode */
+/* Remove blue focus outline */
 .custom-field input:focus {
   outline: none !important;
   box-shadow: none !important;
-  border-color: rgba(255, 0, 0, 0.7) !important; /* Red border on focus */
+  border-color: rgba(128, 0, 128, 0.7) !important; /* Purple border on focus */
 }
 
 /* Remove label blue effect */
 .custom-field .v-label {
-  color: rgba(255, 255, 255, 0.8) !important; /* White for dark mode */
+  color: rgba(0, 0, 0, 0.8) !important; /* Darker label color */
 }
-
 
 /* Responsive Design */
 @media (max-width: 600px) {
