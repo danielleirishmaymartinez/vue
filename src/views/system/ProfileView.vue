@@ -382,7 +382,7 @@ const logout = async () => {
 
 
 <template>
-  <v-responsive class="border rounded">
+  <v-responsive>
     <v-app>
       <!-- Top Navbar -->
       <Navbar />
