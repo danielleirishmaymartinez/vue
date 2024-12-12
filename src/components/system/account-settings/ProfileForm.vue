@@ -12,7 +12,6 @@ const formData = ref({
   lastname: '',
   email: authStore.userData?.email || '',
   facebookLink: '',
-  bio: '',
   location: '',
   time: '',
 });
@@ -24,7 +23,7 @@ const fetchUserData = async () => {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('first_name, last_name, fb_link, bio, preferred_location, preferred_time')
+      .select('first_name, last_name, fb_link, preferred_location, preferred_time')
       .eq('user_id', authStore.userData?.id)
       .single();
 
@@ -36,7 +35,6 @@ const fetchUserData = async () => {
         lastname: data.last_name || '',
         email: authStore.userData?.email || '',
         facebookLink: data.fb_link || '',
-        bio: data.bio || '',
         location: data.preferred_location || '',
         time: data.preferred_time || '',
       };
@@ -53,7 +51,7 @@ const onSubmit = async () => {
     // Fetch the existing profile data to ensure no fields are lost
     const { data: existingData, error: fetchError } = await supabase
       .from('profiles')
-      .select('first_name, last_name, fb_link, bio, preferred_location, preferred_time')
+      .select('first_name, last_name, fb_link, preferred_location, preferred_time')
       .eq('user_id', authStore.userData?.id)
       .single();
 
@@ -66,7 +64,6 @@ const onSubmit = async () => {
       first_name: formData.value.firstname || existingData.first_name,
       last_name: formData.value.lastname || existingData.last_name,
       fb_link: formData.value.facebookLink || existingData.fb_link,
-      bio: formData.value.bio || existingData.bio || 'No bio available.',
       preferred_location: formData.value.location || existingData.preferred_location || 'Not specified',
       preferred_time: formData.value.time || existingData.preferred_time || 'Not specified',
     };
@@ -161,15 +158,6 @@ onMounted(() => {
           prepend-inner-icon="mdi-clock-outline"
           type="time"
           hint="Enter the time"
-        />
-      </v-col>
-
-      <v-col cols="12">
-        <v-textarea
-          v-model="formData.bio"
-          label="Bio"
-          rows="2"
-          hint="Tell us about yourself"
         />
       </v-col>
     </v-row>

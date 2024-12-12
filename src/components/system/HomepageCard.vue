@@ -1,27 +1,22 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';  // Fixed duplicate imports
+import { ref, computed, onMounted } from 'vue';
 import { useSavedProductsStore } from '@/stores/savedProducts';
 import supabase from '@/utils/supabase.js';
 
 const savedProductsStore = useSavedProductsStore();
-const searchQuery = ref('');  // Search query reactive variable
+const searchQuery = ref('');
 const posts = ref([]);
 
 const filteredPosts = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase(); // Trim and normalize the search query
+  const query = searchQuery.value.trim().toLowerCase();
 
-  if (!query) return posts.value; // If no search query, show all posts
+  if (!query) return posts.value;
 
   return posts.value.filter(post => {
     const itemName = post.item_name ? post.item_name.toLowerCase().trim() : '';
-
-    // Check if query matches any part of item_name, description, or location
-    const itemMatches = itemName.includes(query);
-    // Return true only if any of the matches are true
-    return itemMatches;
+    return itemName.includes(query);
   });
 });
-
 
 const carouselItems = [
   {
@@ -42,6 +37,9 @@ const carouselItems = [
 ];
 
 onMounted(async () => {
+  await fetchPosts();
+});
+const fetchPosts = async () => {
   try {
     const { data, error } = await supabase
       .from('posts')
@@ -52,7 +50,6 @@ onMounted(async () => {
       return;
     }
 
-    // Fetch user data and images in parallel
     const postPromises = data.map(async (post) => {
       const { data: userData, error: userError } = await supabase
         .from('profiles')
@@ -66,7 +63,9 @@ onMounted(async () => {
         post.last_name = userData.last_name;
         post.preferred_location = userData.preferred_location;
         post.preferred_time = userData.preferred_time;
-        post.profile_image = userData.profile_image;
+        post.profile_image = userData.profile_image; // Ensure profile image is fetched and assigned
+
+        console.log('Fetched Profile Image:', userData.profile_image); // Add this line for logging
       }
 
       if (post.image) {
@@ -83,14 +82,20 @@ onMounted(async () => {
       return post;
     });
 
-    // Wait for all post promises to resolve
     const postsData = await Promise.all(postPromises);
-    posts.value = postsData;
-
+    posts.value = sortPosts(postsData); // Ensure posts are sorted correctly
   } catch (err) {
     console.error('Unexpected error:', err);
   }
-});
+};
+
+const sortPosts = (postList) => {
+  return postList.sort((a, b) => {
+    if (a.is_sold && !b.is_sold) return 1; // Move sold items to the end
+    if (!a.is_sold && b.is_sold) return -1;
+    return new Date(b.time) - new Date(a.time); // Newest posts first
+  });
+};
 
 const toggleSave = async (post) => {
   try {
@@ -146,6 +151,25 @@ const redirectToFacebookProfile = (post) => {
     alert('Facebook profile link is not available for this user.');
   }
 };
+
+const markAsSold = async (post) => {
+  try {
+    const { error } = await supabase
+      .from('posts')
+      .update({ is_sold: true })
+      .eq('id', post.id);
+
+    if (error) {
+      console.error('Error marking post as sold:', error);
+      return;
+    }
+
+    post.is_sold = true; // Update local state
+    posts.value = sortPosts(posts.value); // Re-sort posts
+  } catch (err) {
+    console.error('Unexpected error:', err);
+  }
+};
 </script>
 
 <template>
@@ -183,41 +207,49 @@ const redirectToFacebookProfile = (post) => {
   ></v-text-field>
 </v-container>
 
+<!-- No Results Message -->
+<v-container v-if="searchQuery && filteredPosts.length === 0" class="no-results-container">
+  <img src="/public/images/no-results.png" alt="No results" class="no-results-icon" />
+  <p class="no-results-text">No results found</p>
+</v-container>
 
-    <!-- Post Cards -->
-    <v-container class="post-section">
-      <v-row justify="start" dense>
-        <v-col v-for="(post, index) in filteredPosts" :key="index" cols="10" sm="6" md="3">
-          <v-card class="post-card">
-            <!-- Image Section -->
-            <v-img :src="post.image" class="post-image" height="250px">
-              <v-btn
-                class="view-button"
-                @click.stop="viewPostDetails(post)"
-                absolute
-                top
-                right
-              >
-                View
-              </v-btn>
-            </v-img>
+<v-container class="post-section">
+  <v-row justify="start" dense>
+    <v-col v-for="(post, index) in filteredPosts" :key="index" cols="10" sm="6" md="3">
+      <v-card class="post-card position-relative">
+        <v-img :src="post.image" class="post-image" height="250px">
+          <v-btn
+            class="view-button"
+            @click.stop="viewPostDetails(post)"
+            absolute
+            top
+            right
+          >
+            View
+          </v-btn>
+        </v-img>
 
-            <!-- Details Section -->
-            <v-card-text class="post-details">
-              <div class="d-flex justify-space-between">
-                <div>
-                  <div class="post-title">{{ post.item_name }}</div>
-                  <div class="post-type">{{ post.type }}</div>
-                </div>
-                <div class="post-price-box">
-                  <div class="post-price">₱{{ post.price }}</div>
-                </div>
-              </div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
+        <!-- Sold Overlay -->
+        <div v-if="post.is_sold" class="sold-overlay">
+          <div class="sold-text">SOLD OUT</div>
+        </div>
+
+        <v-card-text class="post-details">
+          <div class="d-flex justify-space-between">
+            <div>
+              <div class="post-title">{{ post.item_name }}</div>
+              <div class="post-type">{{ post.type }}</div>
+            </div>
+            <div class="post-price-box">
+              <div class="post-price">₱{{ post.price }}</div>
+            </div>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
+</v-container>
+
 <!-- Post Detail Modal -->
 <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
   <v-card class="post-detail-card">
@@ -231,16 +263,17 @@ const redirectToFacebookProfile = (post) => {
 
     <v-card-text>
       <v-row>
-        <v-col cols="12" md="6" class="d-flex justify-center">
-          <v-img :src="selectedPost?.image" class="post-detail-image" />
-        </v-col>
-        <v-col class="post-details-2" cols="12" md="6">
-          <v-avatar size="40" class="me-3" v-if="selectedPost?.profile_image" color="grey lighten-2">
-        <v-img :src="selectedPost?.profile_image" />
+  <v-col cols="12" md="6" class="d-flex justify-center">
+    <v-img :src="selectedPost?.image" class="post-detail-image" />
+  </v-col>
+  <v-col class="post-details-2" cols="12" md="6">
+    <!-- Display seller's profile image if available -->
+    <v-avatar size="55" class="me-4" v-if="selectedPost?.profile_image">
+      <v-img :src="'https://oazrcjrqzmhbtnhxgzkk.supabase.co/storage/v1/object/public/profile-images/' + selectedPost.profile_image" />
       </v-avatar>
-        <span class="seller-name">
-          {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
-        </span>
+    <span class="seller-name">
+      {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+    </span>
         <div class="post-title-2">{{ selectedPost?.item_name }}</div>
 <div class="post-description d-flex icon-color align-center mb-8">
   <p class="text-color">{{ selectedPost?.description }}</p>
@@ -257,16 +290,16 @@ const redirectToFacebookProfile = (post) => {
   <span class="mdi mdi-calendar-text icon-color"></span>
   <p class="text-color">{{ selectedPost?.preferred_time }}</p>
 </div>
-          <v-row justify="left" class="mt-15 button-row">
-            <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
-              <v-icon left>mdi-bookmark-outline</v-icon>
-              {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
-            </v-btn>
-            <v-btn class="custom-button mx-5" @click="redirectToFacebookProfile(selectedPost)">
-              <v-icon left>mdi-facebook</v-icon>
-              Contact Seller
-            </v-btn>
-          </v-row>
+<v-row justify="start" class="mt-15 button-row">
+  <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
+    <v-icon left>mdi-bookmark-outline</v-icon>
+    {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+  </v-btn>
+  <v-btn class="custom-button mx-5" @click="redirectToFacebookProfile(selectedPost)">
+    <v-icon left>mdi-facebook</v-icon>
+    Contact Seller
+  </v-btn>
+</v-row>
         </v-col>
       </v-row>
     </v-card-text>
@@ -378,7 +411,7 @@ const redirectToFacebookProfile = (post) => {
 }
 
 .seller-name {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: bold;
 }
 
@@ -388,6 +421,28 @@ const redirectToFacebookProfile = (post) => {
   padding: 8px; /* Spacing inside the search bar */
 }
 
+.sold-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent gray */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* Ensures it is above other content */
+}
+
+.sold-text {
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+
 .close-btn {
   color: rgb(105, 53, 53);
   width: 5%;
@@ -395,9 +450,10 @@ const redirectToFacebookProfile = (post) => {
 }
 
 .post-title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #210440;
+  margin-bottom: 15px;
 }
 
 .post-title-2 {
@@ -419,7 +475,6 @@ const redirectToFacebookProfile = (post) => {
 
 .post-price-box {
   padding: 4px 8px;
-  border: 1px solid #ff00c3;
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -453,5 +508,27 @@ const redirectToFacebookProfile = (post) => {
   align-items: center;
   gap: 8px; /* Space between icon and text */
 }
+.no-results-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
 
+.no-results-icon {
+  width: 100px;
+  height: 90px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+/* Style for the text */
+.no-results-text {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+  color: #ffffff; /* Grey darken-1 */
+}
 </style>
