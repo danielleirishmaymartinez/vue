@@ -37,7 +37,7 @@ function navigateTo(path) {
     app
     class="border border-sm"
   >
-    <v-list density="compact" nav class=" mt-15 flex-row pt-12">
+    <v-list density="compact" nav class=" mt-15 flex-row pt-20">
       <v-list-item
         prepend-icon="mdi-home"
         title="Home"
