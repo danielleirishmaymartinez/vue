@@ -392,15 +392,15 @@ const logout = async () => {
         <SidebarNav v-model:drawer="drawerVisible" />
 
         <!-- Main Content -->
-        <v-main class="main-content scroll-hidden mt-10 pt-12">
+        <v-main class="main-content mt-10 pt-12">
           <v-container class="profile-container pb-11">
             <!-- Profile Section -->
             <v-row>
               <!-- Profile Image Section -->
-              <v-col cols="12" md="4" class="d-flex justify-center align-center mb-4">
+              <v-col cols="12" md="4" class="d-flex justify-center align-center mb-5">
                 <v-avatar size="200" class="profile-avatar">
                   <template v-if="userProfile?.profile_image">
-                    <img :src="userProfile.profile_image" alt="pfp" />
+                    <img :src="userProfile.profile_image"/>
                   </template>
                   <template v-else>
                     <span class="initials">
@@ -416,16 +416,6 @@ const logout = async () => {
                   <!-- User Name -->
                   <br>
                   <h2 class="mb-2">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
-                  
-                  <!-- User Bio -->
-                  <p class="text-muted mb-4">{{ userProfile.bio || "No bio available." }}</p>
-
-                  <!-- Preferred Locations -->
-                  <div class="mb-3">
-                    <br>
-                    <strong>Preferred Location:</strong> {{ userProfile.preferred_location || "Not specified" }}<br>
-                    <strong>Available Time:</strong> {{ userProfile.preferred_time || "Not specified" }}
-                  </div>
                 </div>
               </v-col>
             </v-row>
@@ -721,21 +711,6 @@ const logout = async () => {
 }
 .sold-overlay {
 opacity: 0.5;
-}
-
-.sold-text {
-  font-size: 3rem;
-  font-weight: bold;
-  color: white;
-  background: rgba(0, 0, 0, 0.6);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 0;
-  left: 0;
 }
 
 .profile-avatar img {

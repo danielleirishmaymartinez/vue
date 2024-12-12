@@ -33,11 +33,11 @@ function navigateTo(path) {
     v-model="drawer"
     :permanent="!mobile.value"
     :temporary="mobile.value"
-    width="260"
+    width="300"
     app
     class="border border-sm"
   >
-    <v-list density="compact" nav class=" mt-15 flex-row pt-12">
+    <v-list density="compact" nav class=" mt-15 flex-row pt-20">
       <v-list-item
         prepend-icon="mdi-home"
         title="Home"
@@ -92,8 +92,6 @@ function navigateTo(path) {
   transform: scale(1.1);
   font-weight: 800;
 }
-
-
 
 .icon-circle {
   border-radius: 50%;
