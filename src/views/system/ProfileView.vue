@@ -423,15 +423,15 @@ const logout = async () => {
           <v-divider :thickness="1" class="border-opacity-50" color="black"></v-divider>
 
           <!-- Tabs Section -->
-          <v-tabs v-model="activeTab" grow class="mb-4">
+          <v-tabs v-model="activeTab" grow class="mb-4 small-tabs">
             <v-tab value="posts" prepend-icon="mdi-grid">Posts</v-tab>
             <v-tab value="saved" prepend-icon="mdi-bookmark">Saved</v-tab>
           </v-tabs>
 
           <div v-if="activeTab === 'posts'">
   <v-row>
-    <v-col v-for="post in posts" :key="post.post_id" cols="12" md="4">
-      <v-card :class="{ 'sold-overlay': post.is_sold }">
+    <v-col v-for="post in posts" :key="post.post_id" cols="12" md="3">
+      <v-card :class="{ 'sold-overlay pt-12' : post.is_sold }">
   <v-img :src="post.image" aspect-ratio="1.5"></v-img>
   <v-card-title>{{ post.item_name }}</v-card-title>
   <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
@@ -479,18 +479,18 @@ const logout = async () => {
 
   <!-- Edit Post Modal -->
   <v-dialog v-model="showEditModal" persistent max-width="600px">
-    <v-card>
+    <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440; " color="purple-darken-4">
       <v-card-title>Edit Post</v-card-title>
       <v-card-text>
-        <v-text-field v-model="editedPost.item_name" label="Item Name"></v-text-field>
-        <v-textarea v-model="editedPost.description" label="Description"></v-textarea>
-        <v-text-field v-model="editedPost.price" label="Price" type="number"></v-text-field>
-        <v-text-field v-model="editedPost.type" label="Type"></v-text-field>
-        <v-file-input v-model="editedPost.image" label="Upload Image" accept="image/*"></v-file-input>
+        <v-text-field v-model="editedPost.item_name" label="Item Name" variant="outlined" rounded="lg"></v-text-field>
+        <v-textarea v-model="editedPost.description" label="Description" variant="outlined" rounded="lg"></v-textarea>
+        <v-text-field v-model="editedPost.price" label="Price" type="number" variant="outlined" rounded="lg"></v-text-field>
+        <v-text-field v-model="editedPost.type" label="Type" variant="outlined" rounded="lg"></v-text-field>
+        <v-file-input v-model="editedPost.image" label="Upload Image" accept="image/*" variant="outlined" rounded="lg"></v-file-input>
       </v-card-text>
       <v-card-actions>
         <v-btn @click="showEditModal = false" color="red">Cancel</v-btn>
-        <v-btn @click="submitEditPost" color="green">Save Changes</v-btn>
+        <v-btn @click="submitEditPost" color="green-lighten-1">Save Changes</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -600,9 +600,9 @@ const logout = async () => {
 
       <!-- Post Form (Floating Form) -->  
       <v-dialog v-model="showPostForm" max-width="500px" persistent>
-<v-card class="pa-4" rounded="xl">
-          <v-btn icon @click="togglePostForm" class="ml-auto">
-        <v-icon>mdi-close</v-icon>
+<v-card class="pa-4" rounded="xl" style="border: 4px solid #210440; " color="purple-darken-4">
+          <v-btn icon @click="togglePostForm" class="ml-auto hover-btn">
+        <v-icon class="hover-icon">mdi-close</v-icon>
       </v-btn>
     <v-card-title>
       Create New Post
@@ -647,7 +647,7 @@ const logout = async () => {
           variant="outlined"
           rounded="lg"
         ></v-file-input>
-        <v-btn type="submit" color="green" class="mt-4" elevation="2" block rounded="lg">
+        <v-btn type="submit" color="deep-purple-accent-2" class="mt-4" elevation="2" block rounded="lg">
           Post
         </v-btn>
       </v-form>
@@ -672,6 +672,20 @@ const logout = async () => {
 
 .main-content {
   scrollbar-width: none; /* For Firefox */
+}
+
+.hover-icon {
+  color: black; /* Default color */
+  transition: color 0.3s ease; /* Smooth transition */
+}
+
+.hover-icon:hover {
+  color: white; /* Color on hover */
+}
+
+.hover-btn:hover {
+  background-color: #210440; /* Replace with your desired hover color */
+  transition: background-color 0.3s ease; /* Smooth transition effect */
 }
 
 .custom-card {

@@ -1,25 +1,36 @@
 <script setup>
-import { ref } from "vue";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import SidebarNav from "@/components/system/SidebarNav.vue";
 import Navbar from "@/components/system/Navbar.vue";
 import PasswordForm from "@/components/system/account-settings/PasswordForm.vue";
 
-const drawerVisible = ref(true);
+// Use the Pinia store
+const sidebarStore = useSidebarStore();
 </script>
 
 <template>
   <v-app>
+    <!-- Navbar -->
     <Navbar />
-    <v-container fluid>
+
+    <!-- Main Container -->
+    <v-container
+      fluid
+      class="custom-container"
+      :class="{ 'sidebar-open': sidebarStore.isSidebarOpen, 'sidebar-closed': !sidebarStore.isSidebarOpen }"
+    >
       <v-row>
+        <!-- Sidebar -->
         <v-col cols="12" md="2" lg="2" class="sidebar">
-          <SidebarNav v-model:drawer="drawerVisible" />
+          <SidebarNav />
         </v-col>
-        <v-col cols="12" md="9" lg="10">
+
+        <!-- Main Content -->
+        <v-col cols="12" :md="sidebarStore.isSidebarOpen ? 9 : 12" :lg="sidebarStore.isSidebarOpen ? 10 : 12">
           <div class="content-wrapper">
-            <v-card class="mb-5 ml-8 extended-card border-lg">
+            <v-card class="mb-5 ml-8 extended-card rounded-lg">
               <v-card-title class="pa-12">Change Password</v-card-title>
-              <v-container class="d-flex justify-center">
+              <v-container>
                 <v-card-text>
                   <PasswordForm />
                 </v-card-text>
@@ -34,7 +45,22 @@ const drawerVisible = ref(true);
 
 <style scoped>
 .extended-card {
-  height: 400px; /* Adjust height as needed */
+  height: 420px; /* Adjust height as needed */
+  border: 2px solid #e8657f;
+}
+
+.custom-container {
+  background-color: #210440; /* Replace with your desired color */
+  transition: margin-left 1.0s ease; /* Smooth transition for movement */
+  min-height: 100vh; /* Ensure the container covers the entire page */
+}
+
+.sidebar-open {
+  margin-left: 0; /* Adjust to the width of the sidebar */
+}
+
+.sidebar-closed {
+  margin-left: 0;
 }
 
 .content-wrapper {

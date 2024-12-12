@@ -1,5 +1,5 @@
 <template>
-  <>
+
     <!-- About Us Section -->
     <v-container fluid class="about py-5">
       <v-container class="py-5">

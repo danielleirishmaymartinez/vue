@@ -20,17 +20,17 @@ const filteredPosts = computed(() => {
 
 const carouselItems = [
   {
-    image: '/images/car-1.jpg',
+    image: '/images/car1.jpg',
     title: 'Discover unbeatable prices',
     subtitle: 'And swap opportunities right here on campus!',
   },
   {
-    image: '/images/car-2.jpg',
+    image: '/images/car2.jpg',
     title: 'Unlock incredible deals at our virtual marketplace',
     subtitle: 'where every purchase and swap saves you more!',
   },
   {
-    image: '/images/car-3.jpg',
+    image: '/images/car3.jpg',
     title: 'Buy what you need, swap what you don’t',
     subtitle: 'Check out our newest collections.',
   },
@@ -133,7 +133,7 @@ const toggleSave = async (post) => {
   }
 };
 
-const isSaved = (post) => 
+const isSaved = (post) =>
   savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
 const selectedPost = ref(null);
