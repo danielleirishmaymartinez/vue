@@ -71,6 +71,9 @@ async function logout() {
 
 .layout {
   background-color: #210440;
+  display: flex;
+  height: 100vh; /* Full viewport height to match sidebar */
+  overflow: hidden; /* Prevent parent container scrolling */
 }
 
 

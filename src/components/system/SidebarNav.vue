@@ -8,11 +8,12 @@ const router = useRouter();
 const { mobile } = useDisplay();
 const sidebarStore = useSidebarStore(); // Access the sidebar store
 
-// Watch for changes in the sidebar state and update the drawer visibility
-const drawer = ref(false);
+//SIDEBAAR
+const drawer = ref(sidebarStore.isSidebarOpen);
 watch(() => sidebarStore.isSidebarOpen, (newState) => {
   drawer.value = newState;
 });
+
 
 // Define reactive data
 const admins = ref([
@@ -36,7 +37,7 @@ function navigateTo(path) {
     app
     class="border border-sm"
   >
-    <v-list density="compact" nav class=" mt-15 flex-row pt-12">
+    <v-list density="compact" nav class=" mt-15 flex-row pt-12 text-black">
       <v-list-item
         prepend-icon="mdi-home"
         title="Home"
@@ -78,12 +79,14 @@ function navigateTo(path) {
   justify-content: space-between;
   background-size: contain;
   background-position: center;
+  background-color: #f7c2ca;
 }
 
 .v-list-item {
   transition: all 0.3s ease;
   border-radius: 15px;
   font-weight: 500;
+  
 }
 
 .v-list-item:hover {
