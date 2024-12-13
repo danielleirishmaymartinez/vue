@@ -12,14 +12,12 @@ import { supabase } from "@/utils/supabase.js"; // Import supabase client
 const { mobile } = useDisplay();
 const drawerVisible = ref(!mobile.value);
 const savedProductsStore = useSavedProductsStore(); // Access saved products store
+const { savedProducts, removeProduct } = useSavedProductsStore();
 const router = useRouter();
 const userProfile = ref({});
 const showPostForm = ref(false);
 const activeTab = ref('posts');
 const posts = ref([]);
-
-// Get saved products from the store
-const savedProducts = savedProductsStore.savedProducts;
 
 // Access the Pinia store
 const authUser = useAuthUserStore(); // Initialize the store
@@ -61,7 +59,7 @@ onMounted(async () => {
     }
 
     userProfile.value = profileData || getDefaultProfile();
-    
+
     // Fetch only posts belonging to the logged-in user (filtered by user_id)
     const { data: postData, error: postError } = await supabase
       .from("posts")
@@ -270,7 +268,7 @@ const markAsSold = async (postId) => {
     }
 
     // Update the local posts list
-    posts.value = posts.value.map(post => 
+    posts.value = posts.value.map(post =>
       post.id === postId ? { ...post, is_sold: true } : post
     );
 
@@ -356,7 +354,7 @@ const refreshPosts = async () => {
   return data;
 };
 
-const isSaved = (post) => 
+const isSaved = (post) =>
   savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
 
 const selectedPost = ref(null);
@@ -597,7 +595,7 @@ const logout = async () => {
   </v-tooltip>
 </v-bottom-navigation>
 
-      <!-- Post Form (Floating Form) -->  
+      <!-- Post Form (Floating Form) -->
       <v-dialog v-model="showPostForm" max-width="500px" persistent>
 <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440; " color="purple-darken-4">
           <v-btn icon @click="togglePostForm" class="ml-auto hover-btn">
@@ -698,15 +696,15 @@ const logout = async () => {
 }
 
 .sold-out-text {
-  position: absolute; 
-  top: 40%; 
-  left: 50%; 
-  transform: translate(-50%, -50%); 
-  font-size: 3.5rem; 
-  font-weight: bold; 
-  color: rgba(14, 2, 2, 0.541); 
-  text-transform: uppercase; 
-  z-index: 1; 
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: rgba(14, 2, 2, 0.541);
+  text-transform: uppercase;
+  z-index: 1;
 }
 
 .profile-avatar {
