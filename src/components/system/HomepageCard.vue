@@ -322,7 +322,7 @@ const markAsSold = async (post) => {
 }
 
 .carousel-content {
-  color: rgb(241, 197, 185);
+  color: rgb(239, 184, 169);
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   position: absolute;
   top: 50%;
@@ -470,7 +470,7 @@ const markAsSold = async (post) => {
 }
 
 .post-description{
-  color:#000000; 
+  color:#000000;
 }
 
 .post-price-box {
