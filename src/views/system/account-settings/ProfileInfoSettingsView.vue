@@ -55,6 +55,7 @@ const sidebarStore = useSidebarStore();
 .custom-container {
   background-color: #210440; /* Replace with your desired color */
   transition: margin-left 0.3s ease; /* Smooth transition for movement */
+    min-height: 100vh;
 }
 
 .custom-container.sidebar-closed {
@@ -68,5 +69,6 @@ const sidebarStore = useSidebarStore();
 
 .sidebar {
   transition: width 0.3s ease; /* Smooth transition for sidebar width */
+  
 }
 </style>

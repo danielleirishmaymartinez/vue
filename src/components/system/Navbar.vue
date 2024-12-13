@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-app-bar color="#1b1028" class="fixed-navbar">
+    <v-app-bar color="#1b1028" class="position-fixed">
       <!-- Sidebar Toggle Button -->
       <v-btn @click="toggleSidebar" icon class="ms-3">
         <v-icon>mdi-menu</v-icon>
@@ -232,10 +232,5 @@ const toggleSidebar = () => {
 .logout-icon {
   margin-right: 20px; /* Additional fine-tuning */
 }
-.fixed-navbar {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-}
+
 </style>

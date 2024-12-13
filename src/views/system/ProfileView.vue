@@ -40,7 +40,7 @@ onMounted(async () => {
     // Fetch profile data
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("first_name, last_name, profile_image, bio, preferred_location, preferred_time")
+      .select("first_name, last_name, profile_image, preferred_location, preferred_time")
       .eq("user_id", userId)
       .single();
 
@@ -327,7 +327,6 @@ const toggleSave = async (post) => {
 const getDefaultProfile = () => ({
   first_name: "Unknown",
   last_name: "User",
-  bio: "No bio available.",
   preferred_location: "Not specified",
   preferred_time: "Not specified",
   profile_image: "/default-avatar.jpg",
@@ -378,6 +377,15 @@ const logout = async () => {
     console.error("Logout error:", error.message);
   }
 };
+
+const redirectToFacebookProfile = (post) => {
+  if (post.fb_link) {
+    window.open(post.fb_link, '_blank');
+  } else {
+    alert('Facebook profile link is not available for this user.');
+  }
+};
+
 </script>
 
 
@@ -388,11 +396,9 @@ const logout = async () => {
       <Navbar />
 
       <v-container fluid class="d-flex page-layout">
-        <!-- Sidebar Navigation -->
-        <SidebarNav v-model:drawer="drawerVisible" />
-
-        <!-- Main Content -->
-        <v-main class="main-content mt-10 pt-12">
+  <SidebarNav :class="{ 'sidebar-closed': !drawerVisible, 'sidebar-open': drawerVisible }" v-model:drawer="drawerVisible" />
+  <v-main :class="{ 'main-content-expanded': !drawerVisible, 'main-content': drawerVisible }">
+    <!-- Content -->
           <v-container class="profile-container pb-11">
             <!-- Profile Section -->
             <v-row>
@@ -467,12 +473,6 @@ const logout = async () => {
     </v-card-actions>
   </v-card>
 
-  <!-- Sold Overlay -->
-  <v-overlay v-if="post.is_sold" absolute z-index="1" class="sold-overlay">
-    <v-row justify="center" align="center" class="sold-text">
-      SOLD
-    </v-row>
-  </v-overlay>
 </v-col>
 
   </v-row>
@@ -496,20 +496,31 @@ const logout = async () => {
   </v-dialog>
 </div>
 
-<div v-else-if="activeTab === 'saved'">
+<div v-else="activeTab === 'saved'">
+  
   <!-- Display message if no saved items -->
   <p v-if="savedProducts.length === 0" class="text-center">You have no saved items.</p>
 
-  <!-- Post Cards -->
+  <!-- Saved Tab Template -->
   <v-container class="post-section mt-5" v-else>
     <v-row justify="start" dense>
-      <v-col v-for="(post, index) in savedProducts" :key="index" cols="12" sm="6" md="4">
-        <v-card class="post-card">
+      <v-col v-for="(post, index) in savedProducts" :key="index" cols="10" sm="6" md="3">
+        <v-card class="post-card1 position-relative">
+          
+          <!-- Debugging log to check if post.is_sold is true -->
+          <div v-if="post.is_sold">
+            <p class="debug">SOLD OUT overlay is showing</p>
+          </div>
+
+          <!-- Sold Overlay -->
+          <div v-if="post.is_sold" class="sold-overlay1">
+            <div class="sold-text1">SOLD OUT</div>
+          </div>
+
           <!-- Image Section -->
-          <v-img :src="post.image" class="post-image" height="200px">
+          <v-img :src="post.image" class="post-image" height="250px">
             <v-btn
               class="view-button"
-              color="brown"
               @click.stop="viewPostDetails(post)"
               absolute
               top
@@ -539,7 +550,7 @@ const logout = async () => {
   <!-- Post Detail Modal -->
   <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
     <v-card class="post-detail-card">
-      <v-card-title class="post-detail-header">
+      <v-card-title class="post-detail-header d-flex align-center">
         <v-btn icon @click="isDialogOpen = false" class="close-btn">
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -548,31 +559,37 @@ const logout = async () => {
       <v-card-text>
         <v-row>
           <v-col cols="12" md="6" class="d-flex justify-center">
-            <v-img :src="selectedPost?.image" class="post-detail-image" cover height="300px" />
+            <v-img :src="selectedPost?.image" class="post-detail-image" />
           </v-col>
-          <v-col cols="12" md="6">
-            <div class="post-title">{{ selectedPost?.item_name }}</div>
-            <div class="post-seller">
-              <strong>Seller:</strong> {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+          <v-col class="post-details-2" cols="12" md="6">
+            <v-avatar size="55" class="me-4" v-if="selectedPost?.profile_image">
+              <v-img :src="'https://oazrcjrqzmhbtnhxgzkk.supabase.co/storage/v1/object/public/profile-images/' + selectedPost.profile_image" />
+            </v-avatar>
+            <span class="seller-name">
+              {{ selectedPost?.first_name }} {{ selectedPost?.last_name }}
+            </span>
+            <div class="post-title-2">{{ selectedPost?.item_name }}</div>
+            <div class="post-description d-flex icon-color align-center mb-8">
+              <p class="text-color">{{ selectedPost?.description }}</p>
             </div>
-            <div class="post-description">
-              <h3>Description</h3>
-              <p>{{ selectedPost?.description }}</p>
+            <div class="post-price d-flex align-center">
+              <span class="mdi mdi-currency-php icon-color"></span>
+              <p class="text-color">{{ selectedPost?.price }}</p>
             </div>
-            <div class="post-price">
-              <h3>Price</h3>
-              <p>₱{{ selectedPost?.price }}</p>
+            <div class="post-location d-flex align-center">
+              <span class="mdi mdi-map-marker-circle icon-color"></span>
+              <p class="text-color">{{ selectedPost?.preferred_location }}</p>
             </div>
-            <div>
-              <p><strong>Preferred Location:</strong> {{ selectedPost?.preferred_location }}</p>
-              <p><strong>Preferred Time:</strong> {{ selectedPost?.preferred_time }}</p>
+            <div class="post-time d-flex align-center">
+              <span class="mdi mdi-calendar-text icon-color"></span>
+              <p class="text-color">{{ selectedPost?.preferred_time }}</p>
             </div>
-            <v-row justify="start" class="mt-4 button-row">
+            <v-row justify="start" class="mt-15 button-row">
               <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
                 <v-icon left>mdi-bookmark-outline</v-icon>
                 {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
               </v-btn>
-              <v-btn class="custom-button mx-2" @click="redirectToFacebookProfile(selectedPost)">
+              <v-btn class="custom-button mx-5" @click="redirectToFacebookProfile(selectedPost)">
                 <v-icon left>mdi-facebook</v-icon>
                 Contact Seller
               </v-btn>
@@ -582,6 +599,7 @@ const logout = async () => {
       </v-card-text>
     </v-card>
   </v-dialog>
+
 </div>
 
         </v-main>
@@ -661,17 +679,15 @@ const logout = async () => {
 <style scoped>
 .page-layout {
   display: flex;
-  height: 100vh; /* Full viewport height to match sidebar */
-  overflow: hidden; /* Prevent parent container scrolling */
-}
-
-/* Hide scrollbar for main content */
-.main-content::-webkit-scrollbar {
-  display: none; /* For Webkit browsers */
+  overflow-y: auto;
 }
 
 .main-content {
-  scrollbar-width: none; /* For Firefox */
+  transition: margin-left 0.5s ease; /* Smooth transition */
+}
+
+.main-content-expanded {
+  transition: margin-left 0.5s ease;
 }
 
 .hover-icon {
@@ -692,10 +708,10 @@ const logout = async () => {
   border-radius: 16px;
 }
 
-.main-content {
-  flex: 1;
-  overflow-y: auto; /* Allow scrolling within the main content */
-  padding: 20px;
+.close-btn {
+  color: rgb(105, 53, 53);
+  width: 5%;
+  height: 35px;
 }
 
 .sold-out-text {
@@ -723,6 +739,7 @@ const logout = async () => {
 .initials {
   text-transform: uppercase;
 }
+
 .sold-overlay {
 opacity: 0.5;
 }
@@ -733,4 +750,145 @@ opacity: 0.5;
   height: 100%;      /* Make the image fill the container */
 }
 
+.post-description,
+.post-price,
+.post-location,
+.post-time {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between icon and text */
+}
+
+.post-detail-header {
+  display: flex;
+  align-items: center;
+  background-color: #4a0074;
+}
+
+.post-detail-card {
+  max-width: 900px; /* Adjusted card width */
+  width: 100%; /* Responsive width */
+  height: 500px; /* Maintain aspect ratio */
+  border: 3px solid #4a0074; /* Set border thickness and color */
+}
+
+
+.post-detail-image {
+  margin-top: 20px;
+  width: 100%; /* Responsive width */
+  height: 350px; /* Adjusted height */
+  object-fit:cover; /* Keeps image proportions while cropping excess */
+  border-radius: 20px; /* Optional: Rounded corners */
+}
+
+.post-card1 {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: 0.3s ease;
+  border: 1px solid #e8657f;
+}
+
+.post-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.post-image {
+  border-bottom: 1px solid #efe8e8;
+}
+
+.view-button {
+  font-size: 0.7rem;
+  background-color: #ff1cc0;
+  color: white;
+  border-radius: 10px;
+}
+
+.view-button:hover {
+  background-color: #7100b2;
+}
+/* Overlay for Sold Out */
+.sold-overlay1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent gray */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above the card content */
+}
+
+/* Overlay text style */
+.sold-text1 {
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Post Details Section */
+.post-details {
+  padding: 15px;
+}
+
+.post-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #210440;
+  margin-bottom: 15px;
+}
+
+.post-title-2 {
+  margin-top: 20px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #210440;
+}
+
+.post-description{
+  color:#000000; 
+}
+
+.post-type {
+  font-size: 0.8rem;
+  color: #000000;
+  margin-top: 4px;
+}
+
+.post-price-box {
+  padding: 4px 8px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.post-price {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #000000;
+}
+
+.text-color {
+  color: #000000; /* Example: Dark Gray for Text */
+}
+
+.icon-color {
+  font-size: 15px;
+  color: hsl(0, 0%, 0%); /* Example: Bright Orange for Icons */
+}
+
+/* Button Styling */
+.custom-button {
+  background-color: #5f0196;
+  color: white;
+  font-weight: bold;
+}
+
+.custom-button:hover {
+  background-color: #3700b3;
+}
 </style>

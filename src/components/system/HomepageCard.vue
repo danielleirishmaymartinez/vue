@@ -291,10 +291,10 @@ const markAsSold = async (post) => {
   <p class="text-color">{{ selectedPost?.preferred_time }}</p>
 </div>
 <v-row justify="start" class="mt-15 button-row">
-  <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
-    <v-icon left>mdi-bookmark-outline</v-icon>
-    {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
-  </v-btn>
+    <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
+      <v-icon left>mdi-bookmark-outline</v-icon>
+      {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
+    </v-btn>
   <v-btn class="custom-button mx-5" @click="redirectToFacebookProfile(selectedPost)">
     <v-icon left>mdi-facebook</v-icon>
     Contact Seller
@@ -318,7 +318,6 @@ const markAsSold = async (post) => {
   border: 2px; /* Dark brown border */
   box-sizing: border-box; /* Ensures border doesn't affect size */
   border-radius: 18px; /* Optional: Adds rounded corners */
-  border-style: solid;
 }
 
 .carousel-content {
@@ -442,7 +441,6 @@ const markAsSold = async (post) => {
   text-align: center;
 }
 
-
 .close-btn {
   color: rgb(105, 53, 53);
   width: 5%;
@@ -478,6 +476,12 @@ const markAsSold = async (post) => {
   border-radius: 5px;
   display: flex;
   align-items: center;
+}
+
+.post-price {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #000000;
 }
 
 .custom-button {

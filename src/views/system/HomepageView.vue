@@ -47,7 +47,7 @@ async function logout() {
 </script>
 
 <template>
-  <v-responsive class="border rounded">
+  <v-responsive>
     <v-app>
       <!-- Navbar -->
       <Navbar />
@@ -71,6 +71,8 @@ async function logout() {
 
 .layout {
   background-color: #210440;
+  display: flex;
+  overflow: hidden; /* Prevent parent container scrolling */
 }
 
 

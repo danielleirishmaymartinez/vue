@@ -4,11 +4,9 @@ import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import HomepageView from '@/views/system/HomepageView.vue'
 import ProfileView from '@/views/system/ProfileView.vue'
-import SettingsView from '@/views/system/SettingsView.vue';
 import PasswordSettingsView from '@/views/system/account-settings/PasswordSettingsView.vue';
 import PictureSettingsView from '@/views/system/account-settings/PictureSettingsView.vue';
 import ProfileInfoSettingsView from '@/views/system/account-settings/ProfileInfoSettingsView.vue';
-import LandingView from '@/views/system/LandingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,7 +14,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'landing',
-      component: LandingView,
+      component: LoginView,
     },
     {
       path: '/login',
@@ -38,12 +36,6 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfileView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      component: SettingsView,
       meta: { requiresAuth: true },
     },
     {
