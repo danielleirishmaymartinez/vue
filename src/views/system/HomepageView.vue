@@ -48,7 +48,6 @@ async function logout() {
 
 <template>
   <v-responsive>
-  <v-responsive>
     <v-app>
       <!-- Navbar -->
       <Navbar />
