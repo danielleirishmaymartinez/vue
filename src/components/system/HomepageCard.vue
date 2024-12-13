@@ -312,12 +312,17 @@ const markAsSold = async (post) => {
     </v-btn>
 
     <!-- Dialog Notification -->
-    <v-dialog v-model="dialogVisible" persistent max-width="400px">
-      <v-card>
-        <v-card-title class="text-h6">{{ alertMessage }}</v-card-title>
+    <v-dialog v-model="dialogVisible" persistent max-width="500px">
+      <v-card class="pa-4" color="pink-accent-1" dark>
+                <v-card-title>
+          Success
+        </v-card-title>
+        <v-card-text>
+          <span>{{ alertMessage }}</span>
+        </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="dialogVisible = false">
+          <v-btn color="white" text @click="dialogVisible = false">
             OK
           </v-btn>
         </v-card-actions>
