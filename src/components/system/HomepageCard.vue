@@ -97,6 +97,9 @@ const sortPosts = (postList) => {
   });
 };
 
+const dialogVisible = ref(false); // Reactive variable for dialog visibility
+const alertMessage = ref(""); // Reactive variable for dialog message
+
 const toggleSave = async (post) => {
   try {
     const isPostSaved = savedProductsStore.savedProducts.some(
@@ -105,36 +108,47 @@ const toggleSave = async (post) => {
 
     if (isPostSaved) {
       const { error } = await supabase
-        .from('saved_posts')
+        .from("saved_posts")
         .delete()
-        .eq('user_id', post.user_id)
-        .eq('post_id', post.id);
+        .eq("user_id", post.user_id)
+        .eq("post_id", post.id);
 
       if (error) {
-        console.error('Error unsaving post:', error);
+        console.error("Error unsaving post:", error);
+        alertMessage.value = "Error unsaving item!";
+        dialogVisible.value = true;
         return;
       }
 
       savedProductsStore.removeProduct(post.item_name);
+      alertMessage.value = "Item unsaved successfully!";
     } else {
       const { error } = await supabase
-        .from('saved_posts')
+        .from("saved_posts")
         .insert([{ user_id: post.user_id, post_id: post.id }]);
 
       if (error) {
-        console.error('Error saving post:', error);
+        console.error("Error saving post:", error);
+        alertMessage.value = "Error saving item!";
+        dialogVisible.value = true;
         return;
       }
 
       savedProductsStore.addProduct(post);
+      alertMessage.value = "Item saved successfully!";
     }
+
+    dialogVisible.value = true; // Show the dialog after save/unsave action
   } catch (error) {
-    console.error('Error toggling save:', error);
+    console.error("Error toggling save:", error);
+    alertMessage.value = "An error occurred while toggling the save.";
+    dialogVisible.value = true;
   }
 };
 
 const isSaved = (post) =>
   savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
+
 
 const selectedPost = ref(null);
 const isDialogOpen = ref(false);
@@ -291,10 +305,29 @@ const markAsSold = async (post) => {
   <p class="text-color">{{ selectedPost?.preferred_time }}</p>
 </div>
 <v-row justify="start" class="mt-15 button-row">
+    <!-- Save/Unsave Button -->
     <v-btn class="custom-button mx-2" @click="toggleSave(selectedPost)">
       <v-icon left>mdi-bookmark-outline</v-icon>
       {{ isSaved(selectedPost) ? "Unsave" : "Save" }}
     </v-btn>
+
+    <!-- Dialog Notification -->
+    <v-dialog v-model="dialogVisible" persistent max-width="500px">
+      <v-card class="pa-4" color="pink-accent-1" dark>
+                <v-card-title>
+          Success
+        </v-card-title>
+        <v-card-text>
+          <span>{{ alertMessage }}</span>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="white" text @click="dialogVisible = false">
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   <v-btn class="custom-button mx-5" @click="redirectToFacebookProfile(selectedPost)">
     <v-icon left>mdi-facebook</v-icon>
     Contact Seller
@@ -318,10 +351,16 @@ const markAsSold = async (post) => {
   border: 2px; /* Dark brown border */
   box-sizing: border-box; /* Ensures border doesn't affect size */
   border-radius: 18px; /* Optional: Adds rounded corners */
+  border-style: solid;
+}
+
+/* Darken the background overlay when the dialog is visible */
+.v-dialog .v-overlay__scrim {
+  background-color: rgba(0, 0, 0, 0.8) !important; /* 80% opacity */
 }
 
 .carousel-content {
-  color: rgb(241, 197, 185);
+  color: rgb(239, 184, 169);
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   position: absolute;
   top: 50%;
@@ -468,7 +507,7 @@ const markAsSold = async (post) => {
 }
 
 .post-description{
-  color:#000000; 
+  color:#000000;
 }
 
 .post-price-box {

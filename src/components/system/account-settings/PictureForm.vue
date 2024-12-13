@@ -24,6 +24,11 @@ const formAction = ref({
 const refVForm = ref();
 const imgPreview = ref('/images/profile.png'); // Default preview image
 
+// Notification state
+const showNotification = ref(false);
+const notificationMessage = ref('');
+const notificationType = ref(''); // 'success' or 'error'
+
 // Fetch the profile image URL from the database for the current user
 const fetchProfileImage = async () => {
   const { data: profileData, error: profileError } = await supabase
@@ -74,52 +79,54 @@ const onSubmit = async () => {
   formAction.value = { ...formActionDefault, formProcess: true };
 
   if (!formData.value.image) {
-    formAction.value.formErrorMessage = "Please select an image to upload.";
+    formAction.value.formErrorMessage = 'Please select an image to upload.';
     formAction.value.formProcess = false;
     return;
   }
 
-  // Upload the image to Supabase Storage
-  const { data: fileData, error: uploadError } = await supabase.storage
-    .from('profile-images')
-    .upload(`${authStore.userData?.id}/${formData.value.image.name}`, formData.value.image);
+  try {
+    // Upload the image to Supabase Storage
+    const { data: fileData, error: uploadError } = await supabase.storage
+      .from('profile-images')
+      .upload(`${authStore.userData?.id}/${formData.value.image.name}`, formData.value.image);
 
-  if (uploadError) {
-    formAction.value.formErrorMessage = `Error uploading image: ${uploadError.message}`;
-    formAction.value.formProcess = false;
-    return;
-  }
+    if (uploadError) throw new Error(`Error uploading image: ${uploadError.message}`);
 
-  // Generate a signed URL for the uploaded file
-  const { data: signedUrlData, error: signedUrlError } = await supabase
-    .storage
-    .from('profile-images')
-    .createSignedUrl(fileData.path, 60 * 60); // 1-hour expiration
+    // Generate a signed URL for the uploaded file
+    const { data: signedUrlData, error: signedUrlError } = await supabase
+      .storage
+      .from('profile-images')
+      .createSignedUrl(fileData.path, 60 * 60); // 1-hour expiration
 
-  if (signedUrlError) {
-    formAction.value.formErrorMessage = `Error creating signed URL: ${signedUrlError.message}`;
-    formAction.value.formProcess = false;
-    return;
-  }
+    if (signedUrlError) throw new Error(`Error creating signed URL: ${signedUrlError.message}`);
 
-  const imageUrl = signedUrlData.signedUrl;
+    const imageUrl = signedUrlData.signedUrl;
 
-  // Update the profile image URL in the database
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({
-      profile_image: fileData.path, // Save file path to DB
-    })
-    .eq('user_id', authStore.userData?.id); // Ensure we're updating the correct profile based on user_id
+    // Update the profile image URL in the database
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        profile_image: fileData.path, // Save file path to DB
+      })
+      .eq('user_id', authStore.userData?.id); // Ensure we're updating the correct profile based on user_id
 
-  if (error) {
-    formAction.value.formErrorMessage = `Error updating profile: ${error.message}`;
-  } else if (data) {
+    if (error) throw new Error(`Error updating profile: ${error.message}`);
+
+    // Show success message
     formAction.value.formSuccessMessage = 'Successfully updated profile image.';
-    imgPreview.value = imageUrl; // Update preview immediately after successful upload
+    imgPreview.value = imageUrl; // Update preview immediately
+    showNotification.value = true;
+    notificationMessage.value = 'Profile image updated successfully!';
+    notificationType.value = 'success';
+  } catch (e) {
+    // Show error message
+    formAction.value.formErrorMessage = e.message;
+    showNotification.value = true;
+    notificationMessage.value = e.message;
+    notificationType.value = 'error';
+  } finally {
+    formAction.value.formProcess = false;
   }
-
-  formAction.value.formProcess = false;
 };
 
 const onFormSubmit = () => {
@@ -128,7 +135,6 @@ const onFormSubmit = () => {
   });
 };
 </script>
-
 <template>
   <AlertNotification
     :form-success-message="formAction.formSuccessMessage"
