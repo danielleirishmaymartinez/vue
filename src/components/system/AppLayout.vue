@@ -21,7 +21,7 @@ function navigateTo(path) {
               class="mr-2"
               width="25"
             />
-            <span class="ml-1">Campus Deals</span>
+            <span class="ml-2">Campus Deals</span>
           </v-btn>
           <v-spacer></v-spacer>
 
@@ -80,7 +80,7 @@ function navigateTo(path) {
 <style scoped>
 /* Background Wrapper */
 .background-wrapper {
-  background-image: url('/images/lr-gif.gif'); /* Path to your background image */
+  background-image: url('/images/a.png'); /* Path to your background image */
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

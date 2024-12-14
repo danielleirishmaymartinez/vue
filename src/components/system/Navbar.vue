@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-app-bar color="#1b1028" class="position-fixed">
+    <v-app-bar color="#B43E8F" class="position-fixed">
       <!-- Sidebar Toggle Button -->
       <v-btn @click="toggleSidebar" icon class="ms-3">
         <v-icon>mdi-menu</v-icon>
@@ -39,10 +39,10 @@
             <!-- Profile Button -->
             <v-btn
               variant="text"
-              class="mt-2 full-width-btn profile-btn"
+              class="mt-3 full-width-btn profile-btn"
               @click="goToProfile"
             >
-              <v-avatar size="45" class="me-2 no-shadow">
+              <v-avatar size="45" class="me-3 no-shadow">
                 <img :src="userProfile.profile_image || '/default-avatar.jpg'" alt="Profile Picture" class="avatar-image"/>
               </v-avatar>
               <span>{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</span>
@@ -230,7 +230,7 @@ const toggleSidebar = () => {
 }
 
 .logout-icon {
-  margin-right: 20px; /* Additional fine-tuning */
+  margin-right: 24px; /* Additional fine-tuning */
 }
 
 </style>
