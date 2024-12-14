@@ -51,6 +51,13 @@ if (profileError) {
 }
 
 userEmail.value = email;
+// Handle errors
+if (profileError) {
+  console.error("Error fetching profile:", profileError);
+  return;
+}
+
+userEmail.value = email;
 
     // If there's a profile image, fetch the signed URL
     if (profileData?.profile_image) {
