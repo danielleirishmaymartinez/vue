@@ -18,6 +18,7 @@ const userProfile = ref({});
 const showPostForm = ref(false);
 const activeTab = ref('posts');
 const posts = ref([]);
+const userEmail = ref('');
 
 // Access the Pinia store
 const authUser = useAuthUserStore(); // Initialize the store
@@ -34,6 +35,7 @@ onMounted(async () => {
     }
 
     const userId = user.id;
+    const email = user.email; // Store the email
 
     // Fetch profile data
     const { data: profileData, error: profileError } = await supabase
@@ -42,7 +44,13 @@ onMounted(async () => {
       .eq("user_id", userId)
       .single();
 
-    if (profileError) throw new Error(profileError.message);
+// Handle errors
+if (profileError) {
+  console.error("Error fetching profile:", profileError);
+  return;
+}
+
+userEmail.value = email;
 
     // If there's a profile image, fetch the signed URL
     if (profileData?.profile_image) {
@@ -258,17 +266,13 @@ const submitEditPost = async () => {
     console.error('Error editing post:', error.message);
   }
 };
-
 const markAsSold = async (postId) => {
   try {
-    // Fetch the current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-
     if (userError || !user) {
       console.error("No active user session found.");
       return;
     }
-
     const userId = user.id;
 
     // Mark the post as sold in the database
@@ -276,7 +280,7 @@ const markAsSold = async (postId) => {
       .from('posts')
       .update({ is_sold: true })
       .eq('id', postId)
-      .eq('user_id', userId) // Ensure the user is the owner of the post
+      .eq('user_id', userId)
       .single();
 
     if (updateError) {
@@ -289,14 +293,64 @@ const markAsSold = async (postId) => {
       post.id === postId ? { ...post, is_sold: true } : post
     );
 
+    // Update savedProducts list (sync with DB)
+    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(post =>
+      post.id === postId ? { ...post, is_sold: true } : post
+    );
+
     // Re-sort the posts after marking as sold
     posts.value = posts.value.sort((a, b) => {
-      if (a.is_sold && !b.is_sold) return 1;  // Sold posts go to the bottom
-      if (!a.is_sold && b.is_sold) return -1; // Unsold posts go to the top
-      return 0; // No change for posts with the same `is_sold` status
+      if (a.is_sold && !b.is_sold) return 1;
+      if (!a.is_sold && b.is_sold) return -1;
+      return 0;
     });
 
     console.log("Post marked as sold:", updatedPost);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+  }
+};
+
+const unmarkAsSold = async (postId) => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("No active user session found.");
+      return;
+    }
+    const userId = user.id;
+
+    // Unmark the post as sold in the database
+    const { data: updatedPost, error: updateError } = await supabase
+      .from('posts')
+      .update({ is_sold: false })
+      .eq('id', postId)
+      .eq('user_id', userId)
+      .single();
+
+    if (updateError) {
+      console.error("Error unmarking post as sold:", updateError.message);
+      return;
+    }
+
+    // Update the local posts list
+    posts.value = posts.value.map(post =>
+      post.id === postId ? { ...post, is_sold: false } : post
+    );
+
+    // Update savedProducts list (sync with DB)
+    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(post =>
+      post.id === postId ? { ...post, is_sold: false } : post
+    );
+
+    // Re-sort the posts after unmarking as sold
+    posts.value = posts.value.sort((a, b) => {
+      if (a.is_sold && !b.is_sold) return 1;
+      if (!a.is_sold && b.is_sold) return -1;
+      return 0;
+    });
+
+    console.log("Post unmarked as sold:", updatedPost);
   } catch (err) {
     console.error("Unexpected error:", err);
   }
@@ -410,38 +464,40 @@ const redirectToFacebookProfile = (post) => {
       <!-- Top Navbar -->
       <Navbar />
 
-      <v-container fluid class="d-flex page-layout">
+      <v-container fluid class="page-layout">
   <SidebarNav :class="{ 'sidebar-closed': !drawerVisible, 'sidebar-open': drawerVisible }" v-model:drawer="drawerVisible" />
   <v-main :class="{ 'main-content-expanded': !drawerVisible, 'main-content': drawerVisible }">
     <!-- Content -->
-          <v-container class="profile-container pb-11">
-            <!-- Profile Section -->
-            <v-row>
-              <!-- Profile Image Section -->
-              <v-col cols="12" md="4" class="d-flex justify-center align-center mb-5">
-                <v-avatar size="200" class="profile-avatar">
-                  <template v-if="userProfile?.profile_image">
-                    <img :src="userProfile.profile_image"/>
-                  </template>
-                  <template v-else>
-                    <span class="initials">
-                      {{ getInitials(userProfile.first_name + ' ' + userProfile.last_name || "Unknown User") }}
-                    </span>
-                  </template>
-                </v-avatar>
-              </v-col>
+    <v-container class="profile-container pb-15 d-flex justify-center align-center">
+  <!-- Profile Section -->
+  <v-row justify="center" align="center" class="w-100">
+    <!-- Profile Image Section -->
+    <v-col cols="12" md="3" class="d-flex justify-center mb-2">
+      <v-avatar size="200" class="profile-avatar">
+        <template v-if="userProfile?.profile_image">
+          <img :src="userProfile.profile_image" />
+        </template>
+        <template v-else>
+          <span class="initials">
+            {{ getInitials(userProfile.first_name + ' ' + userProfile.last_name || "Unknown User") }}
+          </span>
+        </template>
+      </v-avatar>
+    </v-col>
 
-              <!-- Profile Info Section -->
-              <v-col cols="12" md="8">
-                <div class="profile-details">
-                  <!-- User Name -->
-                  <br>
-                  <h2 class="mb-2">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
-                </div>
-              </v-col>
-            </v-row>
-          </v-container>
-          <v-divider :thickness="1" class="border-opacity-50" color="black"></v-divider>
+    <!-- Profile Info Section -->
+    <v-col cols="12" md="5" class="d-flex justify-center align-center">
+      <div class="profile-details text-center">
+        <!-- User Name -->
+        <h2 class="mb-2">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
+        <!-- User Email -->
+        <p class="mb-2">{{ userEmail || "Email not available" }}</p>
+      </div>
+    </v-col>
+  </v-row>
+</v-container>
+
+          <v-divider :thickness="1.5" class="border-opacity-100"></v-divider>
 
           <!-- Tabs Section -->
           <v-tabs v-model="activeTab" grow class="mb-4 small-tabs">
@@ -452,42 +508,44 @@ const redirectToFacebookProfile = (post) => {
           <div v-if="activeTab === 'posts'">
   <v-row class="pt-8">
     <v-col v-for="post in posts" :key="post.post_id" cols="12" md="3">
-      <v-card :class="{ 'sold-overlay pt-12' : post.is_sold }">
-  <v-img :src="post.image" aspect-ratio="1.5"></v-img>
-  <v-card-title>{{ post.item_name }}</v-card-title>
-  <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
+      <v-card :class="{ 'sold-overlay pt-12': post.is_sold }" class="card">
+  <v-img :src="post.image" aspect-ratio="1.5" class="card-image"></v-img>
+  <v-card-title class="card-title">{{ post.item_name }}</v-card-title>
+  <v-card-subtitle class="card-price">₱{{ post.price }}</v-card-subtitle>
   <v-card-text class="card-content">
-    <p>{{ post.description }}</p>
+    <p class="card-description">{{ post.description }}</p>
     <p><strong>Type:</strong> {{ post.type }}</p>
-    <!-- "Sold Out" text centered if the post is sold -->
-    <p v-if="post.is_sold" class="sold-out-text">Sold</p>
+    <p v-if="post.is_sold" class="sold-out-text">Sold Out</p>
   </v-card-text>
 
-    <v-card-actions>
-      <!-- Options Menu for Edit/Delete -->
-      <v-menu v-if="!post.is_sold" offset-y transition="slide-y-reverse-transition" bottom>
-        <template #activator="{ props }">
-          <v-btn icon v-bind="props">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="editPost(post)">
-            <v-list-item-title>Edit</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="deletePost(post.id, post.image)">
-            <v-list-item-title>Delete</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+  <v-card-actions class="card-actions">
+    <v-menu offset-y transition="slide-y-reverse-transition" bottom>
+      <template #activator="{ props }">
+        <v-btn icon v-bind="props">
+          <v-icon>mdi-dots-vertical</v-icon>
+        </v-btn>
+      </template>
+      <v-list>
+        <!-- Option to Edit -->
+        <v-list-item v-if="!post.is_sold" @click="editPost(post)">
+          <v-list-item-title>Edit</v-list-item-title>
+        </v-list-item>
+        <!-- Option to Delete -->
+        <v-list-item @click="deletePost(post.id, post.image)">
+          <v-list-item-title>Delete</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
 
-      <v-btn v-if="!post.is_sold" @click="markAsSold(post.id)" color="green">
-  Mark as Sold
-</v-btn>
-
-    </v-card-actions>
-  </v-card>
-
+    <!-- Mark as Sold or Unmark Button -->
+    <v-btn v-if="!post.is_sold" @click="markAsSold(post.id)" color="green">
+      Mark as Sold
+    </v-btn>
+    <v-btn v-if="post.is_sold" @click="unmarkAsSold(post.id)" color="orange">
+      Set as Available
+    </v-btn>
+  </v-card-actions>
+</v-card>
 </v-col>
 
   </v-row>
@@ -538,11 +596,6 @@ const redirectToFacebookProfile = (post) => {
     <v-row justify="start" dense>
       <v-col v-for="(post, index) in savedProducts" :key="index" cols="10" sm="6" md="3">
         <v-card class="post-card1 position-relative">
-          
-          <!-- Debugging log to check if post.is_sold is true -->
-          <div v-if="post.is_sold">
-            <p class="debug">SOLD OUT overlay is showing</p>
-          </div>
 
           <!-- Sold Overlay -->
           <div v-if="post.is_sold" class="sold-overlay1">
@@ -729,6 +782,7 @@ const redirectToFacebookProfile = (post) => {
 .page-layout {
   display: flex;
   overflow-y: auto;
+  padding-inline: 80px;
 }
 
 .main-content {
@@ -737,6 +791,48 @@ const redirectToFacebookProfile = (post) => {
 
 .main-content-expanded {
   transition: margin-left 0.5s ease;
+}
+
+.card {
+  height:100%;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: 0.3s ease;
+  border: 1.5px solid #6d01a7;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-image {
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #210440;
+}
+
+.card-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.card-description {
+  color: #000000;
+  margin-bottom: 8px;
+}
+
+.card-actions {
+  display:inline-table;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0px;
 }
 
 .hover-icon {
@@ -768,10 +864,11 @@ const redirectToFacebookProfile = (post) => {
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3.5rem;
-  font-weight: bold;
-  color: rgba(14, 2, 2, 0.541);
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgb(1, 0, 0);
   text-transform: uppercase;
+  text-align: center;
   z-index: 1;
 }
 
@@ -784,9 +881,7 @@ const redirectToFacebookProfile = (post) => {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.initials {
-  text-transform: uppercase;
+  margin-left: 100px;
 }
 
 .sold-overlay {
@@ -823,18 +918,23 @@ opacity: 0.5;
 
 
 .post-detail-image {
-  margin-top: 20px;
+  margin-top: 25px;
   width: 100%; /* Responsive width */
   height: 350px; /* Adjusted height */
   object-fit:cover; /* Keeps image proportions while cropping excess */
   border-radius: 20px; /* Optional: Rounded corners */
 }
 
+.post-card1:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
 .post-card1 {
   border-radius: 10px;
   overflow: hidden;
   transition: 0.3s ease;
-  border: 1px solid #e8657f;
+  border: 1.5px solid #6d01a7;
 }
 
 .post-card:hover {
@@ -884,6 +984,11 @@ opacity: 0.5;
   padding: 15px;
 }
 
+.post-details-2 {
+  padding: 15px;
+  margin-top: 25px;
+}
+
 .post-title {
   font-size: 1rem;
   font-weight: bold;
@@ -903,7 +1008,7 @@ opacity: 0.5;
 }
 
 .post-type {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #000000;
   margin-top: 4px;
 }
