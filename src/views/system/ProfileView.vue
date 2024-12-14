@@ -629,13 +629,12 @@ const logout = async () => {
   </v-tooltip>
 </v-bottom-navigation>
 
-<<<<<<< HEAD
-      <!-- Post Form (Floating Form) -->
-      <v-dialog v-model="showPostForm" max-width="500px" persistent>
-<v-card class="pa-4" rounded="xl" style="border: 4px solid #210440; " color="purple-darken-4">
-          <v-btn icon @click="togglePostForm" class="ml-auto hover-btn">
-        <v-icon class="hover-icon">mdi-close</v-icon>
-      </v-btn>
+
+<v-dialog v-model="showPostForm" max-width="500px" persistent>
+  <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440;" color="purple-darken-4">
+    <v-btn icon @click="togglePostForm" class="ml-auto hover-btn">
+      <v-icon class="hover-icon">mdi-close</v-icon>
+    </v-btn>
     <v-card-title>
       Create New Post
     </v-card-title>
@@ -681,64 +680,12 @@ const logout = async () => {
         ></v-file-input>
         <v-btn type="submit" color="deep-purple-accent-2" class="mt-4" elevation="2" block rounded="lg">
           Post
-=======
-    <!-- Post Form (Floating Form) -->
-    <v-dialog v-model="showPostForm" max-width="500px" persistent>
-      <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440;" color="purple-darken-4">
-        <v-btn icon @click="togglePostForm" class="ml-auto hover-btn">
-          <v-icon class="hover-icon">mdi-close</v-icon>
->>>>>>> a64db0ef3b5cb417a9e705fe428ff4b115c938f9
         </v-btn>
-        <v-card-title>
-          Create New Post
-        </v-card-title>
-        <v-card-text>
-          <v-form @submit.prevent="submitPost">
-            <v-text-field
-              v-model="newPost.item_name"
-              label="Item Name"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-text-field>
-            <v-textarea
-              v-model="newPost.description"
-              label="Description"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-textarea>
-            <v-text-field
-              v-model="newPost.price"
-              label="Price"
-              type="number"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-text-field>
-            <v-select
-              v-model="newPost.type"
-              :items="['For Sale', 'For Trade']"
-              label="Type"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-select>
-            <v-file-input
-              v-model="newPost.image"
-              label="Product Image"
-              accept="image/*"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-file-input>
-            <v-btn type="submit" color="deep-purple-accent-2" class="mt-4" elevation="2" block rounded="lg">
-              Post
-            </v-btn>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+      </v-form>
+    </v-card-text>
+  </v-card>
+</v-dialog>
+
 
     <!-- Success Dialog -->
     <v-dialog v-model="showSuccessDialog" max-width="500px">
