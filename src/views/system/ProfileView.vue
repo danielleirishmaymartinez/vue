@@ -369,6 +369,49 @@ const unmarkAsSold = async (postId) => {
 };
 
 
+const unmarkAsSold = async (postId) => {
+  try {
+    // Fetch the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No active user session found.");
+      return;
+    }
+
+    const userId = user.id;
+
+    // Unmark the post as sold in the database
+    const { data: updatedPost, error: updateError } = await supabase
+      .from('posts')
+      .update({ is_sold: false })
+      .eq('id', postId)
+      .eq('user_id', userId) // Ensure the user is the owner of the post
+      .single();
+
+    if (updateError) {
+      console.error("Error unmarking post as sold:", updateError.message);
+      return;
+    }
+
+    // Update the local posts list
+    posts.value = posts.value.map(post =>
+      post.id === postId ? { ...post, is_sold: false } : post
+    );
+
+    // Re-sort the posts after unmarking as sold
+    posts.value = posts.value.sort((a, b) => {
+      if (a.is_sold && !b.is_sold) return 1;  // Sold posts go to the bottom
+      if (!a.is_sold && b.is_sold) return -1; // Unsold posts go to the top
+      return 0; // No change for posts with the same `is_sold` status
+    });
+
+    console.log("Post unmarked as sold:", updatedPost);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+  }
+};
+
 const toggleSave = async (post) => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();    const isPostSaved = savedProductsStore.savedProducts.some(
@@ -477,7 +520,7 @@ const redirectToFacebookProfile = (post) => {
       <!-- Top Navbar -->
       <Navbar />
 
-      <v-container fluid class="d-flex page-layout">
+      <v-container fluid class="page-layout">
   <SidebarNav :class="{ 'sidebar-closed': !drawerVisible, 'sidebar-open': drawerVisible }" v-model:drawer="drawerVisible" />
   <v-main :class="{ 'main-content-expanded': !drawerVisible, 'main-content': drawerVisible }">
     <!-- Content -->
