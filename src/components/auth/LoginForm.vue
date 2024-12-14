@@ -90,7 +90,7 @@ const onFormSubmit = () => {
     <v-btn
       class="mt-2 submit-btn"
       type="submit"
-      color="pink"
+      color="purple"
       prepend-icon="mdi-login"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"
