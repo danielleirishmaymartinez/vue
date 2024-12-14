@@ -470,7 +470,7 @@ const markAsSold = async (post) => {
   font-weight: bold;
 }
 .search-bar {
-  color: #2d003e; /* White text color for contrast */
+  color: #ffffff; /* White text color for contrast */
   font-weight: bold; /* Make text bold */
   border-radius: 8px; /* Smooth rounded corners */
   margin-top: 20px;
