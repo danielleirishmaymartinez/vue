@@ -6,11 +6,15 @@ import { useDisplay } from 'vuetify';
 import { ref, onMounted } from 'vue';
 import supabase from '@/utils/supabase.js';
 import { useRouter } from 'vue-router';
+import { useSidebarStore } from '@/stores/sidebarStore';
 
+const sidebarStore = useSidebarStore();
 const { mobile } = useDisplay();
 const drawerVisible = ref(!mobile.value);
 const router = useRouter();
 const profile = ref(null); // Default profile is null
+
+sidebarStore.isSidebarOpen = false;
 
 // Fetch user data on mount
 onMounted(async () => {
@@ -72,10 +76,9 @@ async function logout() {
 .layout {
   background-color: #210440;
   display: flex;
-  height: 100vh; /* Full viewport height to match sidebar */
-  overflow: hidden; /* Prevent parent container scrolling */
+  overflow: hidden;
+  height: 100vh;
 }
-
 
 /* Hide scrollbar for main content */
 .main-content::-webkit-scrollbar {
