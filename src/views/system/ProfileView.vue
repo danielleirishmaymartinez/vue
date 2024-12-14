@@ -19,6 +19,7 @@ const showPostForm = ref(false);
 const activeTab = ref('posts');
 const posts = ref([]);
 const userEmail = ref('');
+const userEmail = ref('');
 
 // Access the Pinia store
 const authUser = useAuthUserStore(); // Initialize the store
@@ -293,10 +294,13 @@ const markAsSold = async (postId) => {
       post.id === postId ? { ...post, is_sold: true } : post
     );
 
-    // Update savedProducts list (sync with DB)
-    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(post =>
-      post.id === postId ? { ...post, is_sold: true } : post
+    // Update saved products if the marked post is in the saved list
+    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(product => 
+      product.id === postId ? { ...product, is_sold: true } : product
     );
+
+    // Update localStorage after marking as sold
+    savedProductsStore.saveToLocalStorage();
 
     // Re-sort the posts after marking as sold
     posts.value = posts.value.sort((a, b) => {
@@ -310,14 +314,16 @@ const markAsSold = async (postId) => {
     console.error("Unexpected error:", err);
   }
 };
-
 const unmarkAsSold = async (postId) => {
   try {
+    // Fetch the current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
+
     if (userError || !user) {
       console.error("No active user session found.");
       return;
     }
+
     const userId = user.id;
 
     // Unmark the post as sold in the database
@@ -325,7 +331,7 @@ const unmarkAsSold = async (postId) => {
       .from('posts')
       .update({ is_sold: false })
       .eq('id', postId)
-      .eq('user_id', userId)
+      .eq('user_id', userId) // Ensure the user is the owner of the post
       .single();
 
     if (updateError) {
@@ -338,16 +344,63 @@ const unmarkAsSold = async (postId) => {
       post.id === postId ? { ...post, is_sold: false } : post
     );
 
-    // Update savedProducts list (sync with DB)
-    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(post =>
+    // Update saved products if the unmarked post is in the saved list
+    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(product =>
+      product.id === postId ? { ...product, is_sold: false } : product
+    );
+
+    // Update localStorage after unmarking as sold
+    savedProductsStore.saveToLocalStorage();
+
+    // Re-sort the posts after unmarking as sold
+    posts.value = posts.value.sort((a, b) => {
+      if (a.is_sold && !b.is_sold) return 1;  // Sold posts go to the bottom
+      if (!a.is_sold && b.is_sold) return -1; // Unsold posts go to the top
+      return 0; // No change for posts with the same `is_sold` status
+    });
+
+    console.log("Post unmarked as sold:", updatedPost);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+  }
+};
+
+
+const unmarkAsSold = async (postId) => {
+  try {
+    // Fetch the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No active user session found.");
+      return;
+    }
+
+    const userId = user.id;
+
+    // Unmark the post as sold in the database
+    const { data: updatedPost, error: updateError } = await supabase
+      .from('posts')
+      .update({ is_sold: false })
+      .eq('id', postId)
+      .eq('user_id', userId) // Ensure the user is the owner of the post
+      .single();
+
+    if (updateError) {
+      console.error("Error unmarking post as sold:", updateError.message);
+      return;
+    }
+
+    // Update the local posts list
+    posts.value = posts.value.map(post =>
       post.id === postId ? { ...post, is_sold: false } : post
     );
 
     // Re-sort the posts after unmarking as sold
     posts.value = posts.value.sort((a, b) => {
-      if (a.is_sold && !b.is_sold) return 1;
-      if (!a.is_sold && b.is_sold) return -1;
-      return 0;
+      if (a.is_sold && !b.is_sold) return 1;  // Sold posts go to the bottom
+      if (!a.is_sold && b.is_sold) return -1; // Unsold posts go to the top
+      return 0; // No change for posts with the same `is_sold` status
     });
 
     console.log("Post unmarked as sold:", updatedPost);
