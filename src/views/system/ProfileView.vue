@@ -491,71 +491,67 @@ const redirectToFacebookProfile = (post) => {
         </template>
       </v-avatar>
     </v-col>
-
-    <!-- Profile Info Section -->
     <v-col cols="12" md="5" class="d-flex justify-center align-center">
-      <div class="profile-details text-center">
-        <!-- User Name -->
-        <h2 class="mb-2">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
-        <!-- User Email -->
-        <p class="mb-2">{{ userEmail || "Email not available" }}</p>
-      </div>
-    </v-col>
+  <div class="profile-details text-center theme--dark">
+    <!-- User Name -->
+    <h2 class="mb-2" style="color: white;">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
+    <!-- User Email -->
+    <p class="mb-2" style="color: white;">{{ userEmail || "Email not available" }}</p>
+  </div>
+</v-col>
   </v-row>
 </v-container>
 
-          <v-divider :thickness="1.5" class="border-opacity-100"></v-divider>
-
-          <!-- Tabs Section -->
-          <v-tabs v-model="activeTab" grow class="mb-4 small-tabs">
-            <v-tab value="posts" prepend-icon="mdi-grid">Posts</v-tab>
-            <v-tab value="saved" prepend-icon="mdi-bookmark">Saved</v-tab>
-          </v-tabs>
+          <v-divider :thickness="1.5" class="border-opacity-100" color="white"></v-divider>
+<!-- Tabs Section -->
+<v-tabs 
+  v-model="activeTab" 
+  grow 
+  class="mb-4 small-tabs white-tabs"
+>
+  <v-tab value="posts" prepend-icon="mdi-grid">Posts</v-tab>
+  <v-tab value="saved" prepend-icon="mdi-bookmark">Saved</v-tab>
+</v-tabs>
 
           <div v-if="activeTab === 'posts'">
-  <v-row class="pt-8">
-    <v-col v-for="post in posts" :key="post.post_id" cols="12" md="3">
-      <v-card :class="{ 'sold-overlay pt-12': post.is_sold }" class="card">
-  <v-img :src="post.image" aspect-ratio="1.5" class="card-image"></v-img>
-  <v-card-title class="card-title">{{ post.item_name }}</v-card-title>
-  <v-card-subtitle class="card-price">₱{{ post.price }}</v-card-subtitle>
-  <v-card-text class="card-content">
-    <p class="card-description">{{ post.description }}</p>
-    <p><strong>Type:</strong> {{ post.type }}</p>
-    <p v-if="post.is_sold" class="sold-out-text">Sold Out</p>
-  </v-card-text>
+            <v-row class="pt-8 pb-12">
+  <v-col v-for="post in posts" :key="post.post_id" cols="12" md="3">
+    <v-card :class="{ 'sold-overlay pt-12': post.is_sold }" class="card">
+      <v-img :src="post.image" aspect-ratio="1.5" class="card-image"></v-img>
+      <v-card-title class="card-title">{{ post.item_name }}</v-card-title>
+      <v-card-subtitle class="card-price">₱{{ post.price }}</v-card-subtitle>
+      <v-card-text class="card-content">
+        <p class="card-description">{{ post.description }}</p>
+        <p><strong>Type:</strong> {{ post.type }}</p>
+        <p v-if="post.is_sold" class="sold-out-text">Sold Out</p>
+      </v-card-text>
 
-  <v-card-actions class="card-actions">
-    <v-menu offset-y transition="slide-y-reverse-transition" bottom>
-      <template #activator="{ props }">
-        <v-btn icon v-bind="props">
-          <v-icon>mdi-dots-vertical</v-icon>
+      <v-card-actions class="card-actions">
+        <v-menu offset-y transition="slide-y-reverse-transition" bottom>
+          <template #activator="{ props }">
+            <v-btn icon v-bind="props">
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item v-if="!post.is_sold" @click="editPost(post)">
+              <v-list-item-title>Edit</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="deletePost(post.id, post.image)">
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-btn v-if="!post.is_sold" @click="markAsSold(post.id)" color="green">
+          Mark as Sold
         </v-btn>
-      </template>
-      <v-list>
-        <!-- Option to Edit -->
-        <v-list-item v-if="!post.is_sold" @click="editPost(post)">
-          <v-list-item-title>Edit</v-list-item-title>
-        </v-list-item>
-        <!-- Option to Delete -->
-        <v-list-item @click="deletePost(post.id, post.image)">
-          <v-list-item-title>Delete</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-
-    <!-- Mark as Sold or Unmark Button -->
-    <v-btn v-if="!post.is_sold" @click="markAsSold(post.id)" color="green">
-      Mark as Sold
-    </v-btn>
-    <v-btn v-if="post.is_sold" @click="unmarkAsSold(post.id)" color="orange">
-      Set as Available
-    </v-btn>
-  </v-card-actions>
-</v-card>
-</v-col>
-
-  </v-row>
+        <v-btn v-if="post.is_sold" @click="unmarkAsSold(post.id)" color="orange">
+          Set as Available
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-col>
+</v-row>
 
     <!-- Edit Post Modal -->
     <v-dialog v-model="showEditModal" persistent max-width="600px">
@@ -597,47 +593,47 @@ const redirectToFacebookProfile = (post) => {
   
   <!-- Display message if no saved items -->
   <p v-if="savedProducts.length === 0" class="text-center">You have no saved items.</p>
+<!-- Saved Tab Template -->
+<v-container class="post-section mt-5 pb-12" v-else>
+  <v-row justify="start" dense>
+    <v-col v-for="(post, index) in savedProducts" :key="index" cols="10" sm="6" md="3">
+      <v-card class="post-card1 position-relative">
 
-  <!-- Saved Tab Template -->
-  <v-container class="post-section mt-5" v-else>
-    <v-row justify="start" dense>
-      <v-col v-for="(post, index) in savedProducts" :key="index" cols="10" sm="6" md="3">
-        <v-card class="post-card1 position-relative">
+        <!-- Sold Overlay -->
+        <div v-if="post.is_sold" class="sold-overlay1">
+          <div class="sold-text1">SOLD OUT</div>
+        </div>
 
-          <!-- Sold Overlay -->
-          <div v-if="post.is_sold" class="sold-overlay1">
-            <div class="sold-text1">SOLD OUT</div>
-          </div>
+        <!-- Image Section -->
+        <v-img :src="post.image" class="post-image" height="250px">
+          <v-btn
+            class="view-button"
+            @click.stop="viewPostDetails(post)"
+            absolute
+            top
+            right
+          >
+            View
+          </v-btn>
+        </v-img>
 
-          <!-- Image Section -->
-          <v-img :src="post.image" class="post-image" height="250px">
-            <v-btn
-              class="view-button"
-              @click.stop="viewPostDetails(post)"
-              absolute
-              top
-              right
-            >
-              View
-            </v-btn>
-          </v-img>
-
-          <!-- Details Section -->
-          <v-card-text class="post-details">
-            <div class="d-flex justify-space-between">
-              <div>
-                <div class="post-title">{{ post.item_name }}</div>
-                <div class="post-type">{{ post.type }}</div>
-              </div>
-              <div class="post-price-box">
-                <div class="post-price">₱{{ post.price }}</div>
-              </div>
+        <!-- Details Section -->
+        <v-card-text class="post-details">
+          <div class="d-flex justify-space-between">
+            <div>
+              <div class="post-title">{{ post.item_name }}</div>
+              <div class="post-type">{{ post.type }}</div>
             </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+            <div class="post-price-box">
+              <div class="post-price">₱{{ post.price }}</div>
+            </div>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
+</v-container>
+
 
   <!-- Post Detail Modal -->
   <v-dialog v-model="isDialogOpen" max-width="800px" transition="dialog-bottom-transition">
@@ -697,10 +693,14 @@ const redirectToFacebookProfile = (post) => {
         </v-main>
       </v-container>
 
-<v-bottom-navigation app>
+      <v-bottom-navigation app class="position-fixed fixed-bottom">
   <v-tooltip :location="'top'" :origin="'center'" no-click-animation>
     <template v-slot:activator="{ props }">
-      <v-btn v-bind="props" @click="togglePostForm" color="primary">
+      <v-btn 
+        v-bind="props" 
+        @click="togglePostForm" 
+        class="custom-post-btn"
+      >
         <v-icon>mdi-plus</v-icon>
       </v-btn>
     </template>
@@ -790,6 +790,7 @@ const redirectToFacebookProfile = (post) => {
   display: flex;
   overflow-y: auto;
   padding-inline: 80px;
+  background-color: #210440;
 }
 
 .main-content {
@@ -805,7 +806,8 @@ const redirectToFacebookProfile = (post) => {
   border-radius: 10px;
   overflow: hidden;
   transition: 0.3s ease;
-  border: 1.5px solid #6d01a7;
+  border: 1.5px solid #B43E8F;
+  margin-bottom: 5px;
 }
 
 .card:hover {
@@ -939,9 +941,11 @@ opacity: 0.5;
 
 .post-card1 {
   border-radius: 10px;
+  height: 22rem;
   overflow: hidden;
   transition: 0.3s ease;
-  border: 1.5px solid #6d01a7;
+  margin: 5px;
+  border: 2px solid #B43E8F;
 }
 
 .post-card:hover {
@@ -1051,5 +1055,34 @@ opacity: 0.5;
 
 .custom-button:hover {
   background-color: #3700b3;
+}
+
+.position-fixed {
+  background-color: #210440; /* Dark purple background for the navigation */
+}
+
+.custom-post-btn {
+  background-color: #B43E8F !important; /* Vibrant pink for the mdi-plus button */
+  color: white !important; /* White icon color */
+  width: 56px; /* Standard floating action button size */
+  height: 56px;
+}
+
+.custom-post-btn:hover {
+  background-color: #9c357a !important; /* Slightly darker shade on hover */
+}
+
+.custom-post-btn .v-icon {
+  font-size: 24px; /* Adjust icon size if necessary */
+}
+
+.white-tabs {
+  background-color: #210440; /* Set tabs background to white */
+  border-radius: 8px; /* Optional: Rounded corners */
+}
+
+.white-tabs .v-tab {
+  color: #ffff; /* Set tab text to black for contrast */
+  font-weight: bold; /* Optional: Make text bold */
 }
 </style>
