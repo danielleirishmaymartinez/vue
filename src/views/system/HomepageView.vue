@@ -72,9 +72,9 @@ async function logout() {
 .layout {
   background-color: #210440;
   display: flex;
-  overflow: hidden; /* Prevent parent container scrolling */
+  overflow: hidden;
+  height: 100vh;
 }
-
 
 /* Hide scrollbar for main content */
 .main-content::-webkit-scrollbar {

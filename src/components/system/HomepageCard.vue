@@ -20,19 +20,16 @@ const filteredPosts = computed(() => {
 
 const carouselItems = [
   {
-    image: '/images/car1.jpg',
-    title: 'Discover unbeatable prices',
-    subtitle: 'And swap opportunities right here on campus!',
+    image: '/images/1.png',
   },
   {
-    image: '/images/car2.jpg',
-    title: 'Unlock incredible deals at our virtual marketplace',
-    subtitle: 'where every purchase and swap saves you more!',
+    image: '/images/2.png',
   },
   {
-    image: '/images/car3.jpg',
-    title: 'Buy what you need, swap what you don’t',
-    subtitle: 'Check out our newest collections.',
+    image: '/images/3.png',
+  },
+  {
+    image: '/images/4.png',
   },
 ];
 
@@ -188,25 +185,23 @@ const markAsSold = async (post) => {
 
 <template>
   <v-container class="custom-container">
-    <v-carousel height="450px" show-arrows="hover" cycle hide-delimiter-background>
+    <v-carousel height="500px" show-arrows="hover" cycle hide-delimiter-background>
   <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
-    <v-img :src="item.image" cover class="carousel-card border-accent">
-      <div class="d-flex fill-height justify-center align-center">
-        <div class="carousel-content">
-          <h1 class="carousel-title">{{ item.title }}</h1>
-          <h3 class="carousel-subtitle">{{ item.subtitle }}</h3>
-        </div>
-      </div>
+    <v-img :src="item.image" cover class="carousel-card">
+      <!-- The overlay is applied on top of the image -->
     </v-img>
   </v-carousel-item>
-</v-carousel>
-    <!-- Discover Section (Unchanged) -->
-    <div class="text-center mt-5">
-      <h2 class="discover-title">Shop smart, save big!</h2>
-      <p class="discover-subtitle">
-        Affordable prices and easy swaps await you here!
-      </p>
+
+  <!-- Fixed Overlay (Outside of carousel items, inside the carousel) -->
+  <div class="carousel-overlay">
+    <div class="carousel-caption">
+      <h1 class="text-center white--text">Welcome to Campus Deals!</h1>
+      <p class="text-center white--text">Explore endless opportunities to buy, sell, and trade 
+        with your campus community.</p>
+      <p class="text-center white--text">Find amazing deals and connect with students like you!</p>
     </div>
+  </div>
+</v-carousel>
 
 <!-- Search Bar (Centered) -->
 <v-container class="mx-auto d-flex justify-center align-center">
@@ -348,10 +343,8 @@ const markAsSold = async (post) => {
 }
 
 .carousel-card {
-  border: 2px; /* Dark brown border */
-  box-sizing: border-box; /* Ensures border doesn't affect size */
   border-radius: 18px; /* Optional: Adds rounded corners */
-  border-style: solid;
+  position: relative;
 }
 
 /* Darken the background overlay when the dialog is visible */
@@ -359,24 +352,45 @@ const markAsSold = async (post) => {
   background-color: rgba(0, 0, 0, 0.8) !important; /* 80% opacity */
 }
 
+.carousel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;  /* Ensures it covers the entire width of the carousel */
+  height: 100%; /* Ensures it covers the entire height of the carousel */
+  background: #5c58580f; /* Semi-transparent black background */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* Ensure it's above carousel content */
+  pointer-events: none; /* Prevents the overlay from blocking carousel controls */
+}
+
+
+/* Adjust font sizes here */
+.carousel-caption h1 {
+  margin: 0;
+  padding: 0;
+  font-size: 4rem; /* Adjust as needed for headline */
+  font-weight: bold; /* Optional: Make text bold for visibility */
+}
+
+.carousel-caption p {
+  margin: 0;
+  padding: 0;
+  font-size: 1.4rem; /* Adjust as needed for paragraph text */
+  font-weight: normal; /* Optional: Keep it normal */
+}
+
 .carousel-content {
-  color: rgb(239, 184, 169);
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  color: rgb(75, 38, 120);
+  text-shadow: 0 0 2px rgb(255, 255, 255);
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-}
-
-.carousel-title {
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-.carousel-subtitle {
-  font-size: 1.2rem;
-  font-weight: bold;
 }
 
 .discover-title {
@@ -456,7 +470,7 @@ const markAsSold = async (post) => {
 .search-bar {
   color: #ffffff; /* Dark text color */
   border-radius: 6%; /* Rounded corners */
-  padding: 8px; /* Spacing inside the search bar */
+  margin-top: 20px;
 }
 
 .sold-overlay {
@@ -501,7 +515,7 @@ const markAsSold = async (post) => {
 }
 
 .post-type {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #000000;
   margin-top: 4px;
 }
