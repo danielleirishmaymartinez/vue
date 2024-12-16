@@ -593,7 +593,7 @@ const redirectToFacebookProfile = (post) => {
     </v-dialog>
 </div>
 
-<div v-else="activeTab === 'saved'">
+<div v-if="activeTab === 'saved'">
   
   <!-- Display message if no saved items -->
   <p v-if="savedProducts.length === 0" class="text-center">You have no saved items.</p>
@@ -697,7 +697,7 @@ const redirectToFacebookProfile = (post) => {
         </v-main>
       </v-container>
 
-<v-bottom-navigation app>
+<v-bottom-navigation app class="position-fixed fixed-bottom">
   <v-tooltip :location="'top'" :origin="'center'" no-click-animation>
     <template v-slot:activator="{ props }">
       <v-btn v-bind="props" @click="togglePostForm" color="primary">
@@ -804,6 +804,13 @@ const redirectToFacebookProfile = (post) => {
 
 .main-content-expanded {
   transition: margin-left 0.5s ease;
+}
+
+.position-fixed {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 10; /* Ensures it's above other elements */
 }
 
 .card {
