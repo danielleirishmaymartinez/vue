@@ -99,6 +99,7 @@ onMounted(async () => {
 });
 
 
+// Submit New Post
 const newPost = ref({
   item_name: "",
   description: "",
@@ -109,17 +110,14 @@ const newPost = ref({
   image: null,
 });
 
-const showSuccessDialog = ref(false);  // Controls the visibility of the success dialog
-const successMessage = ref('');  // The message to display in the success dialog
-
-// Submit New Post
 const submitPost = async () => {
   try {
-    const userId = authUser.userData.id;
+    const userId = authUser.userData.id; // Get userId from the store
 
+    // Check if an image is selected and ensure it's a valid File object
     if (newPost.value.image && newPost.value.image instanceof File) {
-      const userFolder = `user_${userId}`;
-      const filePath = `${userFolder}/${newPost.value.image.name}`;
+      const userFolder = `user_${userId}`; // Folder name for the user
+      const filePath = `${userFolder}/${newPost.value.image.name}`; // Path inside the user’s folder
 
       // Upload the image to Supabase Storage
       const { data, error: uploadError } = await supabase
@@ -129,15 +127,17 @@ const submitPost = async () => {
 
       if (uploadError) throw new Error(uploadError.message);
 
-      newPost.value.image = filePath;
+      // Once the image is uploaded, update the post's image field with the file path
+      newPost.value.image = filePath; // Update with the file path after successful upload
     } else {
-      newPost.value.image = null;
+      // Handle the case where no image is selected or file is invalid
+      newPost.value.image = null; // Optionally set a default image or leave it null
     }
 
     // Insert the new post into the posts table
     const { error } = await supabase.from('posts').insert([{
       ...newPost.value,
-      user_id: userId,
+      user_id: userId, // Ensure user_id is linked to the post
     }]);
 
     if (error) throw new Error(error.message);
@@ -155,13 +155,8 @@ const submitPost = async () => {
 
     // Close form and refresh posts
     togglePostForm();
-
-    // Set success message and show the dialog
-    successMessage.value = 'Item successfully posted!';
-    showSuccessDialog.value = true;
-
-    // Optionally refresh posts here
     posts.value = await refreshPosts();
+    console.log('Post created successfully!');
   } catch (error) {
     console.error('Error submitting post:', error.message);
   }
@@ -176,11 +171,6 @@ const editedPost = ref({
   type: '',
   image: null
 });
-
-const showEditSuccessDialog = ref(false);  // Controls success dialog visibility
-const editSuccessMessage = ref(''); // Message for the success dialog
-
-// Function to delete a post
 const deletePost = async (postId, imagePath) => {
   try {
     // Delete the post from the database
@@ -209,14 +199,12 @@ const deletePost = async (postId, imagePath) => {
   }
 };
 
-// Function to edit a post
 const editPost = (post) => {
   // Pre-fill the modal with post data
   editedPost.value = { ...post };
   showEditModal.value = true;
 };
 
-// Submit edited post
 const submitEditPost = async () => {
   try {
     // Handle image upload if it's a new image
@@ -246,19 +234,14 @@ const submitEditPost = async () => {
 
     if (updateError) throw new Error(updateError.message);
 
-    // Close the modal and show success dialog
+    // Close the modal and refresh the posts list
     showEditModal.value = false;
-    editSuccessMessage.value = 'Post edited successfully!';
-    showEditSuccessDialog.value = true; // Show success dialog
-
-    // Refresh posts
     posts.value = await refreshPosts();
     console.log('Post edited successfully!');
   } catch (error) {
     console.error('Error editing post:', error.message);
   }
 };
-
 const markAsSold = async (postId) => {
   try {
     // Fetch the current user
@@ -443,7 +426,7 @@ const logout = async () => {
           </v-tabs>
 
           <div v-if="activeTab === 'posts'">
-  <v-row class="pt-8">
+  <v-row>
     <v-col v-for="post in posts" :key="post.post_id" cols="12" md="3">
       <v-card :class="{ 'sold-overlay pt-12' : post.is_sold }">
   <v-img :src="post.image" aspect-ratio="1.5"></v-img>
@@ -491,40 +474,23 @@ const logout = async () => {
 
   </v-row>
 
-    <!-- Edit Post Modal -->
-    <v-dialog v-model="showEditModal" persistent max-width="600px">
-      <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440;" color="purple-darken-4">
-        <v-card-title>Edit Post</v-card-title>
-        <v-card-text>
-          <v-text-field v-model="editedPost.item_name" label="Item Name" variant="outlined" rounded="lg"></v-text-field>
-          <v-textarea v-model="editedPost.description" label="Description" variant="outlined" rounded="lg"></v-textarea>
-          <v-text-field v-model="editedPost.price" label="Price" type="number" variant="outlined" rounded="lg"></v-text-field>
-          <v-text-field v-model="editedPost.type" label="Type" variant="outlined" rounded="lg"></v-text-field>
-          <v-file-input v-model="editedPost.image" label="Upload Image" accept="image/*" variant="outlined" rounded="lg"></v-file-input>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="showEditModal = false" color="red">Cancel</v-btn>
-          <v-btn @click="submitEditPost" color="green-lighten-1">Save Changes</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Success Dialog for Editing Post -->
-    <v-dialog v-model="showEditSuccessDialog" max-width="500px">
-      <v-card class="pa-4" color="pink-accent-1" dark>
-        <v-card-title>
-          Success
-        </v-card-title>
-        <v-card-text>
-          <span>{{ editSuccessMessage }}</span>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="white" @click="showEditSuccessDialog = false">
-            Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+  <!-- Edit Post Modal -->
+  <v-dialog v-model="showEditModal" persistent max-width="600px">
+    <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440; " color="purple-darken-4">
+      <v-card-title>Edit Post</v-card-title>
+      <v-card-text>
+        <v-text-field v-model="editedPost.item_name" label="Item Name" variant="outlined" rounded="lg"></v-text-field>
+        <v-textarea v-model="editedPost.description" label="Description" variant="outlined" rounded="lg"></v-textarea>
+        <v-text-field v-model="editedPost.price" label="Price" type="number" variant="outlined" rounded="lg"></v-text-field>
+        <v-text-field v-model="editedPost.type" label="Type" variant="outlined" rounded="lg"></v-text-field>
+        <v-file-input v-model="editedPost.image" label="Upload Image" accept="image/*" variant="outlined" rounded="lg"></v-file-input>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="showEditModal = false" color="red">Cancel</v-btn>
+        <v-btn @click="submitEditPost" color="green-lighten-1">Save Changes</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </div>
 
 <div v-else-if="activeTab === 'saved'">
@@ -629,7 +595,6 @@ const logout = async () => {
   </v-tooltip>
 </v-bottom-navigation>
 
-<<<<<<< HEAD
       <!-- Post Form (Floating Form) -->
       <v-dialog v-model="showPostForm" max-width="500px" persistent>
 <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440; " color="purple-darken-4">
@@ -681,81 +646,11 @@ const logout = async () => {
         ></v-file-input>
         <v-btn type="submit" color="deep-purple-accent-2" class="mt-4" elevation="2" block rounded="lg">
           Post
-=======
-    <!-- Post Form (Floating Form) -->
-    <v-dialog v-model="showPostForm" max-width="500px" persistent>
-      <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440;" color="purple-darken-4">
-        <v-btn icon @click="togglePostForm" class="ml-auto hover-btn">
-          <v-icon class="hover-icon">mdi-close</v-icon>
->>>>>>> a64db0ef3b5cb417a9e705fe428ff4b115c938f9
         </v-btn>
-        <v-card-title>
-          Create New Post
-        </v-card-title>
-        <v-card-text>
-          <v-form @submit.prevent="submitPost">
-            <v-text-field
-              v-model="newPost.item_name"
-              label="Item Name"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-text-field>
-            <v-textarea
-              v-model="newPost.description"
-              label="Description"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-textarea>
-            <v-text-field
-              v-model="newPost.price"
-              label="Price"
-              type="number"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-text-field>
-            <v-select
-              v-model="newPost.type"
-              :items="['For Sale', 'For Trade']"
-              label="Type"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-select>
-            <v-file-input
-              v-model="newPost.image"
-              label="Product Image"
-              accept="image/*"
-              required
-              variant="outlined"
-              rounded="lg"
-            ></v-file-input>
-            <v-btn type="submit" color="deep-purple-accent-2" class="mt-4" elevation="2" block rounded="lg">
-              Post
-            </v-btn>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-
-    <!-- Success Dialog -->
-    <v-dialog v-model="showSuccessDialog" max-width="500px">
-      <v-card class="pa-4" color="pink-accent-1" dark>
-        <v-card-title>
-          Success
-        </v-card-title>
-        <v-card-text>
-          <span>{{ successMessage }}</span>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="white" @click="showSuccessDialog = false">
-            Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      </v-form>
+    </v-card-text>
+  </v-card>
+</v-dialog>
     </v-app>
   </v-responsive>
 </template>
