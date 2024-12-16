@@ -11,7 +11,7 @@ const { mobile } = useDisplay();
   <AppLayout :is-with-app-bar-nav-icon="false">
     <template #content>
       <v-container fluid>
-        <div class="row justify-content-center pt-4">
+        <div class="row justify-content-center pt-2">
           <div class="col-12" sm="10" md="8" lg="6">
             <v-card class="mx-auto rounded-lg" elevation="0" max-width="700">
               <!-- Title Section -->
@@ -25,8 +25,8 @@ const { mobile } = useDisplay();
               </v-card-title>
 
               <!-- Content Section -->
-              <v-card-text class="pt-4">
-                <v-divider class="my-5"></v-divider>
+              <v-card-text class="pt-2">
+                <v-divider class="my-2"></v-divider>
 
                 <RegisterForm></RegisterForm>
 
@@ -58,7 +58,7 @@ const { mobile } = useDisplay();
 
 /* Adjust Card Responsiveness */
 .v-card {
-  max-width: 400px;
+  max-width: 500px;
 }
 
 /* Title Alignment */

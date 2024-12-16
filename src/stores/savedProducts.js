@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
+import { supabase } from '@/utils/supabase';
 
 export const useSavedProductsStore = defineStore('savedProducts', () => {
   const savedProducts = ref([]);
@@ -39,5 +40,66 @@ export const useSavedProductsStore = defineStore('savedProducts', () => {
   // Load data from localStorage when store is initialized
   loadSavedProducts();
 
-  return { savedProducts, addProduct, removeProduct };
+  // Fetch updated saved products from the database (e.g., after marking as sold)
+  const fetchSavedProductsFromDb = async (userId) => {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('saved_by', userId); // Assuming saved_by column is used to store the user who saved the post
+
+    if (error) {
+      console.error('Error fetching saved products:', error.message);
+      return;
+    }
+
+    // Update the saved products in the store with the latest data from the database
+    savedProducts.value = data;
+
+    // Also update localStorage with the new data
+    saveToLocalStorage();
+  };
+
+  // Example function to mark a post as sold
+  const markAsSold = async (postId) => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      console.error("No active user session found.");
+      return;
+    }
+
+    const userId = user.id;
+
+    // Update the post in the database to mark it as sold
+    const { data: updatedPost, error: updateError } = await supabase
+      .from('posts')
+      .update({ is_sold: true })
+      .eq('id', postId)
+      .eq('saved_by', userId) // Ensure the user is the one who saved the post
+      .single();
+
+    if (updateError) {
+      console.error("Error marking post as sold:", updateError.message);
+      return;
+    }
+
+    // Update the local saved products
+    savedProducts.value = savedProducts.value.map(post =>
+      post.id === postId ? { ...post, is_sold: true } : post
+    );
+
+    // Update localStorage with the modified data
+    saveToLocalStorage();
+
+    // Re-fetch saved products from the database
+    await fetchSavedProductsFromDb(userId);
+  };
+
+  return {
+    savedProducts,
+    addProduct,
+    removeProduct,
+    fetchSavedProductsFromDb,
+    markAsSold,
+  };
 });

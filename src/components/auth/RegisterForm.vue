@@ -176,7 +176,7 @@ const onFormSubmit = () => {
     <v-btn
       class="mt-2 submit-btn"
       type="submit"
-      color="pink"
+      color="purple"
       prepend-icon="mdi-account-plus"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"
