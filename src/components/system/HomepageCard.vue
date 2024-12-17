@@ -185,7 +185,7 @@ const markAsSold = async (post) => {
 
 <template>
   <v-container class="custom-container">
-    <v-carousel height="500px" show-arrows="hover" cycle hide-delimiter-background>
+    <v-carousel height="450px" show-arrows="hover" cycle hide-delimiter-background>
   <v-carousel-item v-for="(item, index) in carouselItems" :key="index">
     <v-img :src="item.image" cover class="carousel-card">
       <!-- The overlay is applied on top of the image -->
@@ -406,13 +406,15 @@ const markAsSold = async (post) => {
 
 .post-card {
   border-radius: 10px;
+  height: 22rem;
   overflow: hidden;
   transition: 0.3s ease;
-  border: 1px solid #e8657f;
+  margin: 5px;
+  border: 2px solid #B43E8F;
 }
 
 .post-card:hover {
-  transform: scale(1.03);
+  transform: scale(1.02);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -466,11 +468,10 @@ const markAsSold = async (post) => {
   font-size: 1.1rem;
   font-weight: bold;
 }
-
 .search-bar {
   color: #ffffff; /* Dark text color */
   border-radius: 6%; /* Rounded corners */
-  margin-top: 20px;
+  padding: 8px; /* Spacing inside the search bar */
 }
 
 .sold-overlay {
