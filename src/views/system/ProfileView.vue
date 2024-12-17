@@ -471,40 +471,36 @@ const redirectToFacebookProfile = (post) => {
       <!-- Top Navbar -->
       <Navbar />
 
-      <v-container fluid class="d-flex page-layout">
-        <!-- Sidebar Navigation -->
-        <SidebarNav v-model:drawer="drawerVisible" />
-
-        <!-- Main Content -->
-        <v-main class="main-content mt-10 pt-12">
-          <v-container class="profile-container pb-11">
-            <!-- Profile Section -->
-            <v-row>
-              <!-- Profile Image Section -->
-              <v-col cols="12" md="4" class="d-flex justify-center align-center mb-5">
-                <v-avatar size="200" class="profile-avatar">
-                  <template v-if="userProfile?.profile_image">
-                    <img :src="userProfile.profile_image"/>
-                  </template>
-                  <template v-else>
-                    <span class="initials">
-                      {{ getInitials(userProfile.first_name + ' ' + userProfile.last_name || "Unknown User") }}
-                    </span>
-                  </template>
-                </v-avatar>
-              </v-col>
-
-              <!-- Profile Info Section -->
-              <v-col cols="12" md="8">
-                <div class="profile-details">
-                  <!-- User Name -->
-                  <br>
-                  <h2 class="mb-2">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
-                </div>
-              </v-col>
-            </v-row>
-          </v-container>
-          <v-divider :thickness="1" class="border-opacity-50" color="black"></v-divider>
+      <v-container fluid class="page-layout">
+  <SidebarNav :class="{ 'sidebar-closed': !drawerVisible, 'sidebar-open': drawerVisible }" v-model:drawer="drawerVisible" />
+  <v-main :class="{ 'main-content-expanded': !drawerVisible, 'main-content': drawerVisible }">
+    <!-- Content -->
+    <v-container class="profile-container pb-15 d-flex justify-center align-center">
+  <!-- Profile Section -->
+  <v-row justify="center" align="center" class="w-100">
+    <!-- Profile Image Section -->
+    <v-col cols="12" md="3" class="d-flex justify-center mb-2">
+      <v-avatar size="200" class="profile-avatar">
+        <template v-if="userProfile?.profile_image">
+          <img :src="userProfile.profile_image" />
+        </template>
+        <template v-else>
+          <span class="initials">
+            {{ getInitials(userProfile.first_name + ' ' + userProfile.last_name || "Unknown User") }}
+          </span>
+        </template>
+      </v-avatar>
+    </v-col>
+    <v-col cols="12" md="5" class="d-flex justify-center align-center">
+  <div class="profile-details text-center theme--dark">
+    <!-- User Name -->
+    <h2 class="mb-2" style="color: white;">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
+    <!-- User Email -->
+    <p class="mb-2" style="color: white;">{{ userEmail || "Email not available" }}</p>
+  </div>
+</v-col>
+  </v-row>
+</v-container>
 
           <v-divider :thickness="1.5" class="border-opacity-100" color="white"></v-divider>
 <!-- Tabs Section -->
@@ -518,53 +514,44 @@ const redirectToFacebookProfile = (post) => {
 </v-tabs>
 
           <div v-if="activeTab === 'posts'">
-  <v-row class="pt-8">
-    <v-col v-for="post in posts" :key="post.post_id" cols="12" md="3">
-      <v-card :class="{ 'sold-overlay pt-12' : post.is_sold }">
-  <v-img :src="post.image" aspect-ratio="1.5"></v-img>
-  <v-card-title>{{ post.item_name }}</v-card-title>
-  <v-card-subtitle>₱{{ post.price }}</v-card-subtitle>
-  <v-card-text class="card-content">
-    <p>{{ post.description }}</p>
-    <p><strong>Type:</strong> {{ post.type }}</p>
-    <!-- "Sold Out" text centered if the post is sold -->
-    <p v-if="post.is_sold" class="sold-out-text">Sold</p>
-  </v-card-text>
+            <v-row class="pt-8 pb-12">
+  <v-col v-for="post in posts" :key="post.post_id" cols="12" md="3">
+    <v-card :class="{ 'sold-overlay pt-12': post.is_sold }" class="card">
+      <v-img :src="post.image" aspect-ratio="1.5" class="card-image"></v-img>
+      <v-card-title class="card-title">{{ post.item_name }}</v-card-title>
+      <v-card-subtitle class="card-price">₱{{ post.price }}</v-card-subtitle>
+      <v-card-text class="card-content">
+        <p class="card-description">{{ post.description }}</p>
+        <p><strong>Type:</strong> {{ post.type }}</p>
+        <p v-if="post.is_sold" class="sold-out-text">Sold Out</p>
+      </v-card-text>
 
-    <v-card-actions>
-      <!-- Options Menu for Edit/Delete -->
-      <v-menu v-if="!post.is_sold" offset-y transition="slide-y-reverse-transition" bottom>
-        <template #activator="{ props }">
-          <v-btn icon v-bind="props">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="editPost(post)">
-            <v-list-item-title>Edit</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="deletePost(post.id, post.image)">
-            <v-list-item-title>Delete</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-
-      <v-btn v-if="!post.is_sold" @click="markAsSold(post.id)" color="green">
-  Mark as Sold
-</v-btn>
-
-    </v-card-actions>
-  </v-card>
-
-  <!-- Sold Overlay -->
-  <v-overlay v-if="post.is_sold" absolute z-index="1" class="sold-overlay">
-    <v-row justify="center" align="center" class="sold-text">
-      SOLD
-    </v-row>
-  </v-overlay>
-</v-col>
-
-  </v-row>
+      <v-card-actions class="card-actions">
+        <v-menu offset-y transition="slide-y-reverse-transition" bottom>
+          <template #activator="{ props }">
+            <v-btn icon v-bind="props">
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item v-if="!post.is_sold" @click="editPost(post)">
+              <v-list-item-title>Edit</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="deletePost(post.id, post.image)">
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-btn v-if="!post.is_sold" @click="markAsSold(post.id)" color="green">
+          Mark as Sold
+        </v-btn>
+        <v-btn v-if="post.is_sold" @click="unmarkAsSold(post.id)" color="orange">
+          Set as Available
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-col>
+</v-row>
 
     <!-- Edit Post Modal -->
     <v-dialog v-model="showEditModal" persistent max-width="600px">
@@ -602,28 +589,33 @@ const redirectToFacebookProfile = (post) => {
     </v-dialog>
 </div>
 
-<div v-else-if="activeTab === 'saved'">
+<div v-if="activeTab === 'saved'">
+  
   <!-- Display message if no saved items -->
   <p v-if="savedProducts.length === 0" class="text-center">You have no saved items.</p>
+<!-- Saved Tab Template -->
+<v-container class="post-section mt-5 pb-12" v-else>
+  <v-row justify="start" dense>
+    <v-col v-for="(post, index) in savedProducts" :key="index" cols="10" sm="6" md="3">
+      <v-card class="post-card1 position-relative">
 
-  <!-- Post Cards -->
-  <v-container class="post-section mt-5" v-else>
-    <v-row justify="start" dense>
-      <v-col v-for="(post, index) in savedProducts" :key="index" cols="12" sm="6" md="4">
-        <v-card class="post-card">
-          <!-- Image Section -->
-          <v-img :src="post.image" class="post-image" height="200px">
-            <v-btn
-              class="view-button"
-              color="brown"
-              @click.stop="viewPostDetails(post)"
-              absolute
-              top
-              right
-            >
-              View
-            </v-btn>
-          </v-img>
+        <!-- Sold Overlay -->
+        <div v-if="post.is_sold" class="sold-overlay1">
+          <div class="sold-text1">SOLD OUT</div>
+        </div>
+
+        <!-- Image Section -->
+        <v-img :src="post.image" class="post-image" height="250px">
+          <v-btn
+            class="view-button"
+            @click.stop="viewPostDetails(post)"
+            absolute
+            top
+            right
+          >
+            View
+          </v-btn>
+        </v-img>
 
         <!-- Details Section -->
         <v-card-text class="post-details">
@@ -701,7 +693,7 @@ const redirectToFacebookProfile = (post) => {
         </v-main>
       </v-container>
 
-<v-bottom-navigation app>
+      <v-bottom-navigation app class="position-fixed fixed-bottom">
   <v-tooltip :location="'top'" :origin="'center'" no-click-animation>
     <template v-slot:activator="{ props }">
       <v-btn 
@@ -716,6 +708,7 @@ const redirectToFacebookProfile = (post) => {
   </v-tooltip>
 </v-bottom-navigation>
 
+<!-- Post Form (Floating Form) -->
 <v-dialog v-model="showPostForm" max-width="500px" persistent>
   <v-card class="pa-4" rounded="xl" style="border: 4px solid #210440;" color="purple-darken-4">
     <v-btn icon @click="togglePostForm" class="ml-auto hover-btn">
@@ -796,13 +789,53 @@ const redirectToFacebookProfile = (post) => {
 <style scoped>
 .page-layout {
   display: flex;
-  height: 100vh; /* Full viewport height to match sidebar */
-  overflow: hidden; /* Prevent parent container scrolling */
+  overflow-y: auto;
+  padding-inline: 80px;
+  background-color: #210440;
 }
 
-/* Hide scrollbar for main content */
-.main-content::-webkit-scrollbar {
-  display: none; /* For Webkit browsers */
+.main-content {
+  transition: margin-left 0.5s ease; /* Smooth transition */
+}
+
+.main-content-expanded {
+  transition: margin-left 0.5s ease;
+}
+
+.card {
+  height:100%;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: 0.3s ease;
+  border: 1.5px solid #B43E8F;
+  margin-bottom: 5px;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-image {
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #210440;
+}
+
+.card-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.card-description {
+  color: #000000;
+  margin-bottom: 8px;
 }
 
 .card-actions {
@@ -871,4 +904,186 @@ opacity: 0.5;
   height: 100%;      /* Make the image fill the container */
 }
 
+.post-description,
+.post-price,
+.post-location,
+.post-time {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between icon and text */
+}
+
+.post-detail-header {
+  display: flex;
+  align-items: center;
+  background-color: #4a0074;
+}
+
+.post-detail-card {
+  max-width: 900px; /* Adjusted card width */
+  width: 100%; /* Responsive width */
+  height: 500px; /* Maintain aspect ratio */
+  border: 3px solid #4a0074; /* Set border thickness and color */
+}
+
+
+.post-detail-image {
+  margin-top: 25px;
+  width: 100%; /* Responsive width */
+  height: 350px; /* Adjusted height */
+  object-fit:cover; /* Keeps image proportions while cropping excess */
+  border-radius: 20px; /* Optional: Rounded corners */
+}
+
+.post-card1:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.post-card1 {
+  border-radius: 10px;
+  height: 22rem;
+  overflow: hidden;
+  transition: 0.3s ease;
+  margin: 5px;
+  border: 2px solid #B43E8F;
+}
+
+.post-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.post-image {
+  border-bottom: 1px solid #efe8e8;
+}
+
+.view-button {
+  font-size: 0.7rem;
+  background-color: #ff1cc0;
+  color: white;
+  border-radius: 10px;
+}
+
+.view-button:hover {
+  background-color: #7100b2;
+}
+/* Overlay for Sold Out */
+.sold-overlay1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent gray */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above the card content */
+}
+
+/* Overlay text style */
+.sold-text1 {
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Post Details Section */
+.post-details {
+  padding: 15px;
+}
+
+.post-details-2 {
+  padding: 15px;
+  margin-top: 25px;
+}
+
+.post-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #210440;
+  margin-bottom: 15px;
+}
+
+.post-title-2 {
+  margin-top: 20px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #210440;
+}
+
+.post-description{
+  color:#000000; 
+}
+
+.post-type {
+  font-size: 0.9rem;
+  color: #000000;
+  margin-top: 4px;
+}
+
+.post-price-box {
+  padding: 4px 8px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.post-price {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #000000;
+}
+
+.text-color {
+  color: #000000; /* Example: Dark Gray for Text */
+}
+
+.icon-color {
+  font-size: 15px;
+  color: hsl(0, 0%, 0%); /* Example: Bright Orange for Icons */
+}
+
+/* Button Styling */
+.custom-button {
+  background-color: #5f0196;
+  color: white;
+  font-weight: bold;
+}
+
+.custom-button:hover {
+  background-color: #3700b3;
+}
+
+.position-fixed {
+  background-color: #210440; /* Dark purple background for the navigation */
+}
+
+.custom-post-btn {
+  background-color: #B43E8F !important; /* Vibrant pink for the mdi-plus button */
+  color: white !important; /* White icon color */
+  width: 56px; /* Standard floating action button size */
+  height: 56px;
+}
+
+.custom-post-btn:hover {
+  background-color: #9c357a !important; /* Slightly darker shade on hover */
+}
+
+.custom-post-btn .v-icon {
+  font-size: 24px; /* Adjust icon size if necessary */
+}
+
+.white-tabs {
+  background-color: #210440; /* Set tabs background to white */
+  border-radius: 8px; /* Optional: Rounded corners */
+}
+
+.white-tabs .v-tab {
+  color: #ffff; /* Set tab text to black for contrast */
+  font-weight: bold; /* Optional: Make text bold */
+}
 </style>

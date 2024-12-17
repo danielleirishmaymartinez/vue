@@ -2,10 +2,8 @@
 import AppLayout from '@/components/system/AppLayout.vue';
 import LoginForm from '@/components/auth/LoginForm.vue';
 import { useDisplay } from 'vuetify';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router'; // Import RouterLink and useRouter
 import { supabase } from '@/utils/supabase'; // Supabase client instance
-import { useSidebarStore } from "@/stores/sidebarStore"; // Import the Pinia store
-
 
 const { mobile } = useDisplay();
 const router = useRouter();
