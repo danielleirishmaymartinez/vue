@@ -7,6 +7,7 @@ import ProfileView from '@/views/system/ProfileView.vue'
 import PasswordSettingsView from '@/views/system/account-settings/PasswordSettingsView.vue';
 import PictureSettingsView from '@/views/system/account-settings/PictureSettingsView.vue';
 import ProfileInfoSettingsView from '@/views/system/account-settings/ProfileInfoSettingsView.vue';
+import AdminView from '@/views/system/AdminView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/admin',
+      name: 'AdminView',
+      component: AdminView,
+      meta: { requiresAuth: true }, // Only for authenticated users
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: ProfileView,
@@ -56,27 +63,30 @@ const router = createRouter({
       component: ProfileInfoSettingsView,
       meta: { requiresAuth: true },
     },
-
   ],
 });
 
-// Navigation guard
 router.beforeEach(async (to) => {
-  const isLoggedIn = await isAuthenticated();
+  const { loggedIn, metadata } = await isAuthenticated();
 
   // Redirect authenticated users away from login/register
-  if ((to.name === 'login' || to.name === 'register') && isLoggedIn) {
-    return { name: 'home' };
+  if ((to.name === 'login' || to.name === 'register') && loggedIn) {
+    return { name: metadata?.is_admin ? 'AdminView' : 'home' };
   }
 
   // Redirect unauthenticated users to login for protected routes
-  if (to.meta.requiresAuth && !isLoggedIn) {
+  if (to.meta.requiresAuth && !loggedIn) {
     return { name: 'login' };
   }
 
+  // Restrict access to admin page only for admins
+  if (to.name === 'AdminView' && !metadata?.is_admin) {
+    return { name: 'home' }; // Redirect non-admin users to home
+  }
+
   // Redirect to home if landing page is accessed when logged in
-  if (to.name === 'landing' && isLoggedIn) {
-    return { name: 'home' };
+  if (to.name === 'landing' && loggedIn) {
+    return { name: metadata?.is_admin ? 'AdminView' : 'home' };
   }
 });
 
