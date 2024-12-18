@@ -22,11 +22,12 @@ const userEmail = ref('');
 
 // Access the Pinia store
 const authUser = useAuthUserStore(); // Initialize the store
+
 onMounted(async () => {
   console.log("Before fetching profile:", userProfile.value);
 
   try {
-    // Fetch user data from auth
+    // Fetch user data from auth (Google)
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) {
       console.error("No active session found. Redirecting to login...");
@@ -35,45 +36,21 @@ onMounted(async () => {
     }
 
     const userId = user.id;
-    const email = user.email; // Store the email
+    const email = user.email;
 
-    // Fetch profile data
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select("first_name, last_name, profile_image, preferred_location, preferred_time")
-      .eq("user_id", userId)
-      .single();
+    // If the user signed in with Google, fetch additional data
+    const userName = user.user_metadata.full_name || "Unknown User";
+    const userImage = user.user_metadata.avatar_url || "/default-avatar.jpg";
 
-// Handle errors
-if (profileError) {
-  console.error("Error fetching profile:", profileError);
-  return;
-}
+    userProfile.value = {
+      first_name: userName.split(" ")[0] || "Unknown",
+      last_name: userName.split(" ")[1] || "User",
+      profile_image: userImage,
+      preferred_location: "Not specified",
+      preferred_time: "Not specified",
+    };
 
-userEmail.value = email;
-// Handle errors
-if (profileError) {
-  console.error("Error fetching profile:", profileError);
-  return;
-}
-
-userEmail.value = email;
-
-    // If there's a profile image, fetch the signed URL
-    if (profileData?.profile_image) {
-      const { data: signedUrlData, error: signedUrlError } = await supabase
-        .storage
-        .from('profile-images')
-        .createSignedUrl(profileData.profile_image, 60 * 60); // 1-hour expiration
-
-      if (signedUrlError) {
-        console.error("Error fetching signed URL for profile image:", signedUrlError.message);
-      } else {
-        profileData.profile_image = signedUrlData.signedUrl; // Update with signed URL
-      }
-    }
-
-    userProfile.value = profileData || getDefaultProfile();
+    userEmail.value = email;
 
     // Fetch only posts belonging to the logged-in user (filtered by user_id)
     const { data: postData, error: postError } = await supabase
@@ -113,292 +90,6 @@ userEmail.value = email;
   }
 });
 
-
-const newPost = ref({
-  item_name: "",
-  description: "",
-  price: "",
-  type: "",
-  location: "",
-  time: "",
-  image: null,
-});
-
-const showSuccessDialog = ref(false);  // Controls the visibility of the success dialog
-const successMessage = ref('');  // The message to display in the success dialog
-
-// Submit New Post
-const submitPost = async () => {
-  try {
-    const userId = authUser.userData.id;
-
-    if (newPost.value.image && newPost.value.image instanceof File) {
-      const userFolder = `user_${userId}`;
-      const filePath = `${userFolder}/${newPost.value.image.name}`;
-
-      // Upload the image to Supabase Storage
-      const { data, error: uploadError } = await supabase
-        .storage
-        .from('post-images')
-        .upload(filePath, newPost.value.image);
-
-      if (uploadError) throw new Error(uploadError.message);
-
-      newPost.value.image = filePath;
-    } else {
-      newPost.value.image = null;
-    }
-
-    // Insert the new post into the posts table
-    const { error } = await supabase.from('posts').insert([{
-      ...newPost.value,
-      user_id: userId,
-    }]);
-
-    if (error) throw new Error(error.message);
-
-    // Reset the form after successful submission
-    newPost.value = {
-      item_name: "",
-      description: "",
-      price: "",
-      type: "",
-      location: "",
-      time: "",
-      image: null,
-    };
-
-    // Close form and refresh posts
-    togglePostForm();
-
-    // Set success message and show the dialog
-    successMessage.value = 'Item successfully posted!';
-    showSuccessDialog.value = true;
-
-    // Optionally refresh posts here
-    posts.value = await refreshPosts();
-  } catch (error) {
-    console.error('Error submitting post:', error.message);
-  }
-};
-
-const showEditModal = ref(false);  // Modal visibility
-const editedPost = ref({
-  id: null,
-  item_name: '',
-  description: '',
-  price: '',
-  type: '',
-  image: null
-});
-
-const showEditSuccessDialog = ref(false);  // Controls success dialog visibility
-const editSuccessMessage = ref(''); // Message for the success dialog
-
-// Function to delete a post
-const deletePost = async (postId, imagePath) => {
-  try {
-    // Delete the post from the database
-    const { error: deletePostError } = await supabase
-      .from('posts')
-      .delete()
-      .eq('id', postId);
-
-    if (deletePostError) throw new Error(deletePostError.message);
-
-    // Now delete the image from Supabase Storage
-    if (imagePath) {
-      const { error: deleteImageError } = await supabase
-        .storage
-        .from('post-images')
-        .remove([imagePath]);
-
-      if (deleteImageError) throw new Error(deleteImageError.message);
-    }
-
-    console.log("Post and image deleted successfully!");
-    // Refresh the posts after deletion
-    posts.value = await refreshPosts();
-  } catch (error) {
-    console.error('Error deleting post:', error.message);
-  }
-};
-
-// Function to edit a post
-const editPost = (post) => {
-  // Pre-fill the modal with post data
-  editedPost.value = { ...post };
-  showEditModal.value = true;
-};
-
-// Submit edited post
-const submitEditPost = async () => {
-  try {
-    // Handle image upload if it's a new image
-    if (editedPost.value.image instanceof File) {
-      const userId = authUser.userData.id;
-      const filePath = `user_${userId}/${editedPost.value.image.name}`;
-      const { data, error: uploadError } = await supabase
-        .storage
-        .from('post-images')
-        .upload(filePath, editedPost.value.image);
-
-      if (uploadError) throw new Error(uploadError.message);
-      editedPost.value.image = filePath;
-    }
-
-    // Update the post in the database
-    const { error: updateError } = await supabase
-      .from('posts')
-      .update({
-        item_name: editedPost.value.item_name,
-        description: editedPost.value.description,
-        price: editedPost.value.price,
-        type: editedPost.value.type,
-        image: editedPost.value.image,
-      })
-      .eq('id', editedPost.value.id);
-
-    if (updateError) throw new Error(updateError.message);
-
-    // Close the modal and show success dialog
-    showEditModal.value = false;
-    editSuccessMessage.value = 'Post edited successfully!';
-    showEditSuccessDialog.value = true; // Show success dialog
-
-    // Refresh posts
-    posts.value = await refreshPosts();
-    console.log('Post edited successfully!');
-  } catch (error) {
-    console.error('Error editing post:', error.message);
-  }
-};
-const markAsSold = async (postId) => {
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("No active user session found.");
-      return;
-    }
-    const userId = user.id;
-
-    // Mark the post as sold in the database
-    const { data: updatedPost, error: updateError } = await supabase
-      .from('posts')
-      .update({ is_sold: true })
-      .eq('id', postId)
-      .eq('user_id', userId)
-      .single();
-
-    if (updateError) {
-      console.error("Error marking post as sold:", updateError.message);
-      return;
-    }
-
-    // Update the local posts list
-    posts.value = posts.value.map(post =>
-      post.id === postId ? { ...post, is_sold: true } : post
-    );
-
-    // Update savedProducts list (sync with DB)
-    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(post =>
-      post.id === postId ? { ...post, is_sold: true } : post
-    );
-
-    // Re-sort the posts after marking as sold
-    posts.value = posts.value.sort((a, b) => {
-      if (a.is_sold && !b.is_sold) return 1;
-      if (!a.is_sold && b.is_sold) return -1;
-      return 0;
-    });
-
-    console.log("Post marked as sold:", updatedPost);
-  } catch (err) {
-    console.error("Unexpected error:", err);
-  }
-};
-
-const unmarkAsSold = async (postId) => {
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("No active user session found.");
-      return;
-    }
-    const userId = user.id;
-
-    // Unmark the post as sold in the database
-    const { data: updatedPost, error: updateError } = await supabase
-      .from('posts')
-      .update({ is_sold: false })
-      .eq('id', postId)
-      .eq('user_id', userId)
-      .single();
-
-    if (updateError) {
-      console.error("Error unmarking post as sold:", updateError.message);
-      return;
-    }
-
-    // Update the local posts list
-    posts.value = posts.value.map(post =>
-      post.id === postId ? { ...post, is_sold: false } : post
-    );
-
-    // Update savedProducts list (sync with DB)
-    savedProductsStore.savedProducts = savedProductsStore.savedProducts.map(post =>
-      post.id === postId ? { ...post, is_sold: false } : post
-    );
-
-    // Re-sort the posts after unmarking as sold
-    posts.value = posts.value.sort((a, b) => {
-      if (a.is_sold && !b.is_sold) return 1;
-      if (!a.is_sold && b.is_sold) return -1;
-      return 0;
-    });
-
-    console.log("Post unmarked as sold:", updatedPost);
-  } catch (err) {
-    console.error("Unexpected error:", err);
-  }
-};
-
-const toggleSave = async (post) => {
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();    const isPostSaved = savedProductsStore.savedProducts.some(
-      (p) => p.item_name === post.item_name
-    );
-
-    if (isPostSaved) {
-      const { error } = await supabase
-        .from('saved_posts')
-        .delete()
-        .eq('user_id', user.id) // Use logged-in user's ID
-        .eq('post_id', post.id);
-
-      if (error) {
-        console.error('Error unsaving post:', error);
-        return;
-      }
-
-      savedProductsStore.removeProduct(post.item_name); // Update store
-    } else {
-      const { error } = await supabase
-        .from('saved_posts')
-        .insert([{ user_id: user.id, post_id: post.id }]);
-
-      if (error) {
-        console.error('Error saving post:', error);
-        return;
-      }
-
-      savedProductsStore.addProduct(post); // Update store
-    }
-  } catch (error) {
-    console.error('Error toggling save:', error);
-  }
-};
-
 // Default user profile if not found
 const getDefaultProfile = () => ({
   first_name: "Unknown",
@@ -408,42 +99,14 @@ const getDefaultProfile = () => ({
   profile_image: "/default-avatar.jpg",
 });
 
-// Get user initials for avatar
+// Function to get user initials for avatar
 const getInitials = (name) => {
   if (!name) return "??";
   const names = name.split(" ");
   return names.map((n) => n.charAt(0)).join("").toUpperCase().slice(0, 2);
 };
 
-// Toggle Post Form visibility
-const togglePostForm = () => (showPostForm.value = !showPostForm.value);
-
-// Fetch posts from the database, sorting by 'is_sold' so sold items are at the bottom
-const refreshPosts = async () => {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('user_id', authUser.userData.id)  // Assuming you're fetching posts for the logged-in user
-    .order('is_sold', { ascending: true });  // Sold posts appear last
-
-  if (error) {
-    console.error('Error refreshing posts:', error.message);
-  }
-  return data;
-};
-
-const isSaved = (post) =>
-  savedProductsStore.savedProducts.some((p) => p.item_name === post.item_name);
-
-const selectedPost = ref(null);
-const isDialogOpen = ref(false);
-
-const viewPostDetails = (post) => {
-  selectedPost.value = post;
-  isDialogOpen.value = true;
-};
-
-// Logout function
+// Other functions for post handling...
 const logout = async () => {
   try {
     await supabase.auth.signOut();
@@ -454,15 +117,26 @@ const logout = async () => {
   }
 };
 
-const redirectToFacebookProfile = (post) => {
-  if (post.fb_link) {
-    window.open(post.fb_link, '_blank');
-  } else {
-    alert('Facebook profile link is not available for this user.');
+// Toggle Post Form visibility
+const togglePostForm = () => (showPostForm.value = !showPostForm.value);
+
+// Function to refresh posts (if necessary)
+const refreshPosts = async () => {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('user_id', authUser.userData.id)
+    .order('is_sold', { ascending: true });  // Sold posts appear last
+
+  if (error) {
+    console.error('Error refreshing posts:', error.message);
   }
+  return data;
 };
 
+// Render profile and posts
 </script>
+
 
 
 <template>
