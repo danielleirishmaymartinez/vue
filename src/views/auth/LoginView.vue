@@ -3,9 +3,26 @@ import AppLayout from '@/components/system/AppLayout.vue';
 import LoginForm from '@/components/auth/LoginForm.vue';
 import { useDisplay } from 'vuetify';
 import { RouterLink, useRouter } from 'vue-router';
+import { supabase } from '@/utils/supabase'; // Supabase client instance
 
 const { mobile } = useDisplay();
 const router = useRouter();
+const onGoogleSignIn = async () => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+
+    if (error) {
+      console.error('Google OAuth error:', error.message);
+    } else if (data) {
+      console.log('Google OAuth success:', data);
+      router.push('/home'); // Navigate to home page after successful login
+    }
+  } catch (error) {
+    console.error('Error during Google sign-in:', error);
+  }
+};
 
 </script>
 
@@ -30,11 +47,24 @@ const router = useRouter();
 
                 <LoginForm></LoginForm>
 
+                <!-- Google OAuth Button -->
+                <div class="text-center mt-4">
+                  <v-btn
+                    color="red darken-1"
+                    class="text-white"
+                    size="large"
+                    @click="onGoogleSignIn"
+                  >
+                    <v-icon left>mdi-google</v-icon>
+                    Sign in with Google
+                  </v-btn>
+                </div>
+                
                 <v-divider class="my-5"></v-divider>
 
                 <div class="row justify-content-center my-10">
                   <h4 class="text-center">
-                    Don't have an account? 
+                    Don't have an account?
                     <RouterLink class="text-red-darken-4 font-weight-black " to="/register">
                       Register
                     </RouterLink>
