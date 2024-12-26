@@ -20,27 +20,29 @@ export const userData = reactive({
   email: null,
   metadata: null,
 })
-
-// Function to check authentication status
 export const isAuthenticated = async () => {
-  const { data, error } = await supabase.auth.getSession()
+  const { data, error } = await supabase.auth.getSession();
 
   if (error) {
-    console.error('Error getting session:', error.message)
-    return false
+    console.error('Error getting session:', error.message);
+    return { loggedIn: false, metadata: null };
   }
 
   if (data.session) {
-    const { id, email, user_metadata } = data.session.user
-    userData.id = id
-    userData.email = email
-    userData.metadata = user_metadata
-  } else {
-    userData.id = null
-    userData.email = null
-    userData.metadata = null
+    const { id, email, user_metadata } = data.session.user;
+
+    userData.id = id;
+    userData.email = email;
+    userData.metadata = user_metadata;
+
+    return { loggedIn: true, metadata: user_metadata };
   }
 
-  return !!data.session
-}
+  userData.id = null;
+  userData.email = null;
+  userData.metadata = null;
+
+  return { loggedIn: false, metadata: null };
+};
+
 export default supabase

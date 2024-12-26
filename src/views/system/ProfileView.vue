@@ -22,11 +22,12 @@ const userEmail = ref('');
 
 // Access the Pinia store
 const authUser = useAuthUserStore(); // Initialize the store
+
 onMounted(async () => {
   console.log("Before fetching profile:", userProfile.value);
 
   try {
-    // Fetch user data from auth
+    // Fetch user data from auth (Google)
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) {
       console.error("No active session found. Redirecting to login...");
@@ -35,45 +36,21 @@ onMounted(async () => {
     }
 
     const userId = user.id;
-    const email = user.email; // Store the email
+    const email = user.email;
 
-    // Fetch profile data
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select("first_name, last_name, profile_image, preferred_location, preferred_time")
-      .eq("user_id", userId)
-      .single();
+    // If the user signed in with Google, fetch additional data
+    const userName = user.user_metadata.full_name || "Unknown User";
+    const userImage = user.user_metadata.avatar_url || "/default-avatar.jpg";
 
-// Handle errors
-if (profileError) {
-  console.error("Error fetching profile:", profileError);
-  return;
-}
+    userProfile.value = {
+      first_name: userName.split(" ")[0] || "Unknown",
+      last_name: userName.split(" ")[1] || "User",
+      profile_image: userImage,
+      preferred_location: "Not specified",
+      preferred_time: "Not specified",
+    };
 
-userEmail.value = email;
-// Handle errors
-if (profileError) {
-  console.error("Error fetching profile:", profileError);
-  return;
-}
-
-userEmail.value = email;
-
-    // If there's a profile image, fetch the signed URL
-    if (profileData?.profile_image) {
-      const { data: signedUrlData, error: signedUrlError } = await supabase
-        .storage
-        .from('profile-images')
-        .createSignedUrl(profileData.profile_image, 60 * 60); // 1-hour expiration
-
-      if (signedUrlError) {
-        console.error("Error fetching signed URL for profile image:", signedUrlError.message);
-      } else {
-        profileData.profile_image = signedUrlData.signedUrl; // Update with signed URL
-      }
-    }
-
-    userProfile.value = profileData || getDefaultProfile();
+    userEmail.value = email;
 
     // Fetch only posts belonging to the logged-in user (filtered by user_id)
     const { data: postData, error: postError } = await supabase
@@ -112,7 +89,6 @@ userEmail.value = email;
     console.error("Unexpected error:", err);
   }
 });
-
 
 const newPost = ref({
   item_name: "",
@@ -408,22 +384,33 @@ const getDefaultProfile = () => ({
   profile_image: "/default-avatar.jpg",
 });
 
-// Get user initials for avatar
+// Function to get user initials for avatar
 const getInitials = (name) => {
   if (!name) return "??";
   const names = name.split(" ");
   return names.map((n) => n.charAt(0)).join("").toUpperCase().slice(0, 2);
 };
 
+// Other functions for post handling...
+const logout = async () => {
+  try {
+    await supabase.auth.signOut();
+    authUser.$reset(); // Reset the store
+    router.push("/login");
+  } catch (error) {
+    console.error("Logout error:", error.message);
+  }
+};
+
 // Toggle Post Form visibility
 const togglePostForm = () => (showPostForm.value = !showPostForm.value);
 
-// Fetch posts from the database, sorting by 'is_sold' so sold items are at the bottom
+// Function to refresh posts (if necessary)
 const refreshPosts = async () => {
   const { data, error } = await supabase
     .from('posts')
     .select('*')
-    .eq('user_id', authUser.userData.id)  // Assuming you're fetching posts for the logged-in user
+    .eq('user_id', authUser.userData.id)
     .order('is_sold', { ascending: true });  // Sold posts appear last
 
   if (error) {
@@ -443,17 +430,6 @@ const viewPostDetails = (post) => {
   isDialogOpen.value = true;
 };
 
-// Logout function
-const logout = async () => {
-  try {
-    await supabase.auth.signOut();
-    authUser.$reset(); // Reset the store
-    router.push("/login");
-  } catch (error) {
-    console.error("Logout error:", error.message);
-  }
-};
-
 const redirectToFacebookProfile = (post) => {
   if (post.fb_link) {
     window.open(post.fb_link, '_blank');
@@ -462,7 +438,9 @@ const redirectToFacebookProfile = (post) => {
   }
 };
 
+// Render profile and posts
 </script>
+
 
 
 <template>
@@ -504,9 +482,9 @@ const redirectToFacebookProfile = (post) => {
 
           <v-divider :thickness="1.5" class="border-opacity-100" color="white"></v-divider>
 <!-- Tabs Section -->
-<v-tabs 
-  v-model="activeTab" 
-  grow 
+<v-tabs
+  v-model="activeTab"
+  grow
   class="mb-4 small-tabs white-tabs"
 >
   <v-tab value="posts" prepend-icon="mdi-grid">Posts</v-tab>
@@ -590,7 +568,7 @@ const redirectToFacebookProfile = (post) => {
 </div>
 
 <div v-if="activeTab === 'saved'">
-  
+
   <!-- Display message if no saved items -->
   <p v-if="savedProducts.length === 0" class="text-center">You have no saved items.</p>
 <!-- Saved Tab Template -->
@@ -696,9 +674,9 @@ const redirectToFacebookProfile = (post) => {
       <v-bottom-navigation app class="position-fixed fixed-bottom">
   <v-tooltip :location="'top'" :origin="'center'" no-click-animation>
     <template v-slot:activator="{ props }">
-      <v-btn 
-        v-bind="props" 
-        @click="togglePostForm" 
+      <v-btn
+        v-bind="props"
+        @click="togglePostForm"
         class="custom-post-btn"
       >
         <v-icon>mdi-plus</v-icon>
@@ -718,7 +696,7 @@ const redirectToFacebookProfile = (post) => {
       Create New Post
     </v-card-title>
     <v-card-text>
-      <v-form @submit.prevent="submitPost">
+      <v-form @submit.prevent="submitPost" novalidate>
         <v-text-field
           v-model="newPost.item_name"
           label="Item Name"
@@ -1016,7 +994,7 @@ opacity: 0.5;
 }
 
 .post-description{
-  color:#000000; 
+  color:#000000;
 }
 
 .post-type {

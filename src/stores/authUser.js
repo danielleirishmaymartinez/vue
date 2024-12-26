@@ -31,7 +31,12 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
       if (data.session) {
         const { id, email, user_metadata } = data.session.user;
-        userData.value = { id, email, ...user_metadata };
+        userData.value = {
+          id,
+          email,
+          name: user_metadata?.full_name || user_metadata?.name || 'Unknown User',
+          image_url: user_metadata?.avatar_url || '/default-avatar.jpg',
+        };
       }
 
       return !!data.session;

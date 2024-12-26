@@ -5,10 +5,8 @@ import { requiredValidator, emailValidator } from '@/utils/validators'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-// Utilize pre-defined vue functions
 const router = useRouter()
 
-// Load Variables
 const formDataDefault = {
   email: '',
   password: ''
@@ -23,30 +21,58 @@ const isPasswordVisible = ref(false)
 const refVForm = ref()
 
 const onSubmit = async () => {
-  // Reset Form Action utils; Turn on processing at the same time
-  formAction.value = { ...formActionDefault, formProcess: true }
+  formAction.value = { ...formActionDefault, formProcess: true };
 
+  // Authenticate user
   const { data, error } = await supabase.auth.signInWithPassword({
     email: formData.value.email,
-    password: formData.value.password
-  })
+    password: formData.value.password,
+  });
 
   if (error) {
-    // Add Error Message and Status Code
-    formAction.value.formErrorMessage = error.message
-    formAction.value.formStatus = error.status
-  } else if (data) {
-    // Add Success Message
-    formAction.value.formSuccessMessage = 'Successfully Logged Account.'
-    // Redirect Acct to Dashboard
-    router.replace('/home')
+    // Show error message if login fails
+    formAction.value.formErrorMessage = error.message;
+    formAction.value.formStatus = error.status;
+  } else if (data?.user) {
+    // Fetch current user session to access metadata (is_admin)
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      formAction.value.formErrorMessage = sessionError.message;
+    } else {
+      const { user_metadata } = sessionData?.session?.user || {};
+
+      // Check if the user is blocked
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('is_blocked')
+        .eq('user_id', data.user.id)
+        .single();
+
+      if (profileError) {
+        formAction.value.formErrorMessage = profileError.message;
+      } else if (profileData?.is_blocked) {
+        // Blocked user: show alert and log them out
+        formAction.value.formErrorMessage = "Your account has been blocked. Please contact support.";
+        await supabase.auth.signOut();
+        return;
+      } else {
+        // User is not blocked, proceed as usual
+        if (user_metadata?.is_admin) {
+          formAction.value.formSuccessMessage = "Admin Logged In Successfully.";
+          router.replace('/admin');
+        } else {
+          formAction.value.formSuccessMessage = "User Logged In Successfully.";
+          router.replace('/home');
+        }
+      }
+    }
   }
 
-  // Reset Form
-  refVForm.value?.reset()
-  // Turn off processing
-  formAction.value.formProcess = false
-}
+  // Reset form
+  refVForm.value?.reset();
+  formAction.value.formProcess = false;
+};
 
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
@@ -100,4 +126,3 @@ const onFormSubmit = () => {
     </v-btn>
   </v-form>
 </template>
-
