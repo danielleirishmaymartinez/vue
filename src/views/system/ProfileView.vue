@@ -48,6 +48,7 @@ onMounted(async () => {
       profile_image: userImage,
       preferred_location: "Not specified",
       preferred_time: "Not specified",
+      email, // Add the email here
     };
 
         // Fetch profile data
@@ -503,7 +504,7 @@ const redirectToFacebookProfile = (post) => {
     <!-- User Name -->
     <h2 class="mb-2" style="color: white;">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
     <!-- User Email -->
-    <p class="mb-2" style="color: white;">{{ userEmail || "Email not available" }}</p>
+    <p class="mb-2" style="color: white;">{{ userProfile.email || "Email not available" }}</p>
   </div>
 </v-col>
   </v-row>
