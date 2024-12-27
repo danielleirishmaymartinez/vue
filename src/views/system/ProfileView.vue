@@ -50,7 +50,36 @@ onMounted(async () => {
       preferred_time: "Not specified",
     };
 
+        // Fetch profile data
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, profile_image, preferred_location, preferred_time")
+      .eq("user_id", userId)
+      .single();
+    
+// Handle errors
+if (profileError) {
+  console.error("Error fetching profile:", profileError);
+  return;
+}
+
     userEmail.value = email;
+
+        // If there's a profile image, fetch the signed URL
+    if (profileData?.profile_image) {
+      const { data: signedUrlData, error: signedUrlError } = await supabase
+        .storage
+        .from('profile-images')
+        .createSignedUrl(profileData.profile_image, 60 * 60); // 1-hour expiration
+
+      if (signedUrlError) {
+        console.error("Error fetching signed URL for profile image:", signedUrlError.message);
+      } else {
+        profileData.profile_image = signedUrlData.signedUrl; // Update with signed URL
+      }
+    }
+
+    userProfile.value = profileData || getDefaultProfile();
 
     // Fetch only posts belonging to the logged-in user (filtered by user_id)
     const { data: postData, error: postError } = await supabase
