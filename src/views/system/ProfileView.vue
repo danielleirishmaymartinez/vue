@@ -504,7 +504,7 @@ const redirectToFacebookProfile = (post) => {
     <!-- User Name -->
     <h2 class="mb-2" style="color: white;">{{ userProfile.first_name + ' ' + userProfile.last_name || "Unknown User" }}</h2>
     <!-- User Email -->
-    <p class="mb-2" style="color: white;">{{ userProfile.email || "Email not available" }}</p>
+    <p class="mb-2" style="color: white;">{{ userProfile.email || userEmail || "Email not available" }}</p>
   </div>
 </v-col>
   </v-row>
